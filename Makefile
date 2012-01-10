@@ -16,7 +16,7 @@ ruby:
 	chmod +x retro
 
 sbcl:
-	( cd vm/lisp && sbcl --no-sysinit --no-userinit --noprint --load sbcl.lisp )
+	( cd vm/complete/lisp && sbcl --no-sysinit --no-userinit --noprint --load sbcl.lisp )
 
 image: retro
 	cd image && cat meta.rx kernel.rx >../core.rx
