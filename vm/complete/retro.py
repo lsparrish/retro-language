@@ -7,6 +7,7 @@
 import os, sys, math, time, struct
 from struct import pack, unpack
 
+set_termio = False
 try:
     import termios
     set_termio = True

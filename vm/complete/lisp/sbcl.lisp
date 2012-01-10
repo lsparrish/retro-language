@@ -17,7 +17,7 @@
 (defun main ()
   (parse-arguments (cdr sb-ext:*posix-argv*))
   (handler-case (retro:ngaro)
-    (error (msg) (format *error-output* "ERROR: ~A~%" msg)))
+    (error (msg) (format *error-output* "~%ERROR: ~A~%" msg)))
   (fresh-line))
 
 (save-lisp-and-die "../../../retro"
