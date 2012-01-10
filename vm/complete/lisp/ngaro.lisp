@@ -13,7 +13,9 @@
 (defparameter *ports-depth*          12)
 (defparameter *files-depth*        1024)
 
-(deftype cell () '(signed-byte 32))
+(defconstant +cell-size+ 32)
+
+(deftype cell () `(signed-byte ,+cell-size+))
 #+(or big-endian ecl)
 (setf *image-file* (concatenate 'string *image-file* "BE"))
 
@@ -245,7 +247,8 @@
                        finally (setf (aref *image* (1+ d)) 0)))
                (drop 2))
         ((-11) (setf (aref *ports* 5) 80))
-        ((-12) (setf (aref *ports* 5) 25))))))
+        ((-12) (setf (aref *ports* 5) 25))
+        ((-13) (setf (aref *ports* 5) +cell-size+))))))
 
 (defun ngaro ()
   (console-prepare)
