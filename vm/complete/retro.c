@@ -69,8 +69,10 @@
 
 #ifdef RXBE
 #define LOCAL_FNAME (LOCAL "BE")
+#define VM_ENDIAN 1
 #else
 #define LOCAL_FNAME (LOCAL)
+#define VM_ENDIAN 0
 #endif
 
 
@@ -386,6 +388,8 @@ void rxDeviceHandler(VM *vm) {
                   vm->ports[5] = w.ws_row;
                   break;
         case -13: vm->ports[5] = CELLSIZE;
+                  break;
+        case -14: vm->poarts[5] = VM_ENDIAN;
                   break;
         default:  vm->ports[5] = 0;
       }
