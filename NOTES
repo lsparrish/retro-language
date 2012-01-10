@@ -1,0 +1,19 @@
+*This is a random collection of notes and snippits related to things I'm working on*
+
+
+chain: cell'
+  : size  ( -n )  -13 5 out wait 5 in ;
+  : bits{  ( n"- )
+    ; immediate
+;chain
+
+with cell'
+
+32 bits{
+... code if ^cell'size = 32 ...
+}
+
+16 bits{
+... code if ^cell'size = 16 ...
+}
+
