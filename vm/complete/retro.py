@@ -177,6 +177,8 @@ def rxHandleDevices( ip, stack, address, ports, memory, files, inputs ):
     ports[5] = 0
   elif ports[5] == -12: # console height
     ports[5] = 0
+  elif ports[5] == -13: # bits per cell
+    ports[5] = 32
 
   return ip
 

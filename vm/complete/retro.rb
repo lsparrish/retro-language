@@ -226,6 +226,7 @@ def handle_devices()
               when -10 then do_env # environment
               when -11 then 0      # console width
               when -12 then 0      # console height
+              when -13 then 32     # bits per cell
               end
 end
 # -----------------------------------------------------------------------------
