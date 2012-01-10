@@ -248,7 +248,10 @@
                (drop 2))
         ((-11) (setf (aref *ports* 5) 80))
         ((-12) (setf (aref *ports* 5) 25))
-        ((-13) (setf (aref *ports* 5) +cell-size+))))))
+        ((-13) (setf (aref *ports* 5) +cell-size+))
+        ((-14) (setf (aref *ports* 5)
+                     #+big-endian 1
+                     #-big-endian 0))))))
 
 (defun ngaro ()
   (console-prepare)
