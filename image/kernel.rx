@@ -1,5 +1,5 @@
 ( Retro ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-( Copyright [c] 2008 - 2011, Charles Childers                                 )
+( Copyright [c] 2008 - 2012, Charles Childers                                 )
 ( Copyright [c] 2009 - 2010, Luke Parrish                                     )
 ( Copyright [c] 2010,        Marc Simpson                                     )
 ( Copyright [c] 2010,        Jay Skeer                                        )
@@ -20,7 +20,7 @@ variable which      ( Pointer to dictionary header of the most recently       )
 pad
 label: copytag   "Retro" $,
 label: version   "11.2" $,
-label: build     "2011.12.29" $,
+label: build     "2012.01.10" $,
 label: okmsg     "ok  " $,
 
 ( Primitives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
