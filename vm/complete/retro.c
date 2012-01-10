@@ -45,19 +45,24 @@
 #define MAX_REQUEST_LENGTH 1024
 #define MAX_OPEN_FILES        8
 #define LOCAL                 "retroImage"
+#define CELLSIZE             32
 
 #ifdef RX64
 #undef CELL
+#undef CELLSIZE
 #undef LOCAL
 #define CELL     int64_t
+#define CELLSIZE 64
 #define LOCAL    "retroImage64"
 #endif
 
 #ifdef RX16
 #undef CELL
+#undef CELLSIZE
 #undef LOCAL
 #undef IMAGE_SIZE
 #define CELL        int16_t
+#define CELLSIZE    16
 #define IMAGE_SIZE  32000
 #define LOCAL       "retroImage16"
 #endif
@@ -379,6 +384,8 @@ void rxDeviceHandler(VM *vm) {
                   break;
         case -12: ioctl(0, TIOCGWINSZ, &w);
                   vm->ports[5] = w.ws_row;
+                  break;
+        case -13: vm->ports[5] = CELLSIZE;
                   break;
         default:  vm->ports[5] = 0;
       }
