@@ -242,6 +242,8 @@ Set port 5 to one of the following values; wait; then read the result back.
 +-------+---------------------------------------+
 | -12   | Console Height                        |
 +-------+---------------------------------------+
+| -13   | Number of bits per cell               |
++-------+---------------------------------------+
 
 At a minimum, an implementation must provide
 support for -1, -5, -6, -8, and -9.
