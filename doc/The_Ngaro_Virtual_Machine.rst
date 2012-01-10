@@ -244,6 +244,8 @@ Set port 5 to one of the following values; wait; then read the result back.
 +-------+---------------------------------------+
 | -13   | Number of bits per cell               |
 +-------+---------------------------------------+
+| -14   | 0 for little endian, 1 for big endian |
++-------+---------------------------------------+
 
 At a minimum, an implementation must provide
 support for -1, -5, -6, -8, and -9.
@@ -256,6 +258,12 @@ memory, starting at the provided buffer address.
 If an environment variable is not found, the
 VM should store a value of zero in the provided
 buffer address.
+
+For -13, if the returned value is zero, the image
+can assume a 32-bit environment.
+
+For -14, if the VM is using big endian internally,
+this should return a value of 1.
 
 
 Port 6: Canvas
