@@ -1,0 +1,16 @@
+( Body Mass Index Calculator   )
+( Ported from Ron Aaron's Reva )
+
+2 elements height weight
+: hello  "\nBMI calculator 1.0\n" puts ;
+: getHeight
+  "\nPlease enter your height, in centimeters: " puts getToken toNumber !height ;
+: getWeight
+  "\nPlease enter your weight in kilograms: "    puts getToken toNumber !weight ;
+: showBMI
+  @weight 100000 @height dup * &* dip / 10 /mod
+  @height @weight
+  "\nFor a weight of %d kg, and a height of %d cm, the BMI is %d.%d\n" puts ;
+: getBMI hello getHeight getWeight showBMI bye ;
+getBMI
+
