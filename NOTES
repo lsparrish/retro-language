@@ -10,7 +10,7 @@ and endian type. A possibility is to draw frm the doc{ style blocks.
 
 
 chain: cell'
-  : size  ( -n )  -13 5 out wait 5 in ;
+  : size  ( -n )  -13 5 out wait 5 in dup 0 = [ drop 32 ] ifTrue ;
   : bits{  ( n"- )
       size <> [ repeat getToken "}" compare if; again ] ifTrue ;
   : }  ( - )  ; immediate
