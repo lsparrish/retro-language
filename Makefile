@@ -27,3 +27,7 @@ image: retro
 
 clean:
 	rm -f retro
+	rm -f retroImage16 retroImage64
+	rm -f retroImage16BE retroImageBE retroImage64BE
+	rm -f convert
+

@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <sys/endian.h>
 
 int32_t input[1000000];
 int16_t output16[1000000];
@@ -14,6 +13,14 @@ int64_t output64[1000000];
 int16_t output16BE[1000000];
 int32_t output32BE[1000000];
 int64_t output64BE[1000000];
+
+u_int32_t bswap32(u_int32_t x)
+{
+  return ((x << 24) & 0xff000000) |
+         ((x <<  8) & 0x00ff0000) |
+         ((x <<  8) & 0x0000ff00) |
+         ((x << 24) & 0x000000ff);
+}
 
 int load_image(char *image)
 {
@@ -36,9 +43,9 @@ int save_image()
 {
   FILE *fp[5];
   int x[5], i;
-  uint32_t image_size = input[3];
+  u_int32_t image_size = input[3];
 
-#if BYTE_ORDER == BIG_ENDIAN
+#ifdef RXBE
   image_size = bswap32(image_size);
 #endif
 
@@ -61,7 +68,7 @@ int save_image()
         fprintf(stderr, "Some images could not be written properly (%d-%d:%d).\n", i, x[i], image_size);
         exit(-1);
     }
-        
+
   return image_size;
 }
 
@@ -78,9 +85,9 @@ void convert()
     be = bswap32(input[i]);
     output16[i] = (int16_t)input[i];
     output64[i] = (int64_t)input[i];
-    output16BE[i] = (int16_t)be; 
-    output32BE[i] = be; 
-    output64BE[i] = (int64_t)be; 
+    output16BE[i] = (int16_t)be;
+    output32BE[i] = be;
+    output64BE[i] = (int64_t)be;
   }
 
   fprintf(stderr, "Saving...\n\n");
