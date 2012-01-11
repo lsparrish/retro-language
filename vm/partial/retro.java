@@ -240,6 +240,16 @@ public class retro {
       ports[5] = 0;
       ports[0] = 1;
     }
+    if (ports[5] == -13)
+    {
+      ports[5] = 32;
+      ports[0] = 1;
+    }
+    if (ports[5] == -14)
+    {
+      ports[5] = 1;
+      ports[0] = 1;
+    }
   }
 
 
