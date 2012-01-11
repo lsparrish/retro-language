@@ -62,7 +62,7 @@ int save_image()
   x[4] = fwrite(output64BE, sizeof(int64_t), image_size, fp[4]);
 
   for (i = 0; i < 5; ++i)
-      fclose(fp[0]);
+      fclose(fp[i]);
   for (i = 0; i < 5; ++i)
     if (x[i] != image_size) {
         fprintf(stderr, "Some images could not be written properly (%d-%d:%d).\n", i, x[i], image_size);
