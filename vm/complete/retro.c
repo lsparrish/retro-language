@@ -389,7 +389,7 @@ void rxDeviceHandler(VM *vm) {
                   break;
         case -13: vm->ports[5] = CELLSIZE;
                   break;
-        case -14: vm->poarts[5] = VM_ENDIAN;
+        case -14: vm->ports[5] = VM_ENDIAN;
                   break;
         default:  vm->ports[5] = 0;
       }
