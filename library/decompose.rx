@@ -3,7 +3,7 @@
 needs casket'
 with casket'
 
-chain: casket::html'
+chain: decompose'
 
 variable attrs
 variable src
@@ -89,7 +89,7 @@ Loading
 -------
 ::
 
-  needs casket::html'
+  needs decompose'
 
 
 -------
@@ -102,7 +102,6 @@ Example
     [ [ [ "Hello" ] title ] head
       [ [ "Welcome" ] h1
         [ "This is a paragraph." ] p ] body ] html ;
-
 
 }doc
 
