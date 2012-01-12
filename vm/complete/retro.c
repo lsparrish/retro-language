@@ -670,6 +670,7 @@ int main(int argc, char **argv) {
 
   if (rxLoadImage(vm, vm->filename) == 0) {
     printf("Sorry, unable to find %s\n", vm->filename);
+    free(vm);
     exit(1);
   }
 
@@ -680,5 +681,7 @@ int main(int argc, char **argv) {
 
   if (wantsStats == 1)
     rxDisplayStats(vm);
+
+  free(vm);
   return 0;
 }
