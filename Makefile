@@ -18,6 +18,8 @@ ruby:
 sbcl:
 	( cd vm/complete/lisp && sbcl --no-sysinit --no-userinit --noprint --load sbcl.lisp )
 
+.PHONY: image
+
 image: retro
 	cd image && cat meta.rx kernel.rx >../core.rx
 	./retro --shrink --image retroImage --with core.rx
