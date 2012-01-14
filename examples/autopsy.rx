@@ -106,7 +106,7 @@ variable vertical
   2 elements x more?
 
   : goToAddress ( "- )
-    clear "Address to jump to: " puts getToken toNumber !x ;
+    clear "Address to jump to: " puts getNumber !x ;
   : rows @ch 2 - ;
   : cols @cw 1 - ;
   : handle
