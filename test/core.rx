@@ -871,6 +871,13 @@ TEST: constant
   [ foo ] expected: { 10 }
 results
 
+TEST: string
+  "Hello" string HELLO
+  "World" string WORLD
+  [ HELLO WORLD compare ] expected: { 0 }
+  [ HELLO HELLO compare ] expected: { -1 }
+results
+
 TEST: allot
   [ here 100 allot here swap 100 + = ] expected: { -1 }
   [ here 100 allot -100 allot here = ] expected: { -1 }
@@ -1053,6 +1060,7 @@ IO: words
 IO: save
 IO: bye
 IO: getToken
+IO: getNumber
 IO: :include
 IO: include
 IO: time

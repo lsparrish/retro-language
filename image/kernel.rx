@@ -20,7 +20,7 @@ variable which      ( Pointer to dictionary header of the most recently       )
 pad
 label: copytag   "Retro" $,
 label: version   "11.2" $,
-label: build     "2012.01.10" $,
+label: build     "2012.01.14" $,
 label: okmsg     "ok  " $,
 
 ( Primitives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
@@ -453,6 +453,7 @@ here
 : variable:  ( n"-  ) create , ;
 : variable   (  "-  ) 0 variable: ;
 : constant   ( n"-  ) create @last !d->xt ;
+: string     ( $"-  ) keepString constant ;
 : allot      (  n-  ) dup 0 < [ +heap ] [ repeat 0; 1- 0 , again ] if ;
 {{
   : list     (  n-a ) here swap allot ;
@@ -650,6 +651,7 @@ create dicts 64 allot
 : save     (  -  ) 1 4 out wait ;
 : bye      (  -  ) cr -9 5 out wait ;
 : getToken ( "-$ ) 32 accept tib tempString ;
+: getNumber ( "-n )  getToken toNumber ;
 : :include ( $-  ) 2 4 out wait ;
 : include  ( "-  ) getToken :include ;
 : time     (  -n ) -8 5 out wait 5 in ;
