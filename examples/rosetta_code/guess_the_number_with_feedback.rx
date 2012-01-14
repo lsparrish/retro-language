@@ -11,6 +11,6 @@
 : guess ( - )
   "I'm thinking of a number between 1 and 100.\n" puts
   "Try to guess it!\n" puts
-  think [ getToken toNumber checkGuess ] while
+  think [ getNumber checkGuess ] while
   "You got it!\n" puts ;
 

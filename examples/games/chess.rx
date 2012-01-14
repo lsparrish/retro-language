@@ -80,7 +80,7 @@ We assume that you know how to play and will only make valid moves.
   : ###  (  -  ) "    0 1 2 3 4 5 6 7 \n" puts ;
   : row  ( a-a ) "%d | " puts 8 [ @+ putc space ] times "|\n" puts ;
 
-  : r,c  ( ""-nn ) ', accept tib toNumber getToken toNumber swap ;
+  : r,c  ( ""-nn ) ', accept tib toNumber getNumber swap ;
   : get  ( ""-a  )  r,c 8 * board 2+ ;
 ---reveal---
   : display  (   - ) cr ### ---  board 8 [ row ] iter drop --- ### cr ;

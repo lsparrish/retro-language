@@ -15,7 +15,7 @@ Solid colored tiles are zero, the others are the number of sides in the priamry 
 So:
 
   : convertToDecimal:  ( n"-n )
-    base ! getToken toNumber decimal ;
+    base ! getNumber decimal ;
 
 Pass this a base, and it'll parse a number and return the decimal form.
 

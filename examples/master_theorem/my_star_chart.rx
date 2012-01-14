@@ -27,7 +27,7 @@ There is an used padding variable. This will be useful later.
 
 We'll follow this up with some helper functions to improve readability:
 
-  : getNumber getToken toNumber ;
+  : getNumber getNumber ;
   : toLetter letters + @ ;
 
 The first function, *getNumber*, parses and returns a number from the

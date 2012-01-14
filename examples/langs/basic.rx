@@ -54,7 +54,7 @@ create nvars
   drop ;
 
 : setCurrentLine ( "- )
-  "\n> " puts here getToken toNumber
+  "\n> " puts here getNumber
     dup 0 4000 within [ lines + ! ] [ 2drop 1 error setCurrentLine ] if ;
 
 : handleKeyword  ( "- ) ;
@@ -92,13 +92,13 @@ create nvars
 }}
 
 : do_goto   ( "- )
-  8 , getToken toNumber lines + , &; do ;
+  8 , getNumber lines + , &; do ;
 
 {{
   : strPrepend ^strings'prepend ;
   : assignValue ( af"- )
     [ eatLeading? off getc putc '" accept tib keepString eatLeading? on ]
-    [ getToken toNumber ] if 2# &! , &; do ;
+    [ getNumber ] if 2# &! , &; do ;
   : addVariable  ( af"- )
     [ getVariable drop over # &@ , # &@ , &strPrepend , # &! , &; do ]
     [ getVariable drop over # &@ , # &@ , &+ ,          # &! , &; do ] if ;
