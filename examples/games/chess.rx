@@ -68,10 +68,8 @@ We assume that you know how to play and will only make valid moves.
 
 
 {{
-  : $, ( $- ) withLength [ @+ , ] times @ , ;
 
-  create blank
-    "rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR" $,
+  "rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR" string BLANK
 
   create board
     64 allot
@@ -84,6 +82,6 @@ We assume that you know how to play and will only make valid moves.
   : get  ( ""-a  )  r,c 8 * board 2+ ;
 ---reveal---
   : display  (   - ) cr ### ---  board 8 [ row ] iter drop --- ### cr ;
-  : new      (   - ) blank board 64 copy display ;
+  : new      (   - ) BLANK board 64 copy display ;
   : move     ( ""- ) get dup @ [ '. swap ! ] dip get ! display ;
 }}
