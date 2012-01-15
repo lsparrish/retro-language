@@ -3,12 +3,12 @@
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* Configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #define CELL            int16_t
-#define IMAGE_SIZE        65000
-#define IMAGE_CACHE_SIZE     77
-#define CHANGE_TABLE_SIZE   307
-#define ADDRESSES           256
-#define STACK_DEPTH         128
-#define PORTS                16
+#define IMAGE_SIZE        31000
+#define IMAGE_CACHE_SIZE    181
+#define CHANGE_TABLE_SIZE   457
+#define ADDRESSES            64
+#define STACK_DEPTH          64
+#define PORTS                15
 #define STRING_BUFFER_SIZE   32
 
 /* General includes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -64,8 +64,8 @@ typedef struct CHANGE_ELEMENT {
 } change_element_t;
 
 typedef struct CHANGE_TABLE {
-    size_t full;
-    size_t size;
+    uint8_t full;
+    uint8_t size;
     change_element_t *elements;
 } change_table_t;
 
@@ -133,12 +133,16 @@ static CELL _img_get(CELL k) {
 
 static void _img_put(CELL k, CELL v) {
     uint16_t i = 0, p = k % IMAGE_CACHE_SIZE;
-    change_table_t *tbl = &(change_table[(k % CHANGE_TABLE_SIZE)]);
+    change_table_t *tbl;
+    if (_img_get(k) == v) return;
+    tbl = &(change_table[(k % CHANGE_TABLE_SIZE)]);
     for (; i < tbl->full && tbl->elements[i].key != k; ++i);
     if (i == tbl->full) {
-        if (tbl->size == tbl->full)
+        if (tbl->size == tbl->full) {
+            tbl->size += 5;
             tbl->elements = (change_element_t*)realloc(tbl->elements,
-                    (tbl->size += 5) * sizeof(change_element_t));
+                    tbl->size * sizeof(change_element_t));
+        }
         tbl->elements[i].key = k; tbl->full += 1;
     }
     tbl->elements[i].value = v;
@@ -331,7 +335,12 @@ int main(void)
                             default: ports[14] = 0;
                         }
 #else
-                        ports[14] = 0;
+                        switch(ports[14]) {
+                            case -1: ports[14] = 0; S_DROP; S_DROP; break;
+                            case -2: ports[14] = 0; S_DROP; S_DROP; break;
+                            case -3: ports[14] = 0; S_DROP; S_DROP; break;
+                            default: ports[14] = 0;
+                        }
 #endif
                     }
                 }

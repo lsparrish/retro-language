@@ -1,4 +1,4 @@
-chain: lcd' {{
+chain: display' {{
 
   0 variable: state
 
@@ -9,7 +9,7 @@ chain: lcd' {{
   : puts ( $- ) @state swap -2 #14 out wait ;
   : setxy ( xy- ) -3 #14 out wait ;
   : clear ( - ) -4 #14 out wait ;
-  : width ( -n ) -5 #14 out wait #14 in ;
+  : with ( -n ) -5 #14 out wait #14 in ;
   : height ( -n ) -6 #14 out wait #14 in ;
 
 }} ;chain
