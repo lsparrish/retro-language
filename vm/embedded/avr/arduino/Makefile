@@ -2,7 +2,7 @@
 BOARD=mega2560
 DISPLAY=nokia3110
 
-CFLAGS=-O2 -std=gnu99 -Wall
+CFLAGS=-O3 -std=gnu99 -Wall
 AVRCFLAGS=$(CFLAGS) -DAVRCPU -DF_CPU=16000000UL -mmcu=atmega2560
 AVRCC=avr-gcc
 AVROBJCOPY=avr-objcopy
@@ -19,13 +19,15 @@ RETRO_MODULES+=$(LIBRARY_PATH)/bstrings.rx
 RETRO_MODULES+=$(LIBRARY_PATH)/char.rx
 RETRO_MODULES+=$(LIBRARY_PATH)/linkedList.rx
 RETRO_MODULES+=$(LIBRARY_PATH)/combinators.rx
-#RETRO_MODULES+=$(LIBRARY_PATH)/decorator.rx
+RETRO_MODULES+=$(LIBRARY_PATH)/decorator.rx
 RETRO_MODULES+=$(LIBRARY_PATH)/math.rx
 #RETRO_MODULES+=$(LIBRARY_PATH)/values.rx
 #RETRO_MODULES+=$(LIBRARY_PATH)/locals.rx
 RETRO_MODULES+=functions.rx
 RETRO_MODULES+=$(BOARD).rx
 RETRO_MODULES+=$(DISPLAY).rx
+RETRO_MODULES+=keypad.rx
+RETRO_MODULES+=main.rx
 RETRO_MODULES+=finish.rx
 CC=gcc
 CP=cp
@@ -64,7 +66,7 @@ clean:
 		     print "  } return 0; }"; \
 		 }' > $@
 
-retro.orig: ../../../retro.c
+retro.orig: ../../../complete/retro.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 retro.nat: retro.c image.hex.h
@@ -76,7 +78,7 @@ retro.out: image.hex.h eeprom_atmel.h console_$(BOARD).h display_$(DISPLAY).h
 convert: ../../../../tools/convert.c
 	$(CC) -O -DRX16 -o $@ $<
 
-retroImage: ../../../../../retroImage retro.orig $(RETRO_MODULES)
+retroImage: ../../../../retroImage retro.orig $(RETRO_MODULES)
 	$(CP) $< $@ && $(CAT) $(RETRO_MODULES) | ./retro.orig
 image.data: convert retroImage
 	./convert && $(CP) retroImage16 image.data

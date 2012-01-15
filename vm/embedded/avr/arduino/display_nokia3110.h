@@ -5,21 +5,8 @@
 #endif
 #define DISPLAY_ACTIVATED
 
-#ifdef PB1
-#define DISPLAY_RST PB1
-#define SPI_CS  PB2
-#define SPI_MOSI PB3
-#define SPI_SCK PB5
-#define DISPLAY_DC  PB0
-#define DISPLAY_BL  PD7
-#else 
-#define DISPLAY_RST PORTB1
-#define SPI_CS  PORTB2
-#define SPI_MOSI PORTB3
-#define SPI_SCK PORTB5
-#define DISPLAY_DC  PORTB0
-#define DISPLAY_BL  PORTD7
-#endif
+#define DISPLAY_WIDTH 14
+#define DISPLAY_HEIGHT 6
 
 typedef unsigned char display_t;
 
@@ -126,27 +113,18 @@ static display_t display_font6_8[][6] PROGMEM =
     { 0x00, 0x44, 0x28, 0x10, 0x28, 0x44 },   // x
     { 0x00, 0x1C, 0xA0, 0xA0, 0xA0, 0x7C },   // y
     { 0x00, 0x44, 0x64, 0x54, 0x4C, 0x44 },   // z
-    { 0x00,0x00, 0x06, 0x09, 0x09, 0x06 }    // horiz lines
+    { 0x00, 0x00, 0x06, 0x09, 0x09, 0x06 }    // horiz lines
 };
 
 static void display_init()
 {
-    //DDRB |= (1<<SPI_CS)|(1<<DISPLAY_DC)|(1<<DISPLAY_RST)|(1<<SPI_MOSI)|(1<<SPI_SCK);
-    //DDRD |= (1<<DISPLAY_BL);
-    DDRH |= (1<<SPI_SCK);
-    DDRH |= (1<<SPI_MOSI);
-    DDRB |= (1<<DISPLAY_DC);
-    DDRB |= (1<<DISPLAY_RST);
-    DDRB |= (1<<SPI_CS);
+    SPI_DDR |= (1<<SPI_CS)|(1<<SPI_MOSI)|(1<<SPI_SCK);
+    DISPLAY_DDR |= (1<<DISPLAY_DC)|(1<<DISPLAY_RST);
 
-    console_puts("\nInitialize LCD ");
-
-    PORTB &= ~(1<<DISPLAY_RST);
+    DISPLAY_PORT &= ~(1<<DISPLAY_RST);
     _delay_ms(100);
-    PORTB |= (1<<DISPLAY_RST);
+    DISPLAY_PORT |= (1<<DISPLAY_RST);
     SPCR = 0x51;   // enable SPI master, fosc/16 = 1MH
-
-    //PORTD |= (1<<DISPLAY_BL);  // turn on backlight
 
     display_write_byte(0x21, 0);
     display_write_byte(0xc6, 0);
@@ -155,21 +133,16 @@ static void display_init()
     display_write_byte(0x20, 0);
     display_clear();
     display_write_byte(0x0c, 0);
-
-    console_puts("LCD initialized");
 }
 
 static void display_write_byte(display_t dat, display_t dat_type)
 {
-    console_putc('>');
-    PORTB &= ~(1<<SPI_CS);
-    if (dat_type == 0) PORTB &= ~(1<<DISPLAY_DC);
-    else PORTB |= (1<<DISPLAY_DC);
+    SPI_PORT &= ~(1<<SPI_CS);
+    if (dat_type == 0) DISPLAY_PORT &= ~(1<<DISPLAY_DC);
+    else DISPLAY_PORT |= (1<<DISPLAY_DC);
     SPDR = dat;
-    console_putc('|');
     while ((SPSR & 0x80) == 0);
-    PORTB |= (1<<SPI_CS);
-    console_putc('<');
+    SPI_DDR |= (1<<SPI_CS);
 }
 
 
@@ -213,8 +186,8 @@ static void display_write_char(display_t c, char mode)
 
 static void display_set_xy(display_t x, display_t y)
 {
-    display_write_byte(0x40 | y, 0);		// column
-    display_write_byte(0x80 | x, 0);          	// row
+    display_write_byte(0x40 | y, 0);
+    display_write_byte(0x80 | x * 6, 0);
 }
 
 static void display_clear(void)
