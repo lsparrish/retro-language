@@ -1,14 +1,13 @@
 /* Ngaro VM for Arduino boards ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   Copyright (c) 2011, Oleksandr Kozachuk
+   Copyright (c) 2011 - 2012, Oleksandr Kozachuk
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* Configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #define CELL            int16_t
-#define IMAGE_SIZE        (IMAGE_CELLS+IMAGE_CHANGE_SIZE)
-#define IMAGE_CHANGE_SIZE (2048/sizeof(CELL))
-#define IMAGE_CACHE_SIZE    719
-#define CHANGE_TABLE_SIZE    67
-#define ADDRESSES           512
-#define STACK_DEPTH         256
+#define IMAGE_SIZE        65000
+#define IMAGE_CACHE_SIZE     77
+#define CHANGE_TABLE_SIZE   307
+#define ADDRESSES           256
+#define STACK_DEPTH         128
 #define PORTS                16
 #define STRING_BUFFER_SIZE   32
 
@@ -25,6 +24,18 @@
 #include <avr/pgmspace.h>
 #include <util/delay.h>
 #include <util/setbaud.h>
+
+#define SPI_PORT     PORTB
+#define SPI_DDR      DDRB
+#define SPI_CS       PB0
+#define SPI_SCK      PB1
+#define SPI_MOSI     PB2
+#define SPI_MISO     PB3
+
+#define DISPLAY_PORT PORTL
+#define DISPLAY_DDR  DDRL
+#define DISPLAY_DC   PL1
+#define DISPLAY_RST  PL0
 
 #else
 #ifdef BOARD_native
@@ -60,16 +71,13 @@ typedef struct CHANGE_TABLE {
 
 static change_table_t change_table[CHANGE_TABLE_SIZE];
 static struct { CELL key; CELL value; } image_cache[IMAGE_CACHE_SIZE];
-static CELL *image_changes;
 static CELL _cache_pos_temp;
 
-#define img_put(k, v) \
-    ( k >= IMAGE_CELLS ? image_changes[k-IMAGE_CELLS] = v : _img_put(k, v) )
+#define img_put(k, v) _img_put(k, v)
 static void _img_put(CELL k, CELL v);
 #define img_get(k) \
-    ( k >= IMAGE_CELLS ? image_changes[k-IMAGE_CELLS] : \
-      ( image_cache[_cache_pos_temp = k % IMAGE_CACHE_SIZE].key == k ? \
-        image_cache[_cache_pos_temp].value : _img_get(k) ) )
+    ( image_cache[_cache_pos_temp = (k % IMAGE_CACHE_SIZE)].key == k ? \
+      image_cache[_cache_pos_temp].value : _img_get(k) )
 static CELL _img_get(CELL k);
 
 /* Board and image setup ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -79,6 +87,7 @@ static CELL _img_get(CELL k);
 #include "console_mega2560.h"
 #include "image.hex.h"
 #include "eeprom_atmel.h"
+
 #ifdef DISPLAY_nokia3110
 #include "display_nokia3110.h"
 #endif
@@ -113,7 +122,7 @@ static void console_puts(char *s) {
 
 /* Image read and write ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 static CELL _img_get(CELL k) {
-    uint16_t i = 0, p = _cache_pos_temp;
+    uint16_t i = 0, p = k % IMAGE_CACHE_SIZE;
     image_cache[p].key = k;
     change_table_t *tbl = &(change_table[(k % CHANGE_TABLE_SIZE)]);
     for (; i < tbl->full && tbl->elements[i].key != k; ++i);
@@ -139,8 +148,8 @@ static void _img_put(CELL k, CELL v) {
 
 void img_string(CELL starting, char *buffer, CELL buffer_len)
 {
-  CELL i = 0;
-  for(; i < buffer_len && 0 != (buffer[i] = img_get(starting)); ++i);
+  CELL i = 0, j = starting;
+  for(; i < buffer_len && 0 != (buffer[i] = img_get(j)); ++i, ++j);
   buffer[i] = 0;
 }
 
@@ -152,14 +161,14 @@ int main(void)
     CELL data[STACK_DEPTH];
     CELL address[ADDRESSES];
     CELL ports[PORTS];
-    CELL a, b, opcode = 0;
+    CELL a, b;
 
 #ifndef BOARD_native
     _delay_ms(1000);
 #endif
 
 #ifdef DISPLAY_ACTIVATED
-    char string_buffer[STRING_BUFFER_SIZE];
+    char string_buffer[STRING_BUFFER_SIZE+1];
 #endif
 
     console_prepare();
@@ -167,17 +176,9 @@ int main(void)
 
 #ifdef DISPLAY_ACTIVATED
     display_init();
-    //display_clear();
-    //display_set_xy(1, 1);
-    //display_write_string("Welcome!", 1);
+    display_clear();
+    display_set_xy(0, 0);
 #endif
-
-    image_changes = (void*) malloc ((IMAGE_SIZE - IMAGE_CELLS) * sizeof(CELL));
-    if (image_changes == NULL) {
-        console_puts("\nERROR: Failed to initialize image changes.\n");
-        goto finish;
-    }
-        
 
     for (j = 0; j < IMAGE_CACHE_SIZE; ++j) image_cache[j].key = -1;
     for (j = 0; j < STACK_DEPTH; ++j) data[j] = 0;
@@ -189,9 +190,8 @@ int main(void)
     }
 
 
-    for (S_IP = 0; S_IP < IMAGE_SIZE; ++S_IP) {
-        while ((opcode = img_get(S_IP)) == VM_NOP) ++S_IP;
-        switch(opcode) {
+    for (S_IP = 0; S_IP >= 0 && S_IP < IMAGE_SIZE; ++S_IP) {
+        switch(img_get(S_IP)) {
             case     VM_NOP: break;
             case     VM_LIT: S_SP++; S_IP++; S_TOS = img_get(S_IP); break;
             case     VM_DUP: S_SP++; S_TOS = S_NOS; break;
@@ -275,6 +275,8 @@ int main(void)
                             case -10: ports[5] = 0; S_DROP;
                                       img_put(S_TOS, 0); S_DROP;
                                       break;
+                            case -11: ports[5] = 80; break;
+                            case -12: ports[5] = 25; break;
                             default:  ports[5] = 0;
                         }
                     }
@@ -298,6 +300,12 @@ int main(void)
                                 else _SFR_IO8(a) &= ~(1 << b);
                                 ports[13] = 0;
                                 S_DROP; break;
+#ifndef BOARD_native
+                            case -5: a = S_TOS; S_DROP;
+                                     _delay_ms(a);
+                                     ports[13] = 0;
+                                     break;
+#endif
                             default: ports[13] = 0;
                         }
                     }
@@ -308,16 +316,18 @@ int main(void)
                             case -1: display_write_char(S_TOS, S_NOS);
                                      ports[14] = 0;
                                      S_DROP; S_DROP; break;
-                            case -2: img_string(S_TOS, string_buffer, sizeof(string_buffer));
+                            case -2: img_string(S_TOS, string_buffer, STRING_BUFFER_SIZE);
                                      display_write_string(string_buffer, S_NOS);
                                      ports[14] = 0;
                                      S_DROP; S_DROP; break;
-                            case -3: display_set_xy(S_TOS, S_NOS);
+                            case -3: display_set_xy(S_NOS, S_TOS);
                                      ports[14] = 0;
                                      S_DROP; S_DROP; break;
                             case -4: display_clear();
                                      ports[14] = 0;
                                      break;
+                            case -5: ports[14] = DISPLAY_WIDTH; break;
+                            case -6: ports[14] = DISPLAY_HEIGHT; break;
                             default: ports[14] = 0;
                         }
 #else
@@ -330,13 +340,11 @@ int main(void)
                 S_RSP++;
                 S_TORS = S_IP;
                 S_IP = img_get(S_IP) - 1;
-                if (S_IP < 0) S_IP = IMAGE_SIZE;
                 break;
         }
         ports[3] = 1;
     }
 
-finish:
     console_puts("\n\nNgaro VM is down.\n");
     console_finish();
 #ifndef BOARD_native

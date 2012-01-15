@@ -14,13 +14,15 @@ int16_t output16BE[1000000];
 int32_t output32BE[1000000];
 int64_t output64BE[1000000];
 
-u_int32_t bswap32(u_int32_t x)
+#ifdef RXBE
+uint32_t bitswap32(uint32_t x)
 {
   return ((x << 24) & 0xff000000) |
          ((x <<  8) & 0x00ff0000) |
          ((x <<  8) & 0x0000ff00) |
          ((x << 24) & 0x000000ff);
 }
+#endif
 
 int load_image(char *image)
 {
@@ -46,7 +48,7 @@ int save_image()
   u_int32_t image_size = input[3];
 
 #ifdef RXBE
-  image_size = bswap32(image_size);
+  image_size = bitswap32(image_size);
 #endif
 
   if ((fp[0] = fopen("retroImage16", "w")) == NULL) exit(-1);

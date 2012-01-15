@@ -1,0 +1,7 @@
+[ ( code which should be started on boot )
+  4 4 ^arduino'DDRC ^arduino'PORTC ^arduino'PINC ^keypad'init-keypad
+  build version "Retro %s (%s)\n" puts
+  "Retro " ^lcd'puts
+  version  ^lcd'puts
+  0 1      ^lcd'setxy
+] is boot
