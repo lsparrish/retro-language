@@ -133,7 +133,9 @@ static CELL _img_get(CELL k) {
 
 static void _img_put(CELL k, CELL v) {
     uint16_t i = 0, p = k % IMAGE_CACHE_SIZE;
-    change_table_t *tbl = &(change_table[(k % CHANGE_TABLE_SIZE)]);
+    change_table_t *tbl;
+    if (_img_get(k) == v) return;
+    tbl = &(change_table[(k % CHANGE_TABLE_SIZE)]);
     for (; i < tbl->full && tbl->elements[i].key != k; ++i);
     if (i == tbl->full) {
         if (tbl->size == tbl->full) {
