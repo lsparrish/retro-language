@@ -2,8 +2,10 @@
 BOARD=mega2560
 DISPLAY=nokia3110
 
-CFLAGS=-O3 -std=gnu99 -Wall
+CFLAGS=-O2 -std=gnu99 -Wall
+NATCFLAGS=-DBOARD_native
 AVRCFLAGS=$(CFLAGS) -DAVRCPU -DF_CPU=16000000UL -mmcu=atmega2560
+AVRCFLAGS+=-DBOARD_$(BOARD) -DDISPLAY_$(DISPLAY)
 AVRCC=avr-gcc
 AVROBJCOPY=avr-objcopy
 IMAGE_BLOCK_SIZE=32
@@ -21,6 +23,7 @@ RETRO_MODULES+=$(LIBRARY_PATH)/linkedList.rx
 RETRO_MODULES+=$(LIBRARY_PATH)/combinators.rx
 RETRO_MODULES+=$(LIBRARY_PATH)/decorator.rx
 RETRO_MODULES+=$(LIBRARY_PATH)/math.rx
+RETRO_MODULES+=$(LIBRARY_PATH)/variations.rx
 #RETRO_MODULES+=$(LIBRARY_PATH)/values.rx
 #RETRO_MODULES+=$(LIBRARY_PATH)/locals.rx
 RETRO_MODULES+=functions.rx
@@ -48,7 +51,7 @@ clean:
 	$(AVROBJCOPY) -O ihex -R .eeprom $< $@
 
 %.out: %.c
-	$(AVRCC) -DBOARD_$(BOARD) -DDISPLAY_$(DISPLAY) $(AVRCFLAGS) -o $@ $<
+	$(AVRCC) $(AVRCFLAGS) -o $@ $<
 
 %.hex.h: %.data
 	$(HEXDUMP) -v -e '"{" ${IMAGE_BLOCK_SIZE}/2 "%d," "},\n"' $< \
@@ -70,7 +73,7 @@ retro.orig: ../../../complete/retro.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 retro.nat: retro.c image.hex.h
-	$(CC) -DBOARD_native $(CFLAGS) $(NATCFLAGS) -o $@ $<
+	$(CC) $(CFLAGS) $(NATCFLAGS) -o $@ $<
 
 retro.hex: retro.out
 retro.out: image.hex.h eeprom_atmel.h console_$(BOARD).h display_$(DISPLAY).h

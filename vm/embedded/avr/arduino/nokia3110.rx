@@ -1,15 +1,15 @@
-chain: lcd' {{
+chain: display' {{
 
   0 variable: state
 
 ---reveal---
 
-  : mode ( n- ) !state ;
-  : putc ( c- ) @state swap -1 #14 out wait ;
-  : puts ( $- ) @state swap -2 #14 out wait ;
-  : setxy ( xy- ) -3 #14 out wait ;
-  : clear ( - ) -4 #14 out wait ;
-  : width ( -n ) -5 #14 out wait #14 in ;
-  : height ( -n ) -6 #14 out wait #14 in ;
+  : dispmode ( n- ) !state ;
+  : dispc ( c- ) @state swap -1 #14 out wait ;
+  : disps ( $- ) @state swap -2 #14 out wait ;
+  : dispxy ( xy- ) -3 #14 out wait ;
+  : dispclr ( - ) -4 #14 out wait ;
+  : dispw ( -n ) -5 #14 out wait #14 in ;
+  : disph ( -n ) -6 #14 out wait #14 in ;
 
 }} ;chain
