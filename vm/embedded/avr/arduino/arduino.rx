@@ -1,4 +1,4 @@
-chain: avr'
+chain: arduino'
 
 : io-byte@  ( n-n ) -1 #13 out wait #13 in wait ;
 : io-byte! ( nn-n ) -2 #13 out wait ;

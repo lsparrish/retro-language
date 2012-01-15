@@ -3,9 +3,9 @@ chain: keypad' {{
   variables| k-cols k-rows k-ddr k-port k-pin |
 
   : init-cols ( n-n )
-    @k-cols [ dup [ over = ] dip @k-port ^avr'io-bit! ] iter ;
+    @k-cols [ dup [ over = ] dip @k-port ^arduino'io-bit! ] iter ;
   : get-row ( n-n )
-    @k-cols + @k-pin ^avr'io-bit@ ;
+    @k-cols + @k-pin ^arduino'io-bit@ ;
   : check-rows ( n-n )
     dup 0 = if; dup 1- get-row 0 = [ 1- check-rows ] ifTrue ;
   : check-all ( n-n )
@@ -19,8 +19,8 @@ chain: keypad' {{
   ( Arguments: cols,rows,ddr,port,pin                       )
   : init-keypad ( nnnnn- ) 
     !k-pin !k-port !k-ddr !k-rows !k-cols
-    @k-cols [ 1 swap @k-ddr ^avr'io-bit! ] iter
-    @k-rows [ 0 swap @k-cols + @k-ddr ^avr'io-bit! ] iter ;
+    @k-cols [ 1 swap @k-ddr ^arduino'io-bit! ] iter
+    @k-rows [ 0 swap @k-cols + @k-ddr ^arduino'io-bit! ] iter ;
 
   ( Returns the currently pressed key )
   : pressed-key ( -n )
@@ -28,6 +28,6 @@ chain: keypad' {{
 
   ( Wait for a key press )
   : wait-key ( -n )
-    [ pressed-key dup 0 = [ drop -1 50 ] [ 0 200 ] if ^avr'sleep ] while ;
+    [ pressed-key dup 0 = [ drop -1 50 ] [ 0 200 ] if ^arduino'sleep ] while ;
     
 }} ;chain

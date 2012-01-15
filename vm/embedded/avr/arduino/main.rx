@@ -1,12 +1,9 @@
-with avr'
 with arduino'
-with display'
-with keypad'
 
 [ ( code which should be started on boot )
-  4 4 DDRC PORTC PINC init-keypad
-  "Retro " disps
-  version  disps
-  0 1      dispxy
+  4 4 DDRC PORTC PINC ^keypad'init-keypad
+  "Retro " ^display'disps
+  version  ^display'disps
+  0 1      ^display'dispxy
   build version "Retro %s (%s)\n" puts
 ] is boot

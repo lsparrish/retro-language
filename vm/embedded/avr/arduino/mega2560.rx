@@ -1,6 +1,6 @@
 ( Mostly for ATmega2560 )
 
-chain: arduino'
+with arduino'
 
 0     constant PINA
 1     constant DDRA
@@ -90,9 +90,9 @@ chain: arduino'
 3     constant FLASHEND      ( Real Value: 65535 + FLASHEND << 16 )
 
 : led ( n- ) 
-  [ 0 = ] [ drop 0 7 DDRB ^avr'io-bit! 0 7 PORTB ^avr'io-bit! ] when
-  [ 1 = ] [ drop 0 7 DDRB ^avr'io-bit! 1 7 PORTB ^avr'io-bit! ] when
-  [ 2 = ] [ drop 1 7 DDRB ^avr'io-bit! 1 7 PORTB ^avr'io-bit! ] when
+  [ 0 = ] [ drop 0 7 DDRB io-bit! 0 7 PORTB io-bit! ] when
+  [ 1 = ] [ drop 0 7 DDRB io-bit! 1 7 PORTB io-bit! ] when
+  [ 2 = ] [ drop 1 7 DDRB io-bit! 1 7 PORTB io-bit! ] when
   drop "\nLED level need to be 0, 1 or 2 " puts ;
   
-;chain
+without
