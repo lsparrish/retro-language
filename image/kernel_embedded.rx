@@ -9,7 +9,7 @@
 ( Kernel Begins ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 IMAGE-SIZE  constant CORE
 CORE 0000 + constant TIB
-TIB   512 + constant HEAP
+TIB   128 + constant HEAP
 
 ( Initial Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 mark variable last  ( Pointer to the most recent dictionary header            )
@@ -575,19 +575,19 @@ create dicts 64 allot
 
 ( Core Strings ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 {{
-  : buffers ( -a ) 2048 here + ;
+  : buffers ( -a ) 512 here + ;
   variable next
 ---reveal---
   : tempString ( $-$ )
     withLength 1+
-    @next 12 = [ 0 !next ] ifTrue
-    @next 512 * buffers + [ swap copy ] sip
+    @next 4 = [ 0 !next ] ifTrue
+    @next 128 * buffers + [ swap copy ] sip
     next ++ ;
 }}
 
 {{
   variable end
-  : pad     (  -a ) 1024 here + ;
+  : pad     (  -a ) 128 here + ;
   : keep    (  -  ) @compiler &keepString &tempString if .data ;
   : >pad    ( $-$ ) pad over getLength 1+ copy pad keep ;
   : chop    ( $-$ ) end -- 0 @end ! ;
@@ -702,7 +702,7 @@ with buffer'
 chain: strings'
 {{
   variables| len needle haystack flag right left src |
-  : buffer (  -a ) here 8192 + ;
+  : buffer (  -a ) here 1024 + ;
   : trim   ( $-$ )
     dup withLength + 1- dup @ 32 =if 0 swap ! dup 1- -- trim ;; then drop ;
   : place  ( $$n- ) [ copy 0 ] sip here + ! ;
@@ -721,14 +721,14 @@ chain: strings'
     again ;
   : chop      ( $-$ ) tempString withLength over + 1- 0 swap ! ;
   : getSubset ( $nn-$ )
-    buffer 0 1024 fill
+    buffer 0 256 fill
     !right !left !src
     @src @left + @right buffer swap copy buffer tempString ;
   : trimLeft  ( $-$ ) [ @+ [ 32 = ] [ 0 <> ] bi = ] while 1- ;
   : trimRight ( $-$ )
-    buffer [ 0 1024 fill ] [ over getLength copy ] [ trim ] tri tempString ;
+    buffer [ 0 256 fill ] [ over getLength copy ] [ trim ] tri tempString ;
   : prepend ( $$-$ )
-    buffer 0 1024 fill
+    buffer 0 256 fill
     withLength buffer swap dup &copy dip
     &withLength dip buffer + swap copy buffer tempString ;
   : append ( $$-$ ) swap prepend ;
