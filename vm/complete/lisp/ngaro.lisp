@@ -253,11 +253,6 @@
                      #+big-endian 1
                      #-big-endian 0))))))
 
-(defmacro protocase (val &rest rules)
-  `(case ,val
-     ,@(loop for r in rules collect
-             `(,(first r) (format t "~&~S" ',(first r)) ,@(rest r)))))
-
 (defun ngaro ()
   (console-prepare)
   (unwind-protect
@@ -270,7 +265,7 @@
               while (and (< d *image-size*) c)
               do (setf (aref *image* d) c)))
       (loop
-        (protocase (op ip)
+        (case (op ip)
           ((0) nil)
           ((1) (incf sp) (incf ip) (setf (tos) (op ip)))
           ((2) (incf sp) (setf (tos) (nos)))
