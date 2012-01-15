@@ -4,11 +4,11 @@
 /* Configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #define CELL            int16_t
 #define IMAGE_SIZE        31000
-#define IMAGE_CACHE_SIZE     77
-#define CHANGE_TABLE_SIZE   307
-#define ADDRESSES           256
-#define STACK_DEPTH         128
-#define PORTS                16
+#define IMAGE_CACHE_SIZE    181
+#define CHANGE_TABLE_SIZE   457
+#define ADDRESSES            64
+#define STACK_DEPTH          64
+#define PORTS                15
 #define STRING_BUFFER_SIZE   32
 
 /* General includes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -64,8 +64,8 @@ typedef struct CHANGE_ELEMENT {
 } change_element_t;
 
 typedef struct CHANGE_TABLE {
-    size_t full;
-    size_t size;
+    uint8_t full;
+    uint8_t size;
     change_element_t *elements;
 } change_table_t;
 
