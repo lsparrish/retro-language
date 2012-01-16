@@ -12,7 +12,12 @@ buffers.
 What we can do is:
 
 1) Use 16 bits per cell if possible
-2) Reduce the buffers
+
+With a 16 bit cell, this cuts the physical memory use in half. So we can be around
+40 KiB for a base image and buffers. This is still pretty big, especially as we
+also want room to actually hold our own code and data. This brings to the next step:
+
+2) Reduce the max string length
 
 Most of the buffers are for strings. A standard image has 512 cells per string. With
 12 temporary buffers, this is 6k cells. There's another couple of buffers used for
@@ -21,13 +26,21 @@ the strings down a lot:
 
 [ 128 ] is STRING-LENGTH
 
-This cuts the memory consumption down to around 2 - 3k cells. Reducing the number of
-temporary buffers can lead to even more savings:
+This cuts the memory consumption down to around 2 - 3k cells., or about 24 KiB of
+physical memory. This alone makes it viable on some of the larger boards. With
+32 KiB, you can have the standard image and around 4k cells for your programs.
+If you need more, then:
+
+3) Reduce the number of rotating buffers:
 
 [ 4 ] is STRING-BUFFERS
 
-This would reduce memory down to approx 1.5k cells. after running these sequences,
-save the image to test out the memory reductions.
+This would reduce memory down to approx 1.5k cells. This won't net as much, but
+could be helpful if you are very tight.
+
+Once either (or both) of these are executed, they remain active until the image
+is shut down. You can use 'save' to make them remain active on subsequent reloads
+of the image.
 
 
 == Image Naming ==
