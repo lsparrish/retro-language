@@ -1,36 +1,33 @@
 *This is a random collection of notes and snippits related to things I'm working on*
 
-== Dealing with Cell Sizes ==
+== Images for Embedded Use ==
 
-In 11.2 new queries have been added to allow for checking the endian type amd bits
-per cell. A standard system will be 32-bit, little endian, but with the recent
-expansions into embedded realms, this should help ensure that images run only o
-compatible Ngaro implementations.
+A standard image is 32-bit, and assumes a big memory area (a typical VM will provide
+around 1,000,000 cells). Assume that a standard image consumes around 10k cells. So
+just to have everything in memory needs 40 KiB. In addition to this, we have some
+necessary buffers for temporary strings and such. So add another 8 - 10k cells. On
+a 32-bit system, you need at least 80 KiB of RAM to comfortably hold the image and
+buffers.
 
-It would be useful to allow for code to be conditionally compiled based on bit size
-and endian type. A possibility is to draw frm the doc{ style blocks.
+What we can do is:
 
+1) Use 16 bits per cell if possible
+2) Reduce the buffers
 
-chain: cell'
-  : size  ( -n )  -13 5 out wait 5 in dup 0 = [ drop 32 ] ifTrue ;
-  : bits{  ( n"- )
-      size <> [ repeat getToken "}" compare if; again ] ifTrue ;
-  : }  ( - )  ; immediate
-;chain
+Most of the buffers are for strings. A standard image has 512 cells per string. With
+12 temporary buffers, this is 6k cells. There's another couple of buffers used for
+strings as well, bringing us to 8-10k. On an embedded system, we can cut the size of
+the strings down a lot:
 
+[ 128 ] is STRING-LENGTH
 
-With this, the following will work:
+This cuts the memory consumption down to around 2 - 3k cells. Reducing the number of
+temporary buffers can lead to even more savings:
 
+[ 4 ] is STRING-BUFFERS
 
-with cell'
-
-32 bits{
-... code if ^cell'size = 32 ...
-}
-
-16 bits{
-... code if ^cell'size = 16 ...
-}
+This would reduce memory down to approx 1.5k cells. after running these sequences,
+save the image to test out the memory reductions.
 
 
 == Image Naming ==
