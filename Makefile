@@ -27,12 +27,6 @@ image: retro
 	mv retroImage.js vm/web/html5
 	rm core.rx
 
-embeddedimage: retro
-	cd image && cat meta.rx kernel_embedded.rx >../core.rx
-	cp retroImage embeddedImage
-	./retro --shrink --image embeddedImage --with core.rx
-	rm core.rx
-
 clean:
 	rm -f retro
 	rm -f retroImage16 retroImage64

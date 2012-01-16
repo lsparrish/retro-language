@@ -1029,6 +1029,9 @@ TEST: rename:
   [ @bar @foo ] expected: { 200 100 }
 results
 
+IO: STRING-LENGTH
+IO: STRING-BUFFERS
+
 TEST: tempString
   [ "100" dup tempString over over < [ compare ] dip and ] expected: { -1 }
 results
