@@ -24,6 +24,7 @@ image: retro
 	cd image && cat meta.rx kernel.rx >../core.rx
 	./retro --shrink --image retroImage --with core.rx
 	./retro --with vm/web/html5/dumpImage.rx
+	cp retroImage.js vm/web/android-phonegap/assets/www
 	mv retroImage.js vm/web/html5
 	rm core.rx
 
