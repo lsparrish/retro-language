@@ -1,12 +1,14 @@
-16-bit Ngaro and retroImage for mbed
--------------------------------------------------------------------------------
-Building on the standard retro16 VM, this is a customized version for use with
-the mbed microcontroller.
+Retro Language
+--------------
+This is a virtual machine and modules for using Retro on an mbed development
+board. The mbed board used is the LPC1768, which has an ARM processor, 32 KiB
+of RAM, and 512 KiB of flash memory. The CPU is a Cortex-M3, running at 96MHz,
+so it's fast enough for most purposes.
 
-To build this, load the source into the mbed compiler and build. You will need
-to flash the binary to your mbed, and copy a 16-bit image (build using the
-vm/experimental/retro16 sources). Rename the image to retroImg before copying
-it to your mbed.
+The current implementation loads the image into RAM. This does not leave much
+room for user level code. It would be better to keep the image on an external
+memory device (such as an SD card), and leave the limited internal RAM for
+caches and VM use.
 
 Known Bugs:
 
