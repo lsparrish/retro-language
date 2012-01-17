@@ -1,0 +1,12 @@
+chain: diet'
+  : shrink  ( - )
+    [ 128 ] &STRING-LENGTH :is
+    [   6 ] &STRING-BUFFERS :is ;
+
+  : bloat   ( - )
+    &STRING-LENGTH :devector
+    &STRING-BUFFERS :devector ;
+
+  shrink
+;chain
+
