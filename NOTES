@@ -1,5 +1,28 @@
 *This is a random collection of notes and snippits related to things I'm working on*
 
+== Embedded Boards ==
+
+arduino
+mega 2560
+ATmega2560
+16MHz, 256K flash (8K for bootloader), 8K RAM, 4K EEPRON
+
+
+mbed
+NXP LPX1768
+Cortex-M3
+96MHz, 512K flash, 32K RAM, ARM
+
+NXP LPC11U24
+Cortex-M0
+48MHz, 32K flash, 8K RAM, ARM
+
+
+ubw32
+PIC32MX795
+80MHz, 512K Flash, 128K RAM, MIPS
+
+
 == Images for Embedded Use ==
 
 A standard image is 32-bit, and assumes a big memory area (a typical VM will provide
