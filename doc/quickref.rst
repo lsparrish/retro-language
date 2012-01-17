@@ -73,12 +73,52 @@ Numbers
 
 ::
 
-  getToken toNumber
+  getNumber
 
 
 ------------
 Conditionals
 ------------
+
+Equality
+========
+
+::
+
+  2 3 =
+
+
+Inequality
+==========
+
+::
+
+  3 4 <>
+
+
+Greather Than
+=============
+
+::
+
+  3 4 >
+
+
+Less Than
+=========
+
+::
+
+  3 4 <
+
+
+String Equality
+===============
+
+::
+
+  "hello"   "world"  compare
+
 
 If / Then
 =========
@@ -96,13 +136,13 @@ Multiple Comparisons
 ::
 
   [ @base
-    [  8 = ] [ "octal" ] whend
-    [ 10 = ] [ "decimal" ] whend
+    [  8 = ] [ "octal"       ] whend
+    [ 10 = ] [ "decimal"     ] whend
     [ 16 = ] [ "hexadecimal" ] whend
     drop ( default case ) ] do
 
   [ @base
-    [ 8 = ] [ "base is octal: %d" puts ] when
+    [  8 = ] [ "base is octal: %d"   puts ] when
     [ 10 = ] [ "base is decimal: %d" puts ] when
     drop ( default case ) ] do
 
@@ -165,6 +205,77 @@ Conditional
 ::
 
   10 [ 1- dup putn dup 0 <> ] while
+
+
+----
+Math
+----
+
+Addition
+========
+
+::
+
+  100 200 +
+
+
+Subtraction
+===========
+
+::
+
+  400 32 -
+
+
+Multiplication
+==============
+
+::
+
+  98 12 *
+
+
+Division
+========
+
+::
+
+  200 4 /
+
+
+Remainder
+=========
+
+::
+
+  203 4 mod
+
+
+Power
+=====
+
+Raise 3 to the second power.
+
+::
+
+  3 2 pow
+
+
+Absolute Value
+==============
+
+::
+
+  -76 abs
+
+
+Minimum and Maximum Value
+=========================
+
+::
+
+  34 8 min
+  34 8 max
 
 
 ------------
