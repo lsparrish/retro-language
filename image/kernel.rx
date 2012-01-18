@@ -20,7 +20,7 @@ variable which      ( Pointer to dictionary header of the most recently       )
 pad
 label: copytag   "Retro" $,
 label: version   "11.3" $,
-label: build     "2012.01.15" $,
+label: build     "2012.01.18" $,
 label: okmsg     "ok  " $,
 
 ( Primitives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
@@ -172,6 +172,8 @@ t: count       ( a-a ) repeat @+ 0; drop, again ;
 t: getLength   ( a-n ) dup, count 1-, swap, -, ;
 t: withLength  ( a-an ) dup, getLength ;
 t: keepString  ( a-a ) withLength 3 # +, here +, 8 # , , here swap, $ ;
+t: STRING-LENGTH  ( -n )  512 # ;
+t: STRING-BUFFERS ( -n )   12 # ;
 
 ( Numbers [Parsing & Display] ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 4 elements #value num negate? flag
@@ -243,63 +245,64 @@ t: process ( af- ) 0 # !if word ; then drop number ;
 t: listen  (   - ) repeat ok 32 # accept tib find process again ;
 
 ( Initial Dictionary ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-' 1+           prim: 1+            ' 1-           prim: 1-
-' swap         prim: swap          ' drop         prim: drop
-' and          prim: and           ' or           prim: or
-' xor          prim: xor           ' @            prim: @
-' !            prim: !             ' +            prim: +
-' -            prim: -             ' *            prim: *
-' /mod         prim: /mod          ' <<           prim: <<
-' >>           prim: >>            ' tib          word: tib
-' dup          prim: dup           ' in           prim: in
-' out          prim: out           ' accept       word: accept
-' here         word: here          ' ,            word: ,
-' create       word: create        ' ]]           word: ]]
-' :            word: :             ' header       word: header
-' cr           word: cr            ' putc         word: putc
-' remapKeys    word: remapKeys     ' <puts>       word: <puts>
-' over         word: over
-' not          word: not           ' on           word: on
-' off          word: off           ' /            word: /
-' mod          word: mod           ' negate       word: negate
-' do           word: do            ' nums         word: numbers
-' wait         word: wait          ' t-'          word: '
-' @+           word: @+            ' !+           word: !+
-' keepString   word: keepString    ' getLength    word: getLength
-' withLength   word: withLength    ' withClass    word: withClass
-' .word        word: .word         ' .macro       word: .macro
-' .data        word: .data         ' .primitive   word: .primitive
-' d->class     word: d->class      ' d->xt        word: d->xt
-' d->name      word: d->name       ' boot         word: boot
-' toNumber     word: toNumber      ' isNumber?    word: isNumber?
-' ok           word: ok            ' listen       word: listen
-' getc         word: getc          ' find         word: find
-' notFound     word: notFound      ' <notFound>   word: <notFound>
-' puts         word: puts          ' compare      word: compare
-' redraw       word: redraw        ' if           word: if
-' ifTrue       word: ifTrue        ' ifFalse      word: ifFalse
-' dip          word: dip           ' sip          word: sip
-' =            word: =             ' <>           word: <>
-' <            word: <             ' >            word: >
-' <=           word: <=            ' >=           word: >=
+' 1+             prim: 1+             ' 1-           prim: 1-
+' swap           prim: swap           ' drop         prim: drop
+' and            prim: and            ' or           prim: or
+' xor            prim: xor            ' @            prim: @
+' !              prim: !              ' +            prim: +
+' -              prim: -              ' *            prim: *
+' /mod           prim: /mod           ' <<           prim: <<
+' >>             prim: >>             ' tib          word: tib
+' dup            prim: dup            ' in           prim: in
+' out            prim: out            ' accept       word: accept
+' here           word: here           ' ,            word: ,
+' create         word: create         ' ]]           word: ]]
+' :              word: :              ' header       word: header
+' cr             word: cr             ' putc         word: putc
+' remapKeys      word: remapKeys      ' <puts>       word: <puts>
+' over           word: over
+' not            word: not            ' on           word: on
+' off            word: off            ' /            word: /
+' mod            word: mod            ' negate       word: negate
+' do             word: do             ' nums         word: numbers
+' wait           word: wait           ' t-'          word: '
+' @+             word: @+             ' !+           word: !+
+' keepString     word: keepString     ' getLength    word: getLength
+' STRING-LENGTH  word: STRING-LENGTH  ' STRING-BUFFERS word: STRING-BUFFERS
+' withLength     word: withLength     ' withClass    word: withClass
+' .word          word: .word          ' .macro       word: .macro
+' .data          word: .data          ' .primitive   word: .primitive
+' d->class       word: d->class       ' d->xt        word: d->xt
+' d->name        word: d->name        ' boot         word: boot
+' toNumber       word: toNumber       ' isNumber?    word: isNumber?
+' ok             word: ok             ' listen       word: listen
+' getc           word: getc           ' find         word: find
+' notFound       word: notFound       ' <notFound>   word: <notFound>
+' puts           word: puts           ' compare      word: compare
+' redraw         word: redraw         ' if           word: if
+' ifTrue         word: ifTrue         ' ifFalse      word: ifFalse
+' dip            word: dip            ' sip          word: sip
+' =              word: =              ' <>           word: <>
+' <              word: <              ' >            word: >
+' <=             word: <=             ' >=           word: >=
 
-' t-;          macro: ;            ' ;;           macro: ;;
-' t-=if        macro: =if          ' t->if        macro: >if
-' t-<if        macro: <if          ' t-!if        macro: !if
-' t-then       macro: then         ' t-repeat     macro: repeat
-' t-again      macro: again        ' t-0;         macro: 0;
-' push         macro: push         ' pop          macro: pop
-' [            macro: [            ' ]            macro: ]
-' t-(          macro: (            ' [[           macro: [[
+' t-;            macro: ;             ' ;;           macro: ;;
+' t-=if          macro: =if           ' t->if        macro: >if
+' t-<if          macro: <if           ' t-!if        macro: !if
+' t-then         macro: then          ' t-repeat     macro: repeat
+' t-again        macro: again         ' t-0;         macro: 0;
+' push           macro: push          ' pop          macro: pop
+' [              macro: [             ' ]            macro: ]
+' t-(            macro: (             ' [[           macro: [[
 
-  last         data: last          compiler     data: compiler
-  fb           data: fb            fw           data: fw
-  fh           data: fh            memory       data: memory
-  cw           data: cw            ch           data: ch
-  heap         data: heap          which        data: which
-  remapping    data: remapping     eatLeading?  data: eatLeading?
-  base         data: base          update       data: update
-  version      data: version       build        data: build
+  last           data: last           compiler     data: compiler
+  fb             data: fb             fw           data: fw
+  fh             data: fh             memory       data: memory
+  cw             data: cw             ch           data: ch
+  heap           data: heap           which        data: which
+  remapping      data: remapping      eatLeading?  data: eatLeading?
+  base           data: base           update       data: update
+  version        data: version        build        data: build
   tabAsWhitespace data: tabAsWhitespace
 patch
 
@@ -574,9 +577,6 @@ create dicts 64 allot
 }}
 
 ( Core Strings ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-: STRING-LENGTH  ( -n )  512 ;
-: STRING-BUFFERS ( -n )   12 ;
-
 {{
   : buffers ( -a ) STRING-LENGTH 4 * here + ;
   variable next
