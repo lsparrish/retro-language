@@ -152,21 +152,26 @@ luaretro.o: lua51 luaretro.c
 	gcc -g -O0 -Wall -fPIC -I$(LUASRC)/include -c luaretro.c -o luaretro.o
 retro.so: lua51 libretro.o luaretro.o
 	gcc $(SHARED) -o retro.so -L$(LUASRC)/lib -llua libretro.o luaretro.o
-runluatest: lua51 retro.so
+runluatest: lua51 retro.so image
 	$(LUA51) test.lua
+image:
+	ln -s ../../retroImage
 
 
 # «clean»  (to ".clean")
 clean:
+	rm -fv retroImage
 	rm -fv libretro.so
 	rm -fv libretro.o luaretro.o retro.so
 
 # The "cleanlocal" targets don't delete anything outside the local dirs
 cleanlocallua:
 	rm -Rfv usr/lua-5.1.4/ lua51
+
 cleanlocaldownloads:
-	# ?
-veryclean: clean cleanlocallua
+	rm -rf usrc/* snarf/*
+
+veryclean: clean cleanlocallua cleanlocaldownloads
 
 
 
