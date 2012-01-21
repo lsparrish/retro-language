@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.7: http://docutils.sourceforge.net/" />
+<title>Casket</title>
+<style type="text/css">
+
+body {
+  font: 100% sans-serif;
+  background: #ffffff;
+  color: black;
+  margin: 2em;
+  padding: 0em 2em; }
+
+p.topic-title {
+  font-weight: bold; }
+
+table.docinfo {
+  text-align: left;
+  margin: 2em 0em; }
+
+a[href] {
+  color: #436976;
+  background-color: transparent; }
+
+a.toc-backref {
+  text-decoration: none; }
+
+h1 a[href] {
+  color: #003a6b;
+  text-decoration: none;
+  background-color: transparent; }
+
+a.strong {
+  font-weight: bold; }
+
+img {
+  margin: 0;
+  border: 0; }
+
+p {
+  margin: 0.5em 0 1em 0;
+  line-height: 1.5em; }
+
+p a:visited {
+  color: purple;
+  background-color: transparent; }
+
+p a:active {
+  color: red;
+  background-color: transparent; }
+
+a:hover {
+  text-decoration: none; }
+
+p img {
+  border: 0;
+  margin: 0; }
+
+p.rubric {
+  font-weight: bold;
+  font-style: italic; }
+
+h1.title {
+  color: #003a6b;
+  font-size: 250%;
+  margin-bottom: 0em; }
+
+h2.subtitle {
+  color: #003a6b;
+  border-bottom: 0px; }
+
+h1, h2, h3, h4, h5, h6 {
+  color: #555;
+  background-color: transparent;
+  margin: 0em;
+  padding-top: 0.5em; }
+
+h1 {
+  font-size: 160%;
+  margin-bottom: 0.5em;
+  border-bottom: 2px solid #aaa; }
+
+h2 {
+  font-size: 140%;
+  margin-bottom: 0.5em;
+  border-bottom: 1px solid #aaa; }
+
+h3 {
+  font-size: 130%;
+  margin-bottom: 0.5em; }
+
+h4 {
+  font-size: 110%;
+  font-weight: bold;
+  margin-bottom: 0.5em; }
+
+h5 {
+  font-size: 105%;
+  font-weight: bold;
+  margin-bottom: 0.5em; }
+
+h6 {
+  font-size: 100%;
+  font-weight: bold;
+  margin-bottom: 0.5em; }
+
+dt {
+  font-style: italic; }
+
+dd {
+  margin-bottom: 1.5em; }
+
+div.admonition, div.note, div.tip, div.caution, div.important {
+  margin: 2em 2em;
+  padding: 0em 1em;
+  border-top: 1px solid #aaa;
+  border-left: 1px solid #aaa;
+  border-bottom: 2px solid #555;
+  border-right: 2px solid #555; }
+
+div.important {
+  background: transparent url('../images/important.png') 10px 2px no-repeat; }
+
+div.caution {
+  background: transparent url('../images/caution.png') 10px 2px no-repeat; }
+
+div.note {
+  background: transparent url('../images/note.png') 10px 2px no-repeat; }
+
+div.tip {
+  background: transparent url('../images/tip.png') 10px 2px no-repeat; }
+
+div.admonition-example {
+  background: transparent url('../images/tip.png') 10px 2px no-repeat; }
+
+div.admonition-critical-example {
+  background: transparent url('../images/important.png') 10px 2px no-repeat; }
+
+p.admonition-title {
+  font-weight: bold;
+  border-bottom: 1px solid #aaa;
+  padding-left: 30px; }
+
+table.docutils {
+  text-align: left;
+  border: 1px solid gray;
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5em 0em; }
+
+table.docutils caption {
+  font-style: italic; }
+
+table.docutils td, table.docutils th {
+  padding: 0.25em 0.5em; }
+
+table.docutils th {
+  background-color: #dddddd; }
+
+div.sidebar {
+  width: 33%;
+  float: right;
+  margin: 0em 2em;
+  padding: 0em 1em;
+  border-top: 1px solid #aaa;
+  border-left: 1px solid #aaa;
+  border-bottom: 2px solid #555;
+  border-right: 2px solid #555; }
+
+p.sidebar-title {
+  margin-bottom: 0em;
+  color: #003a6b;
+  border-bottom: 1px solid #aaa;
+  font-weight: bold; }
+
+p.sidebar-subtitle {
+  margin-top: 0em;
+  font-style: italic;
+  color: #003a6b; }
+
+pre.literal-block {
+  margin-left: 1em;
+  margin-right: 1em;
+  background: #dddddd; }
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+td.label {
+  width: 8%; }
+
+table.corefunc td:nth-child(2n) { text-align: center; }
+table.corefunc {
+  text-align: left;
+  border: 1px solid gray;
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5em 0em; }
+
+table.corefunc caption {
+  font-style: italic; }
+
+table.corefunc td, table.corefunc th {
+  padding: 0.25em 0.5em; }
+
+table.corefunc th {
+  background-color: #dddddd; }
+
+</style>
+</head>
+<body>
+<div class="document" id="casket">
+<h1 class="title">Casket</h1>
+
+<div class="section" id="overview">
+<h1>Overview</h1>
+<p>Casket is a lightweight framework intended to simplify the development of
+web apps in Retro.</p>
+<p>Casket grew out of my work on the Corpse blog and later through work on the
+Rancid IRC log viewer.</p>
+</div>
+<div class="section" id="functions">
+<h1>Functions</h1>
+<table border="1" class="docutils">
+<colgroup>
+<col width="24%" />
+<col width="9%" />
+<col width="67%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Name</th>
+<th class="head">Stack</th>
+<th class="head">Usage</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>serve:</td>
+<td>&quot;&quot;&quot;-</td>
+<td>Serve a file with a specific mime type</td>
+</tr>
+<tr><td>decode</td>
+<td>$-</td>
+<td>Decode a URL encoded string</td>
+</tr>
+<tr><td>dispatch</td>
+<td><tt class="docutils literal">-</tt></td>
+<td>Look for a view handler (e.g., /index) and call
+it, or call <strong>/404</strong> if none is found</td>
+</tr>
+<tr><td>doBeforeDispatch</td>
+<td><tt class="docutils literal">-</tt></td>
+<td>Code to execute before processing paths. This is
+always called before <strong>dispatch</strong>.</td>
+</tr>
+<tr><td>/</td>
+<td><tt class="docutils literal">-</tt></td>
+<td>Default index page</td>
+</tr>
+<tr><td>/404</td>
+<td><tt class="docutils literal">-</tt></td>
+<td>Default 404 error page</td>
+</tr>
+<tr><td>withTemplate</td>
+<td>$-</td>
+<td>Include and render a template file using the
+<strong>tputs</strong> function</td>
+</tr>
+<tr><td>withFile</td>
+<td>$-</td>
+<td>Include and render a raw file</td>
+</tr>
+<tr><td>tputs</td>
+<td>...$-</td>
+<td>This is a replacement for <strong>puts</strong>, which adds
+additional escape sequences for use with the
+templates.</td>
+</tr>
+<tr><td>eputs</td>
+<td>$-</td>
+<td>This is a replacement for <strong>puts</strong>, which escapes
+html entities for use with &lt;pre&gt; and such</td>
+</tr>
+<tr><td>Content-type:</td>
+<td>&quot;-</td>
+<td>Generate a MIME header for a file or view</td>
+</tr>
+<tr><td>getFormData</td>
+<td>-$</td>
+<td>Process a form and return the elements as a text
+string</td>
+</tr>
+<tr><td>getRequest</td>
+<td><tt class="docutils literal">-</tt></td>
+<td>Internal: Read the PATH_INFO environment variable
+and parse for <strong>casket:path</strong> and
+<strong>casket:options</strong></td>
+</tr>
+<tr><td>casket:url</td>
+<td>-a</td>
+<td>Function returning application url</td>
+</tr>
+<tr><td>casket:root</td>
+<td>-a</td>
+<td>Function returning path to application root</td>
+</tr>
+<tr><td>casket:form</td>
+<td>-a</td>
+<td>Internal buffer for form data</td>
+</tr>
+<tr><td>casket:buffer</td>
+<td>-a</td>
+<td>Internal buffer</td>
+</tr>
+<tr><td>casket:options</td>
+<td>-a</td>
+<td>Returns optional data following view)</td>
+</tr>
+<tr><td>casket:path</td>
+<td>-a</td>
+<td>Returns requested view (e.g., /index)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="example">
+<h1>Example</h1>
+<div class="section" id="application-rx">
+<h2>application.rx</h2>
+<pre class="literal-block">
+ needs casket'
+ with casket'
+
+: /index
+   Content-type: text/html
+   &quot;index.erx&quot; withTemplate ;
+
+ : /test
+   Content-type: text/html
+   casket:options &quot;test.erx&quot; withTemplate ;
+
+ [ ( -$ ) &quot;/path/to/app/&quot; ] is casket:root
+ [ ( -$ ) &quot;http://domain.ext/path/to/cgi&quot; ] is casket:url
+ &amp;/index is /
+ &amp;dispatch is boot
+ save bye
+</pre>
+</div>
+<div class="section" id="index-erx">
+<h2>index.erx</h2>
+<pre class="literal-block">
+&lt;html&gt;
+&lt;body&gt;&lt;h1&gt;Test of Casket&lt;/h1&gt;
+&lt;p&gt;&lt;a href='%u/test/apple'&gt;test apple&lt;/a&gt;
+   or &lt;a href='%u/test/banana'&gt;test banana&lt;/a&gt;.&lt;/p&gt;
+&lt;/body&gt;&lt;/html&gt;
+</pre>
+</div>
+<div class="section" id="test-erx">
+<h2>test.erx</h2>
+<pre class="literal-block">
+&lt;html&gt;&quot;  tputs
+&lt;body&gt;&lt;h1&gt;You requested...&lt;/h1&gt;
+&lt;p&gt;An %s.&lt;/p&gt;
+&lt;/body&gt;&lt;/html&gt;
+</pre>
+</div>
+</div>
+</div>
+</body>
+</html>

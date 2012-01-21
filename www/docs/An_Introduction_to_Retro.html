@@ -326,7 +326,7 @@ complete, and can be setup quickly and easily.</p>
 <td>&nbsp;</td>
 </tr>
 <tr><td>Go</td>
-<td>gonga/</td>
+<td>goa/</td>
 <td>x</td>
 <td>x</td>
 <td>x</td>
@@ -337,11 +337,11 @@ complete, and can be setup quickly and easily.</p>
 <td>cd gonga &amp;&amp; make</td>
 </tr>
 <tr><td>Lisp</td>
-<td>retro.lisp</td>
+<td>lisp/</td>
 <td>x</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
 <td>x</td>
 <td>x</td>
 <td>x</td>
@@ -374,6 +374,17 @@ complete, and can be setup quickly and easily.</p>
 <td>x</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
+<td>&nbsp;</td>
+</tr>
+<tr><td>PHP</td>
+<td>retro.php</td>
+<td>x</td>
+<td>x</td>
+<td>x</td>
 <td>&nbsp;</td>
 <td>x</td>
 <td>x</td>
@@ -432,7 +443,7 @@ libraries and handling dependencies.</p>
 <h2>Basic Interactions</h2>
 <p>When you start Retro, you should see something like the following:</p>
 <pre class="literal-block">
-Retro 11.1 (1234567890)
+Retro 11.2 (2012-01-17)
 
 ok
 </pre>
@@ -661,7 +672,7 @@ the <em>.macro</em> class or the <em>.compiler</em> class, use either <strong>im
 <div class="section" id="data-structures">
 <h2>Data Structures</h2>
 <p>You can create named data structures using <strong>create</strong>, <strong>variable</strong>,
-<strong>variable:</strong>, <strong>constant</strong>, and <strong>elements</strong>.</p>
+<strong>variable:</strong>, <strong>variables|</strong>, <strong>constant</strong>, and <strong>elements</strong>.</p>
 <div class="section" id="constants">
 <h3>Constants</h3>
 <p>These are the simplest data structure. The <em>xt</em> is set to a value, which is
@@ -689,6 +700,11 @@ This is cleaner than doing:</p>
 <pre class="literal-block">
 variable a
 10 a !
+</pre>
+<p>If you are creating a series of variables, you can simplify the declaration by
+using <strong>variables|</strong>:</p>
+<pre class="literal-block">
+variables| a b c d e |
 </pre>
 </div>
 <div class="section" id="custom-structures">

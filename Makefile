@@ -37,6 +37,10 @@ clean:
 webdocs:
 	sh tools/exportHTML.sh doc
 	mv doc/*.html www/docs
-#	sh tools/exportHTML.sh doc/library
-#	mv doc/library/*.html www/docs/library
+	sh tools/exportHTML.sh doc/library
+	mv doc/library/*.html www/docs/library
+
+libdocs:
+	sh tools/extractDocs.sh library
+	mv library/*.rst doc/library
 
