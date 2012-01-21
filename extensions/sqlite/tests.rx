@@ -6,7 +6,7 @@ with sql'
 [ 1024 ] is STRING-LENGTH
 
 : displayQueryResults ( - )
-  loadResults .s
+  loadResults
   [ cr getRow itemize [ 1- :column puts '| putc ] iter ] times finished ;
 
 : displayBooksByAuthor ( $- )
@@ -22,5 +22,4 @@ with sql'
 "select * from catalog where id < 100" submitQuery
 displayQueryResults
 
-.s
 bye
