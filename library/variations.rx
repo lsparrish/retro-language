@@ -13,6 +13,25 @@ chain: variations'
 
 
 doc{
+==========
+Variations
+==========
+
+--------
+Overview
+--------
+This library provides some functions for determining the differences between
+VM implementations and conditionally evaluating code blocks based on these
+differences.
+
+Specifically, it provides functions for determining the number of bits per
+cell and the endian nature of an implementation.
+
+
+---------
+Functions
+---------
+
 +--------------+-------+------------------------------------------------+
 | Function     | Stack | Usage                                          |
 +==============+=======+================================================+
