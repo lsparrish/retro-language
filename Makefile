@@ -34,3 +34,7 @@ clean:
 	rm -f retroImage16BE retroImageBE retroImage64BE
 	rm -f convert
 
+libdocs:
+	sh tools/extractDocs.sh library
+	mv library/*.rst doc/library
+
