@@ -29,15 +29,17 @@ complete, and can be setup quickly and easily.
 +------------+--------------+---+---+---+---+---+---+---+----------------------+
 | Forth      | retro.fs     | x | x | x |   | x | x | x |                      |
 +------------+--------------+---+---+---+---+---+---+---+----------------------+
-| Go         | gonga/       | x | x | x | x | x | x | x | cd gonga && make     |
+| Go         | goa/         | x | x | x | x | x | x | x | cd gonga && make     |
 +------------+--------------+---+---+---+---+---+---+---+----------------------+
-| Lisp       | retro.lisp   | x |   |   |   | x | x | x |                      |
+| Lisp       | lisp/        | x | x | x | x | x | x | x |                      |
 +------------+--------------+---+---+---+---+---+---+---+----------------------+
 | Java       | retro.java   | x |   |   |   | x | x | x | javac retro.java     |
 +------------+--------------+---+---+---+---+---+---+---+----------------------+
 | Lua        | retro.lua    | x |   |   |   | x | x | x |                      |
 +------------+--------------+---+---+---+---+---+---+---+----------------------+
 | Perl       | retro.pl     | x |   |   |   | x | x | x |                      |
++------------+--------------+---+---+---+---+---+---+---+----------------------+
+| PHP        | retro.php    | x | x | x |   | x | x | x |                      |
 +------------+--------------+---+---+---+---+---+---+---+----------------------+
 | Python     | retro.py     | x | x | x | x | x | x | x |                      |
 +------------+--------------+---+---+---+---+---+---+---+----------------------+
@@ -76,7 +78,7 @@ When you start Retro, you should see something like the following:
 
 ::
 
-  Retro 11.1 (1234567890)
+  Retro 11.2 (2012-01-17)
 
   ok
 
@@ -324,7 +326,7 @@ the *.macro* class or the *.compiler* class, use either **immediate** or
 Data Structures
 ===============
 You can create named data structures using **create**, **variable**,
-**variable:**, **constant**, and **elements**.
+**variable:**, **variables|**, **constant**, and **elements**.
 
 
 Constants
@@ -363,6 +365,14 @@ This is cleaner than doing:
 
   variable a
   10 a !
+
+
+If you are creating a series of variables, you can simplify the declaration by
+using **variables|**:
+
+::
+
+  variables| a b c d e |
 
 
 Custom Structures
