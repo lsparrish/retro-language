@@ -13,14 +13,22 @@ NXP LPX1768
 Cortex-M3
 96MHz, 512K flash, 32K RAM, ARM
 
+On the mbed LPX1768, we have 14000 cells for the image. This is sufficient, once the
+diet' vocabulary is loaded. You'll have around 3k cells for your application. Or a bit
+more if you do a ^diet'extreme before saving the image and converting to 16-bit. 
+
 NXP LPC11U24
 Cortex-M0
 48MHz, 32K flash, 8K RAM, ARM
+
+The mbed implemenation does not support this board.
 
 
 ubw32
 PIC32MX795
 80MHz, 512K Flash, 128K RAM, MIPS
+
+This one looks like a nice target. Not too pricey, lots of RAM, and plenty of flash.
 
 
 == Images for Embedded Use ==
