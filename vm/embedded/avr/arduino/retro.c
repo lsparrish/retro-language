@@ -361,3 +361,4 @@ int main(void)
 #endif
     return 0;
 }
+// vim:sts=4:sw=4:expandtab:
