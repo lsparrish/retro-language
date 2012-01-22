@@ -39,6 +39,10 @@
 #define DISPLAY_DC   PL1
 #define DISPLAY_RST  PL0
 
+#define SDCARD_PORT  SPI_PORT
+#define SDCARD_DDR   SPI_DDR
+#define SDCARD_SS    SPI_SS
+
 #else
 #ifdef BOARD_native
 
@@ -65,6 +69,7 @@ static void spi_master_init(void);
 static void spi_slave_init(void);
 static uint8_t spi_transfer_byte(uint8_t data);
 static CELL spi_transfer_cell(CELL data);
+static uint32_t spi_transfer_long(uint32_t data);
 
 #endif
 
@@ -101,6 +106,10 @@ static CELL _img_get(CELL k);
 
 #ifdef DISPLAY_nokia3110
 #include "display_nokia3110.h"
+#endif
+
+#ifdef STORAGE_sdcard
+#include "storage_sdcard.h"
 #endif
 
 #else
@@ -160,6 +169,14 @@ static CELL spi_transfer_cell(CELL data) {
     union { CELL l; uint8_t c[sizeof(CELL)]; } d;
     d.l = data;
     for (int8_t i = sizeof(CELL) - 1; i >= 0; --i)
+        d.c[i] = spi_transfer_byte(d.c[i]);
+    return d.l;
+}
+
+static uint32_t spi_transfer_long(uint32_t data) {
+    union { uint32_t l; uint8_t c[sizeof(long)]; } d;
+    d.l = data;
+    for (int8_t i = sizeof(uint32_t) - 1; i >= 0; --i)
         d.c[i] = spi_transfer_byte(d.c[i]);
     return d.l;
 }
@@ -230,6 +247,9 @@ int main(void)
     display_init();
     display_clear();
     display_set_xy(0, 0);
+#endif
+#ifdef STORAGE_ACTIVATED
+    storage_initialize(SPI_SPEED);
 #endif
 
     for (j = 0; j < IMAGE_CACHE_SIZE; ++j) image_cache[j].key = -1;
