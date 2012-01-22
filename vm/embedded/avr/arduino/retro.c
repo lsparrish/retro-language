@@ -27,13 +27,15 @@
 
 #define SPI_PORT     PORTB
 #define SPI_DDR      DDRB
-#define SPI_CS       PB0
-#define SPI_SCK      PB1
-#define SPI_MOSI     PB2
 #define SPI_MISO     PB3
+#define SPI_MOSI     PB2
+#define SPI_SCK      PB1
+#define SPI_SS       PB0
+#define SPI_SPEED    1
 
 #define DISPLAY_PORT PORTL
 #define DISPLAY_DDR  DDRL
+#define DISPLAY_SS   PL2
 #define DISPLAY_DC   PL1
 #define DISPLAY_RST  PL0
 
@@ -56,6 +58,15 @@ enum vm_opcode {VM_NOP, VM_LIT, VM_DUP, VM_DROP, VM_SWAP, VM_PUSH, VM_POP,
                 VM_WAIT };
 
 static void console_puts(char *s);
+
+#ifndef BOARD_native
+
+static void spi_master_init(void);
+static void spi_slave_init(void);
+static uint8_t spi_transfer_byte(uint8_t data);
+static CELL spi_transfer_cell(CELL data);
+
+#endif
 
 /* Change store ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 typedef struct CHANGE_ELEMENT {
@@ -120,6 +131,40 @@ static void console_puts(char *s) {
         console_putc(*x);
 }
 
+/* SPI ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+#ifndef BOARD_native
+
+static void spi_master_init(void) {
+    SPI_DDR &= ~(1 << SPI_MISO);
+    SPI_DDR |=  (1 << SPI_MOSI);
+    SPI_DDR |=  (1 << SPI_SCK);
+    SPI_DDR |=  (1 << SPI_SS);
+    SPCR = (1 << SPE) | (1 << MSTR) | SPI_SPEED;
+}
+
+static void spi_slave_init(void) {
+    SPI_DDR |=  (1 << SPI_MISO);
+    SPI_DDR &= ~(1 << SPI_MOSI);
+    SPI_DDR &= ~(1 << SPI_SCK);
+    SPI_DDR &= ~(1 << SPI_SS);
+    SPCR = (1 << SPE) | SPI_SPEED;
+}
+
+static uint8_t spi_transfer_byte(uint8_t data) {
+    SPDR = data;
+    while ((SPSR & (1 << SPIF)) == 0);
+    return SPDR;
+}
+
+static CELL spi_transfer_cell(CELL data) {
+    union { CELL l; uint8_t c[sizeof(CELL)]; } d;
+    d.l = data;
+    for (int8_t i = sizeof(CELL) - 1; i >= 0; --i)
+        d.c[i] = spi_transfer_byte(d.c[i]);
+    return d.l;
+}
+
+#endif
 /* Image read and write ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 static CELL _img_get(CELL k) {
     uint16_t i = 0, p = k % IMAGE_CACHE_SIZE;
@@ -152,9 +197,9 @@ static void _img_put(CELL k, CELL v) {
 
 void img_string(CELL starting, char *buffer, CELL buffer_len)
 {
-  CELL i = 0, j = starting;
-  for(; i < buffer_len && 0 != (buffer[i] = img_get(j)); ++i, ++j);
-  buffer[i] = 0;
+    CELL i = 0, j = starting;
+    for(; i < buffer_len && 0 != (buffer[i] = img_get(j)); ++i, ++j);
+    buffer[i] = 0;
 }
 
 /* Main ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -178,6 +223,9 @@ int main(void)
     console_prepare();
     console_puts("\nInitialize Ngaro VM.\n\n");
 
+#ifndef BOARD_native
+    spi_master_init();
+#endif
 #ifdef DISPLAY_ACTIVATED
     display_init();
     display_clear();
@@ -309,6 +357,16 @@ int main(void)
                                      _delay_ms(a);
                                      ports[13] = 0;
                                      break;
+                            case -6: spi_master_init(); ports[13] = 0; break;
+                            case -7: spi_slave_init(); ports[13] = 0; break;
+                            case -8:
+                                a = S_TOS; S_DROP;
+                                ports[13] = spi_transfer_byte(a);
+                                break;
+                            case -9:
+                                a = S_TOS; S_DROP;
+                                ports[13] = spi_transfer_cell(a);
+                                break;
 #endif
                             default: ports[13] = 0;
                         }
