@@ -28,11 +28,15 @@ image: retro
 	mv retroImage.js vm/web/html5
 	rm core.rx
 
+images:
+	$(CC) $(CFLAGS) tools/convert.c -o convert
+	./convert
+	rm -f convert
+
 clean:
 	rm -f retro
 	rm -f retroImage16 retroImage64
 	rm -f retroImage16BE retroImageBE retroImage64BE
-	rm -f convert
 
 webdocs:
 	sh tools/exportHTML.sh doc
