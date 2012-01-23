@@ -229,7 +229,7 @@ static uint8_t fs_find_next_file(struct fs_t *self, fs_directory_entry *DE) {
     }
 }
 
-static uint8_t fs_open_file(struct fat32_t *self, char *fn, uint8_t mode) {
+static uint8_t fs_open_file(struct fs_t *self, char *fn, uint8_t mode) {
     fs_directory_entry tmpDE;
     char tmpFN[13];
     byte res;
@@ -286,7 +286,7 @@ static uint8_t fs_open_file(struct fat32_t *self, char *fn, uint8_t mode) {
     return ERROR_FILE_NOT_FOUND;
 }
 
-static uint16_t fs_read_binary(struct fat32_t *self) {
+static uint16_t fs_read_binary(struct fs_t *self) {
     uint32_t sec;
 
     if (self->currFile.fileMode == FILEMODE_BINARY) {
@@ -312,7 +312,7 @@ static uint16_t fs_read_binary(struct fat32_t *self) {
     else return ERROR_WRONG_FILEMODE;
 }
 
-static uint16_t fs_read_ln(struct fat32_t *self, char *st, int buf_size) {
+static uint16_t fs_read_ln(struct fs_t *self, char *st, int buf_size) {
     uint32_t sec;
     int bufIndex = 0;
 
@@ -350,7 +350,7 @@ static uint16_t fs_read_ln(struct fat32_t *self, char *st, int buf_size) {
                 storage_read_sector(self->buffer, sec);
             }
         }
-        if (self->currFile.currentPos>=self->currFile.fileSize) return EOF;
+        if (self->currFile.currentPos >= self->currFile.fileSize) return EOF;
         else if ((self->buffer[(self->currFile.currentPos % STORAGE_SECTOR_SIZE)] == 13)
                 && (self->buffer[(self->currFile.currentPos % STORAGE_SECTOR_SIZE) + 1] == 10))
         {
@@ -369,7 +369,7 @@ static uint16_t fs_read_ln(struct fat32_t *self, char *st, int buf_size) {
     else return ERROR_WRONG_FILEMODE;
 }
 
-static uint16_t fs_write_ln(struct fat32_t *self, char *st) {
+static uint16_t fs_write_ln(struct fs_t *self, char *st) {
     unsigned long currSec = firstDirSector;
     uint16_t nextCluster = 0;
     uint16_t offset = -32;
@@ -527,35 +527,21 @@ static uint16_t fs_write_ln(struct fat32_t *self, char *st) {
         offset = -32;
         done = false;
         storage_read_sector(self->buffer, currSec);
-        while (!done)
-        {
+        while (!done) {
             offset+=32;
-            if (offset == STORAGE_SECTOR_SIZE)
-            {
-                currSec++;
-                storage_read_sector(self->buffer, currSec);
+            if (offset == STORAGE_SECTOR_SIZE) {
+                storage_read_sector(self->buffer, ++currSec);
                 offset = 0;
             } 
 
             j = 0;
             for (int i = 0; i<8; i++)
-            {
-                if (self->buffer[i + offset]!=0x20)
-                {
-                    tmpFN[j] = self->buffer[i + offset];
-                    j++;
-                }
-            }
-            tmpFN[j] = '.';
-            j++;
+                if (self->buffer[i + offset]!=0x20) {
+                    tmpFN[j++] = self->buffer[i + offset];
+            tmpFN[j++] = '.';
             for (int i = 0; i<3; i++)
-            {
                 if (self->buffer[i + 0x08 + offset]!=0x20)
-                {
-                    tmpFN[j] = self->buffer[i + 0x08 + offset];
-                    j++;
-                }
-            }
+                    tmpFN[j++] = self->buffer[i + 0x08 + offset];
             tmpFN[j] = 0x00;
 
             if (!strcmp(tmpFN, self->currFile.filename))
@@ -576,12 +562,12 @@ static uint16_t fs_write_ln(struct fat32_t *self, char *st) {
     else return ERROR_WRONG_FILEMODE;
 }
 
-static void fs_close_file(struct fat32_t *self, void) {
+static void fs_close_file(struct fs_t *self, void) {
     self->currFile.filename[0] = 0x00;
     self->currFile.fileMode = 0x00;
 }
 
-static uint8_t fs_exists(struct fat32_t *self, char *fn) {
+static uint8_t fs_exists(struct fs_t *self, char *fn) {
     _directory_entry tmpDE;
     char tmpFN[13];
     byte res;
@@ -620,7 +606,7 @@ static uint8_t fs_exists(struct fat32_t *self, char *fn) {
     return false;
 }
 
-static uint8_t fs_rename(struct fat32_t *self, char *fn1, char *fn2) {
+static uint8_t fs_rename(struct fs_t *self, char *fn1, char *fn2) {
     unsigned long currSec = firstDirSector;
     uint16_t offset = -32;
     char tmpFN[13];
@@ -668,7 +654,7 @@ static uint8_t fs_rename(struct fat32_t *self, char *fn1, char *fn2) {
     } else return false;
 }
 
-static uint8_t fs_del_file(struct fat32_t *self, char *fn) {
+static uint8_t fs_del_file(struct fs_t *self, char *fn) {
     unsigned long currSec = firstDirSector;
     uint16_t firstCluster, currCluster, nextCluster;
     uint16_t offset = -32;
@@ -754,7 +740,7 @@ static uint8_t fs_del_file(struct fat32_t *self, char *fn) {
     } else return false;
 }
 
-static uint8_t fs_create(struct fat32_t *self, char *fn) {
+static uint8_t fs_create(struct fs_t *self, char *fn) {
     unsigned long currSec;
     uint16_t offset = 0;
     uint8_t done = false;
@@ -804,7 +790,7 @@ static uint8_t fs_create(struct fat32_t *self, char *fn) {
     } else return false;
 }
 
-static uint16_t fat32_find_next_cluster(struct fat32_t *self, uint16_t cc) {
+static uint16_t fat32_find_next_cluster(struct fs_t *self, uint16_t cc) {
     uint16_t nc;
     storage_read_sector(self->buffer, self->BS.fat1Start + int(cc / 256));
     nc = self->buffer[(cc % 256) * 2] + (self->buffer[((cc % 256) * 2) + 1]<<8);
@@ -825,7 +811,7 @@ static uint8_t fat32_valid_char(char c) {
     return false;
 }
 
-static uint16_t fat32_find_free_cluster(struct fat32_t *self) {
+static uint16_t fat32_find_free_cluster(struct fs_t *self) {
     unsigned long currSec = 0;
     uint16_t firstFreeCluster = 0;
     uint16_t offset = 0;
