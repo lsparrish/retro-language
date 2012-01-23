@@ -1,5 +1,5 @@
 /* Ngaro VM ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   Copyright (c) 2008 - 2011, Charles Childers
+   Copyright (c) 2008 - 2012, Charles Childers
    Copyright (c) 2009 - 2010, Luke Parrish
    Copyright (c) 2010,        Marc Simpson
    Copyright (c) 2010,        Jay Skeer
@@ -31,10 +31,10 @@ LocalFileSystem local("local");
    it and experience odd problems, try raising it a bit higher.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #define CELL          int16_t
-#define IMAGE_SIZE      14000              /* This can be raised to 15k */
+#define IMAGE_SIZE      14000
 #define ADDRESSES         256
 #define STACK_DEPTH        50
-#define PORTS              24
+#define PORTS              16
 #define MAX_FILE_NAME      48
 #define MAX_ENV_QUERY       1
 #define MAX_OPEN_FILES      4
