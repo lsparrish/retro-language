@@ -76,8 +76,7 @@ To build for 16-bit, define **RX16**, and for 64-bit, define
 
 ::
 
-  make tools
-  ./convert
+  make images
 
 
 Forth
@@ -91,8 +90,11 @@ that matches your Forth's cell size.
 There is no support for **getEnv** due to lack of a
 standard function to access this in ANS Forth.
 
-You can build 16-bit and 64-bit images using the
-*convert* tool.
+You can build 16-bit and 64-bit images using:
+
+::
+
+  make images
 
 
 Lua
@@ -117,13 +119,13 @@ Retro can be used on some development boards. There may be limitations to
 the overall functionality, or special extensions to use features of the
 target platforms. See the individual implementations for notes.
 
-+-----+------------+
-| CPU | Board      |
-+=====+============+
-| ARM | mbed.org   |
-+-----+------------+
-| AVR | arduino    |
-+-----+------------+
++-----+--------------+
+| CPU | Board        |
++=====+==============+
+| ARM | mbed LPX1768 |
++-----+--------------+
+| AVR | arduino mega |
++-----+--------------+
 
 
 ----------------------------
@@ -142,6 +144,9 @@ real-world applications.
 |          |                   | stack depth and memory size              |
 +----------+-------------------+------------------------------------------+
 | C        | sdl/              | SDL 1.3 based Ngaro w/support for canvas |
++----------+-------------------+------------------------------------------+
+| C        | retro-sockets.c   | Has the non-standard socket device from  |
+|          |                   | Retro 10.x                               |
 +----------+-------------------+------------------------------------------+
 | Python   | retro-skinless.py | Python implementation w/o file I/O for   |
 |          |                   | use in testing the ShedSkin compiler     |
