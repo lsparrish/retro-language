@@ -2,11 +2,18 @@
 BOARD=mega2560
 DISPLAY=nokia3110
 STORAGE=sdcard
+FILESYSTEM=fat32
 
 CFLAGS=-O3 -std=gnu99 -Wall
 NATCFLAGS=-DBOARD_native
 AVRCFLAGS=$(CFLAGS) -DAVRCPU -DF_CPU=16000000UL -mmcu=atmega2560
-AVRCFLAGS+=-DBOARD_$(BOARD) -DDISPLAY_$(DISPLAY) -DSTORAGE_$(STORAGE)
+AVRCFLAGS+=-DBOARD_$(BOARD)
+AVRCFLAGS+=-DDISPLAY_$(DISPLAY)
+DEPENDS+=display_$(DISPLAY).h
+AVRCFLAGS+=-DSTORAGE_$(STORAGE)
+DEPENDS+=storage_$(STORAGE).h
+AVRCFLAGS+=-DFILESYSTEM_$(FILESYSTEM)
+DEPENDS+=filesystem_$(FILESYSTEM).h
 AVRCC=avr-gcc
 AVROBJCOPY=avr-objcopy
 IMAGE_BLOCK_SIZE=256
@@ -78,7 +85,7 @@ retro.nat: retro.c image.hex.h
 	$(CC) $(CFLAGS) $(NATCFLAGS) -o $@ $<
 
 retro.hex: retro.out
-retro.out: image.hex.h eeprom_atmel.h console_$(BOARD).h display_$(DISPLAY).h storage_$(STORAGE).h
+retro.out: image.hex.h eeprom_atmel.h console_$(BOARD).h $(DEPENDS)
 
 convert: ../../../../tools/convert.c
 	$(CC) -O -DRX16 -o $@ $<

@@ -112,6 +112,10 @@ static CELL _img_get(CELL k);
 #include "storage_sdcard.h"
 #endif
 
+#ifdef FILESYSTEM_fat32
+#include "filesystem_fat32.h"
+#endif
+
 #else
 #ifdef BOARD_native
 
