@@ -6,6 +6,7 @@ default: clean
 	$(CC) ../../../../tools/convert.c -o convert
 	./convert
 	rm -f convert retroImage*BE retroImage64 retroImage
+	mv retroImage16 retroImg
 
 clean:
 	rm -f retro retroImage library
