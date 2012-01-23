@@ -1,27 +1,26 @@
-#ifndef FILESYSTEM_FAT32_H
-#define FILESYSTEM_FAT32_H
+#ifndef FILESYSTEM_FS_H
+#define FILESYSTEM_FS_H
 
-#define FAT32_NO_ERROR			0x00
-#define FAT32_ERROR_NO_MORE_FILES	0x01
-#define FAT32_ERROR_FILE_NOT_FOUND	0x10
-#define FAT32_ERROR_ANOTHER_FILE_OPEN	0x11
-#define	FAT32_ERROR_MBR_READ_ERROR	0xF0
-#define	FAT32_ERROR_MBR_SIGNATURE	0xF1
-#define	FAT32_ERROR_MBR_INVALID_FS	0xF2
-#define FAT32_ERROR_BOOTSEC_READ_ERROR	0xE0
-#define	FAT32_ERROR_BOOTSEC_SIGNATURE	0xE1
-#define FAT32_ERROR_NO_FILE_OPEN	0xFFF0
-#define FAT32_ERROR_WRONG_FILEMODE	0xFFF1
-#define FAT32_FILE_IS_EMPTY		0xFFFD
-#define FAT32_BUFFER_OVERFLOW		0xFFFE
-#define FAT32_EOF			0xFFFF
+#define FS_NO_ERROR		    0x00
+#define FS_ERROR_NO_MORE_FILES	    0x01
+#define FS_ERROR_FILE_NOT_FOUND	    0x10
+#define FS_ERROR_ANOTHER_FILE_OPEN  0x11
+#define	FS_ERROR_MBR_READ_ERROR	    0xF0
+#define	FS_ERROR_MBR_SIGNATURE	    0xF1
+#define	FS_ERROR_MBR_INVALID_FS	    0xF2
+#define FS_ERROR_BOOTSEC_READ_ERROR 0xE0
+#define	FS_ERROR_BOOTSEC_SIGNATURE  0xE1
+#define FS_ERROR_NO_FILE_OPEN	    0xFFF0
+#define FS_ERROR_WRONG_FILEMODE	    0xFFF1
+#define FS_FILE_IS_EMPTY	    0xFFFD
+#define FS_BUFFER_OVERFLOW	    0xFFFE
+#define FS_EOF			    0xFFFF
 
-#define FAT32_FILEMODE_BINARY		0x01
-#define FAT32_FILEMODE_TEXT_READ	0x02
-#define FAT32_FILEMODE_TEXT_WRITE	0x03
+#define FS_FILEMODE_BINARY	    0x01
+#define FS_FILEMODE_TEXT_READ	    0x02
+#define FS_FILEMODE_TEXT_WRITE	    0x03
 
-struct fat32_directory_entry
-{
+struct fs_directory_entry {
     char filename[9];
     char fileext[4];
     uint8_t attributes;
@@ -31,8 +30,7 @@ struct fat32_directory_entry
     uint32_t fileSize;
 };
 
-struct fat32_t
-{
+struct fs_t {
     struct {
         uint8_t part1Type;
         unsigned long part1Start;
@@ -53,9 +51,9 @@ struct fat32_t
         float partitionSize;
     } BS;
 
-    fat32_directory_entry DE;
+    fs_directory_entry DE;
     unsigned long firstDirSector;
-    uint8_t buffer[512]; // the buffer cannot be any smaller, SD cards are read/written in blocks of 512 uint8_ts
+    uint8_t buffer[STORAGE_SECTOR_SIZE]; // the buffer cannot be any smaller, SD cards are read/written in blocks of 512 uint8_ts
 
     struct {
         char filename[13];
@@ -66,28 +64,26 @@ struct fat32_t
     } currFile;
 
     int	DEcnt;
-    uint8_t inited;
 };
 
-static uint8_t fat32_initialize(struct fat32_t *self) {
+static uint8_t fs_initialize(struct fs_t *self) {
     if (RES_OK == storage_read_sector(self->buffer, 0)) {
-        if ((buffer[0x01FE]==0x55) && (buffer[0x01FF]==0xAA)) {
+        if ((self->buffer[0x01FE] == 0x55) && (self->buffer[0x01FF] == 0xAA)) {
             self->MBR.part1Type = self->buffer[450];
-            self->MBR.part1Start = 
-                uint16_t(self->buffer[454]) 
+            self->MBR.part1Start = uint16_t(self->buffer[454]) 
                 + (uint16_t(self->buffer[455])<<8)
                 + (uint32_t(self->buffer[456])<<16)
                 + (uint32_t(self->buffer[457])<<24);
-            self->MBR.part1Size =
-                uint16_t(self->buffer[458])
-                + (uint16_t(buffer[459])<<8)
-                + (uint32_t(buffer[460])<<16)
+            self->MBR.part1Size = uint16_t(self->buffer[458])
+                + (uint16_t(self->buffer[459])<<8)
+                + (uint32_t(self->buffer[460])<<16)
                 + (uint32_t(self->buffer[461])<<24);
         }
         else return ERROR_MBR_SIGNATURE;
     } else return ERROR_MBR_READ_ERROR;
 
-    if ((MBR.part1Type!=0x04) && (MBR.part1Type!=0x06) && (MBR.part1Type!=0x86))
+    if ((MBR.part1Type!=0x04) && (MBR.part1Type!=0x06) \
+            && (MBR.part1Type!=0x86))
         return ERROR_MBR_INVALID_FS;
 
     if (RES_OK == storage_read_sector(self->buffer, self->MBR.part1Start)) {
@@ -95,85 +91,72 @@ static uint8_t fat32_initialize(struct fat32_t *self) {
                 && (self->buffer[0x01FF] == 0xAA))
         {
             self->BS.sectorsPerCluster = self->buffer[0x0D];
-            self->BS.reservedSectors =
-                uint16_t(self->buffer[0x0E])
+            self->BS.reservedSectors = uint16_t(self->buffer[0x0E])
                 + (uint16_t(self->buffer[0x0F])<<8);
-            self->BS.fatCopies = buffer[0x10];
-            self->BS.rootDirectoryEntries =
-                uint16_t(self->buffer[0x11])
+            self->BS.fatCopies = self->buffer[0x10];
+            self->BS.rootDirectoryEntries = uint16_t(self->buffer[0x11])
                 + (uint16_t(self->buffer[0x12])<<8);
-            self->BS.totalFilesystemSectors = 
-                uint16_t(self->buffer[0x13])
+            self->BS.totalFilesystemSectors = uint16_t(self->buffer[0x13])
                 + (uint16_t(self->buffer[0x14])<<8);
             if (self->BS.totalFilesystemSectors == 0)
-                self->BS.totalFilesystemSectors =
-                    uint16_t(self->buffer[0x20])
+                self->BS.totalFilesystemSectors = uint16_t(self->buffer[0x20])
                     + (uint16_t(self->buffer[0x21])<<8)
                     + (uint32_t(self->buffer[0x22])<<16)
                     + (uint32_t(self->buffer[0x23])<<24);
-            self->BS.sectorsPerFAT =
-                uint16_t(buffer[0x16])
+            self->BS.sectorsPerFAT = uint16_t(self->buffer[0x16])
                 + (uint16_t(self->buffer[0x17])<<8);
-            self->BS.hiddenSectors =
-                uint16_t(buffer[0x1C])
+            self->BS.hiddenSectors = uint16_t(self->buffer[0x1C])
                 + (uint16_t(self->buffer[0x1D])<<8)
                 + (uint32_t(self->buffer[0x1E])<<16)
                 + (uint32_t(self->buffer[0x1F])<<24);
-            self->BS.partitionSerialNum =
-                uint16_t(self->buffer[0x27])
+            self->BS.partitionSerialNum = uint16_t(self->buffer[0x27])
                 + (uint16_t(self->buffer[0x28])<<8)
                 + (uint32_t(self->buffer[0x29])<<16)
                 + (uint32_t(self->buffer[0x2A])<<24);
-            self->firstDirSector =
-                self->MBR.part1Start
+            self->firstDirSector = self->MBR.part1Start
                 + self->BS.reservedSectors
                 + (self->BS.fatCopies * self->BS.sectorsPerFAT);
-            self->BS.fat1Start =
-                self->MBR.part1Start 
+            self->BS.fat1Start = self->MBR.part1Start 
                 + self->BS.reservedSectors;
-            self->BS.fat2Start = 
-                self->BS.fat1Start 
+            self->BS.fat2Start = self->BS.fat1Start 
                 + self->BS.sectorsPerFAT;
             self->BS.partitionSize =
-                float((self->MBR.part1Size*512)/float(1048576));
+                float((self->MBR.part1Size * STORAGE_SECTOR_SIZE) / float(1048576));
         }
         else return ERROR_BOOTSEC_SIGNATURE;
     }
     else return ERROR_BOOTSEC_READ_ERROR;
-
-    self->inited=true;
     return NO_ERROR;
 }
 
-static uint8_t fat32_find_first_file(struct fat32_t *self, fat32_directory_entry *DE) {
+static uint8_t fs_find_first_file(struct fs_t *self, fs_directory_entry *DE) {
     unsigned long currSec = firstDirSector;
-    word offset = 0;
+    uint16_t offset = 0;
 
-    DEcnt=0;
+    self->DEcnt = 0;
     storage_read_sector(self->buffer, currSec);
 
-    if (buffer[0]==0x00) return ERROR_NO_MORE_FILES;
-    else
-    {
+    if (self->buffer[0] == 0x00) return ERROR_NO_MORE_FILES;
+    else {
         while ((self->buffer[offset + 0x0B] & 0x08) \
                 || (self->buffer[offset + 0x0B] & 0x10) \
-                || (self->buffer[offset]==0xE5))
+                || (self->buffer[offset] == 0xE5))
         {
             offset+=32;
-            DEcnt++;
-            if (offset==512) {
+            self->DEcnt++;
+            if (offset == STORAGE_SECTOR_SIZE) {
                 currSec++;
                 storage_read_sector(self->buffer, currSec);
                 offset = 0;
             } 
-            if (buffer[offset]==0x00)
+            if (self->buffer[offset] == 0x00)
                 return ERROR_NO_MORE_FILES;
         }
 
-        for (int i=0; i<8; i++)
-            DE->filename[i] = self->buffer[i+offset];
-        for (int i=0; i<3; i++)
-            DE->fileext[i] = self->buffer[i+0x08+offset];
+        for (int i = 0; i<8; i++)
+            DE->filename[i] = self->buffer[i + offset];
+        for (int i = 0; i<3; i++)
+            DE->fileext[i] = self->buffer[i + 0x08 + offset];
 
         DE->filename[8] = 0;
         DE->fileext[3] = 0;
@@ -182,499 +165,453 @@ static uint8_t fat32_find_first_file(struct fat32_t *self, fat32_directory_entry
             + (uint16_t(self->buffer[0x0F + offset])<<8);
         DE->date = uint16_t(self->buffer[0x10 + offset])
             + (uint16_t(self->buffer[0x11 + offset])<<8);
-        DE->startCluster = uint16_t(buffer[0x1A + offset])
+        DE->startCluster = uint16_t(self->buffer[0x1A + offset])
             + (uint16_t(self->buffer[0x1B + offset])<<8);
         DE->fileSize = uint16_t(self->buffer[offset + 0x1C])
             | (uint16_t(self->buffer[offset + 0x1D])<<8)
             | (uint32_t(self->buffer[offset + 0x1E])<<16)
             | (uint32_t(self->buffer[offset + 0x1F])<<24);
-        DEcnt++;
+        self->DEcnt++;
     }
     return NO_ERROR;
 }
 
-static uint8_t fat32_find_next_file(struct fat32_t *self, fat32_directory_entry *DE) {
-    unsigned long currSec = firstDirSector;
-    word offset = DEcnt*32;
+static uint8_t fs_find_next_file(struct fs_t *self, fs_directory_entry *DE) {
+    unsigned long currSec = self->firstDirSector;
+    uint16_t offset = self->DEcnt * 32;
 
-    while (offset>=512)
+    while (offset >= STORAGE_SECTOR_SIZE)
     {
         currSec++;
-        offset-=512;
+        offset -= STORAGE_SECTOR_SIZE;
     }
 
-    mmc::readSector(buffer, currSec);
+    storage_read_sector(self->buffer, currSec);
 
-    if (buffer[offset]==0x00)
+    if (self->buffer[offset] == 0x00)
         return ERROR_NO_MORE_FILES;
-    else
-    {
-        while ((buffer[offset + 0x0B] & 0x08) || (buffer[offset + 0x0B] & 0x10) || (buffer[offset]==0xE5))
+    else {
+        while ((self->buffer[offset + 0x0B] & 0x08) \
+                || (self->buffer[offset + 0x0B] & 0x10) \
+                || (self->buffer[offset] == 0xE5))
         {
             offset+=32;
             DEcnt++;
-            if (offset==512)
-            {
+            if (offset == STORAGE_SECTOR_SIZE) {
                 currSec++;
-                mmc::readSector(buffer, currSec);
+                storage_read_sector(self->buffer, currSec);
                 offset = 0;
             } 
-            if (buffer[offset]==0x00)
+            if (self->buffer[offset] == 0x00)
                 return ERROR_NO_MORE_FILES;
         }
 
-        for (int i=0; i<8; i++)
-        {
-            tempDE->filename[i] = buffer[i+offset];
-        }
-        for (int i=0; i<3; i++)
-        {
-            tempDE->fileext[i] = buffer[i+0x08+offset];
-        }
-        tempDE->filename[8] = 0;
-        tempDE->fileext[3] = 0;
-        tempDE->attributes = buffer[0x0B + offset];
-        tempDE->time = uint16_t(buffer[0x0E + offset]) + (uint16_t(buffer[0x0F + offset])<<8);
-        tempDE->date = uint16_t(buffer[0x10 + offset]) + (uint16_t(buffer[0x11 + offset])<<8);
-        tempDE->startCluster = uint16_t(buffer[0x1A + offset]) + (uint16_t(buffer[0x1B + offset])<<8);
-        tempDE->fileSize = uint16_t(buffer[offset + 0x1C]) | (uint16_t(buffer[offset + 0x1D])<<8) | (uint32_t(buffer[offset + 0x1E])<<16) | (uint32_t(buffer[offset + 0x1F])<<24);
-        DEcnt++;
+        for (int i = 0; i<8; i++)
+            DE->filename[i] = self->buffer[i + offset];
+        for (int i = 0; i<3; i++)
+            DE->fileext[i] = self->buffer[i + 0x08 + offset];
+        DE->filename[8] = 0;
+        DE->fileext[3] = 0;
+        DE->attributes = self->buffer[0x0B + offset];
+        DE->time = uint16_t(self->buffer[0x0E + offset]) 
+            + (uint16_t(self->buffer[0x0F + offset])<<8);
+        DE->date = uint16_t(self->buffer[0x10 + offset]) 
+            + (uint16_t(self->buffer[0x11 + offset])<<8);
+        DE->startCluster = uint16_t(self->buffer[0x1A + offset]) 
+            + (uint16_t(self->buffer[0x1B + offset])<<8);
+        DE->fileSize = uint16_t(self->buffer[offset + 0x1C]) 
+            | (uint16_t(self->buffer[offset + 0x1D])<<8) 
+            | (uint32_t(self->buffer[offset + 0x1E])<<16) 
+            | (uint32_t(self->buffer[offset + 0x1F])<<24);
+        self->DEcnt++;
 
         return NO_ERROR;
     }
 }
 
-static uint8_t	fat32_open_file(char *fn, uint8_t mode) {
-    _directory_entry tmpDE;
+static uint8_t fs_open_file(struct fat32_t *self, char *fn, uint8_t mode) {
+    fs_directory_entry tmpDE;
     char tmpFN[13];
     byte res;
     int i, j;
 
-    if (currFile.filename[0]!=0x00)
+    if (self->currFile.filename[0]!=0x00)
         return ERROR_ANOTHER_FILE_OPEN;
 
-    for (i=0; i<strlen(fn); i++)
-        fn[i]=uCase(fn[i]);
+    for (i = 0; i < strlen(fn); i++)
+        fn[i] = fat32_uCase(fn[i]);
 
-    res=findFirstFile(&tmpDE);
-    if (res==ERROR_NO_MORE_FILES)
-        return ERROR_FILE_NOT_FOUND;
-    else
-    {
-        i=0;
-        j=0;
-        while ((tmpDE.filename[i]!=0x20) and (i<8))
-        {
-            tmpFN[i]=tmpDE.filename[i];
-            i++;
-        }
-        tmpFN[i]='.';
-        i++;
-        while ((tmpDE.fileext[j]!=0x20) and (j<3))
-        {
-            tmpFN[i]=tmpDE.fileext[j];
-            i++;
-            j++;
-        }
-        tmpFN[i]=0x00;
-        if (!strcmp(tmpFN,fn))
-        {
-            for (i=0; i<13; i++)
-                currFile.filename[i]=tmpFN[i];
-            currFile.currentCluster=tmpDE.startCluster;
-            currFile.fileSize=tmpDE.fileSize;
-            currFile.currentPos=0;
-            currFile.fileMode=mode;
+    res = fs_find_first_file(&tmpDE);
+    if (res == ERROR_NO_MORE_FILES) return ERROR_FILE_NOT_FOUND;
+    else {
+        i = j = 0;
+        while ((tmpDE.filename[i]!=0x20) && (i<8))
+            tmpFN[i] = tmpDE.filename[i++];
+        tmpFN[i++] = '.';
+        while ((tmpDE.fileext[j]!=0x20) && (j<3))
+            tmpFN[i++] = tmpDE.fileext[j++];
+        tmpFN[i] = 0x00;
+        if (!strcmp(tmpFN,fn)) {
+            for (i = 0; i < 13; i++)
+                self->currFile.filename[i] = tmpFN[i];
+            self->currFile.currentCluster = tmpDE.startCluster;
+            self->currFile.fileSize = tmpDE.fileSize;
+            self->currFile.currentPos = 0;
+            self->currFile.fileMode = mode;
             return NO_ERROR;
         }
-        while (res==NO_ERROR)
-        {
+        while (res == NO_ERROR) {
             res = file.findNextFile(&tmpDE);
-            if (res==NO_ERROR)
+            if (res == NO_ERROR)
             {
-                i=0;
-                j=0;
-                while ((tmpDE.filename[i]!=0x20) and (i<8))
-                {
-                    tmpFN[i]=tmpDE.filename[i];
-                    i++;
-                }
-                tmpFN[i]='.';
-                i++;
-                while ((tmpDE.fileext[j]!=0x20) and (j<3))
-                {
-                    tmpFN[i]=tmpDE.fileext[j];
-                    i++;
-                    j++;
-                }
-                tmpFN[i]=0x00;
-                if (!strcmp(tmpFN,fn))
-                {
-                    for (i=0; i<13; i++)
-                        currFile.filename[i]=tmpFN[i];
-                    currFile.currentCluster=tmpDE.startCluster;
-                    currFile.fileSize=tmpDE.fileSize;
-                    currFile.currentPos=0;
-                    currFile.fileMode=mode;
+                i = j = 0;
+                while ((tmpDE.filename[i]!=0x20) && (i<8))
+                    tmpFN[i] = tmpDE.filename[i++];
+                tmpFN[i++] = '.';
+                while ((tmpDE.fileext[j]!=0x20) && (j<3))
+                    tmpFN[i++] = tmpDE.fileext[j++];
+                tmpFN[i] = 0x00;
+                if (!strcmp(tmpFN ,fn)) {
+                    for (i = 0; i < 13; i++)
+                        self->currFile.filename[i] = tmpFN[i];
+                    self->currFile.currentCluster = tmpDE.startCluster;
+                    self->currFile.fileSize = tmpDE.fileSize;
+                    self->currFile.currentPos = 0;
+                    self->currFile.fileMode = mode;
                     return NO_ERROR;
                 }
             }
         }
-
-
     }
     return ERROR_FILE_NOT_FOUND;
 }
 
-static uint16_t fat32_read_binary(void) {
+static uint16_t fs_read_binary(struct fat32_t *self) {
     uint32_t sec;
 
-    if (currFile.fileMode==FILEMODE_BINARY)
-    {
-        if ((currFile.currentPos==0) and (currFile.currentCluster==0))
+    if (self->currFile.fileMode == FILEMODE_BINARY) {
+        if ((self->currFile.currentPos == 0) && (self->currFile.currentCluster == 0))
             return FILE_IS_EMPTY;
-        if (((currFile.currentPos % BS.sectorsPerCluster)==0) and (currFile.currentPos>0))
-            currFile.currentCluster=findNextCluster(currFile.currentCluster);
-        sec=(BS.reservedSectors+(BS.fatCopies*BS.sectorsPerFAT)+((BS.rootDirectoryEntries*32)/512)+((currFile.currentCluster-2)*BS.sectorsPerCluster)+BS.hiddenSectors)+(currFile.currentPos % BS.sectorsPerCluster);
-        mmc::readSector(buffer, sec);
-        currFile.currentPos++;
-        if ((currFile.currentPos*512)>currFile.fileSize)
-        {
-            return (currFile.fileSize-((currFile.currentPos-1)*512));
-        }
-        else
-        {
-            return 512;
-        }
+        if (((self->currFile.currentPos % self->BS.sectorsPerCluster) == 0) \
+                && (self->currFile.currentPos>0))
+            self->currFile.currentCluster =
+                fat32_find_next_cluster(self->currFile.currentCluster);
+        sec = (self->BS.reservedSectors 
+                + (self->BS.fatCopies * self->BS.sectorsPerFAT)
+                + ((self->BS.rootDirectoryEntries * 32) / STORAGE_SECTOR_SIZE)
+                + ((self->currFile.currentCluster - 2) * self->BS.sectorsPerCluster)
+                + self->BS.hiddenSectors)
+            + (self->currFile.currentPos % self->BS.sectorsPerCluster);
+        storage_read_sector(self->buffer, sec);
+        self->currFile.currentPos++;
+        if ((self->currFile.currentPos * STORAGE_SECTOR_SIZE) > self->currFile.fileSize)
+            return (self->currFile.fileSize - ((self->currFile.currentPos-1) * STORAGE_SECTOR_SIZE));
+        else return STORAGE_SECTOR_SIZE;
     }
-    else
-        if (currFile.fileMode==0x00)
-            return ERROR_NO_FILE_OPEN;
-        else
-            return ERROR_WRONG_FILEMODE;
+    else if (self->currFile.fileMode == 0x00) return ERROR_NO_FILE_OPEN;
+    else return ERROR_WRONG_FILEMODE;
 }
 
-static uint16_t fat32_read_ln(char *st, int buf_size) {
+static uint16_t fs_read_ln(struct fat32_t *self, char *st, int buf_size) {
     uint32_t sec;
-    int bufIndex=0;
+    int bufIndex = 0;
 
-    for (int i=0; i<=bufSize; i++)
-        st[i]=0;
-
-    if (currFile.fileMode==FILEMODE_TEXT_READ)
-    {
-        if ((currFile.currentPos==0) and (currFile.currentCluster==0))
+    for (int i = 0; i <= bufSize; i++) st[i] = 0;
+    if (self->currFile.fileMode == FILEMODE_TEXT_READ) {
+        if ((self->currFile.currentPos == 0) && (self->currFile.currentCluster == 0))
             return FILE_IS_EMPTY;
-        sec=(BS.reservedSectors+(BS.fatCopies*BS.sectorsPerFAT)+((BS.rootDirectoryEntries*32)/512)+((currFile.currentCluster-2)*BS.sectorsPerCluster)+BS.hiddenSectors)+((currFile.currentPos/512) % BS.sectorsPerCluster);
-        mmc::readSector(buffer, sec);
-        while ((currFile.currentPos<currFile.fileSize) and (buffer[currFile.currentPos % 512]!=10) and (buffer[currFile.currentPos % 512]!=13) and (bufIndex<bufSize))
+        sec = (self->BS.reservedSectors 
+                + (self->BS.fatCopies * self->BS.sectorsPerFAT) 
+                + ((self->BS.rootDirectoryEntries * 32) / STORAGE_SECTOR_SIZE) 
+                + ((self->currFile.currentCluster-2) * self->BS.sectorsPerCluster) 
+                + self->BS.hiddenSectors) 
+            + ((self->currFile.currentPos / STORAGE_SECTOR_SIZE) % self->BS.sectorsPerCluster);
+        storage_read_sector(self->buffer, sec);
+        while ((self->currFile.currentPos<self->currFile.fileSize) 
+                && (self->buffer[self->currFile.currentPos % STORAGE_SECTOR_SIZE] != 10)
+                && (self->buffer[self->currFile.currentPos % STORAGE_SECTOR_SIZE] != 13)
+                && (bufIndex < bufSize))
         {
-            st[bufIndex]=buffer[currFile.currentPos % 512];
+            st[bufIndex] = self->buffer[self->currFile.currentPos % STORAGE_SECTOR_SIZE];
             bufIndex++;
-            currFile.currentPos++;
-            if ((currFile.currentPos % 512) == 0)
+            self->currFile.currentPos++;
+            if ((self->currFile.currentPos % STORAGE_SECTOR_SIZE) == 0)
             {
                 sec++;
-                if (((currFile.currentPos/512) % BS.sectorsPerCluster)==0)
+                if (((self->currFile.currentPos / STORAGE_SECTOR_SIZE) % self->BS.sectorsPerCluster) == 0)
                 {
-                    currFile.currentCluster=findNextCluster(currFile.currentCluster);
-                    sec=(BS.reservedSectors+(BS.fatCopies*BS.sectorsPerFAT)+((BS.rootDirectoryEntries*32)/512)+((currFile.currentCluster-2)*BS.sectorsPerCluster)+BS.hiddenSectors);
+                    self->currFile.currentCluster = fat32_find_next_cluster(self->currFile.currentCluster);
+                    sec = (self->BS.reservedSectors
+                            + (self->BS.fatCopies * self->BS.sectorsPerFAT)
+                            + ((self->BS.rootDirectoryEntries * 32) / STORAGE_SECTOR_SIZE)
+                            + ((self->currFile.currentCluster - 2) * self->BS.sectorsPerCluster)
+                            + self->BS.hiddenSectors);
                 }
-                mmc::readSector(buffer, sec);
+                storage_read_sector(self->buffer, sec);
             }
         }
-        if (currFile.currentPos>=currFile.fileSize)
-            return EOF;
-        else if ((buffer[(currFile.currentPos % 512)]==13) and (buffer[(currFile.currentPos % 512)+1]==10))
+        if (self->currFile.currentPos>=self->currFile.fileSize) return EOF;
+        else if ((self->buffer[(self->currFile.currentPos % STORAGE_SECTOR_SIZE)] == 13)
+                && (self->buffer[(self->currFile.currentPos % STORAGE_SECTOR_SIZE) + 1] == 10))
         {
-            currFile.currentPos+=2;
+            self->currFile.currentPos += 2;
             return bufIndex;
         }
-        else if ((buffer[(currFile.currentPos % 512)]==13) or (buffer[(currFile.currentPos % 512)]==10))
+        else if ((self->buffer[(self->currFile.currentPos % STORAGE_SECTOR_SIZE)] == 13)
+                || (self->buffer[(self->currFile.currentPos % STORAGE_SECTOR_SIZE)] == 10))
         {
-            currFile.currentPos++;
+            self->currFile.currentPos++;
             return bufIndex;
         }
-        else
-            return BUFFER_OVERFLOW;
+        else return BUFFER_OVERFLOW;
     }
-    else
-        if (currFile.fileMode==0x00)
-            return ERROR_NO_FILE_OPEN;
-        else
-            return ERROR_WRONG_FILEMODE;
+    else if (self->currFile.fileMode == 0x00) return ERROR_NO_FILE_OPEN;
+    else return ERROR_WRONG_FILEMODE;
 }
 
-static uint16_t fat32_write_ln(char *st) {
+static uint16_t fs_write_ln(struct fat32_t *self, char *st) {
     unsigned long currSec = firstDirSector;
     uint16_t nextCluster = 0;
-    word offset = -32;
+    uint16_t offset = -32;
     uint32_t sec;
     char tmpFN[13];
     int i, j;
-    int bufIndex=0;
-    boolean done=false;
+    int bufIndex = 0;
+    uint8_t done = false;
 
-    if (currFile.fileMode==FILEMODE_TEXT_WRITE)
-    {
-        if (currFile.currentCluster==0)
-        {
-            currFile.currentCluster=findFreeCluster();
+    if (self->currFile.fileMode == FILEMODE_TEXT_WRITE) {
+        if (self->currFile.currentCluster == 0) {
+            self->currFile.currentCluster = fat32_find_free_cluster();
 
-            mmc::readSector(buffer, currSec);
-            while (!done)
-            {
-                offset+=32;
-                if (offset==512)
-                {
+            storage_read_sector(self->buffer, currSec);
+            while (!done) {
+                offset += 32;
+                if (offset == STORAGE_SECTOR_SIZE) {
                     currSec++;
-                    mmc::readSector(buffer, currSec);
+                    storage_read_sector(self->buffer, currSec);
                     offset = 0;
                 } 
 
-                j=0;
-                for (int i=0; i<8; i++)
+                j = 0;
+                for (int i = 0; i < 8; i++)
+                    if (self->buffer[i + offset]!=0x20)
+                        tmpFN[j++] = self->buffer[i + offset];
+                tmpFN[j++] = '.';
+                for (int i = 0; i < 3; i++)
+                    if (self->buffer[i + 0x08 + offset]!=0x20)
+                        tmpFN[j++] = self->buffer[i + 0x08 + offset];
+                tmpFN[j] = 0x00;
+
+                if (!strcmp(tmpFN, self->currFile.filename))
                 {
-                    if (buffer[i+offset]!=0x20)
-                    {
-                        tmpFN[j]=buffer[i+offset];
-                        j++;
-                    }
-                }
-                tmpFN[j]='.';
-                j++;
-                for (int i=0; i<3; i++)
-                {
-                    if (buffer[i+0x08+offset]!=0x20)
-                    {
-                        tmpFN[j]=buffer[i+0x08+offset];
-                        j++;
-                    }
-                }
-                tmpFN[j]=0x00;
+                    self->buffer[offset + 0x1A] = self->currFile.currentCluster & 0xFF;
+                    self->buffer[offset + 0x1B] = self->currFile.currentCluster>>8;
 
-                if (!strcmp(tmpFN, currFile.filename))
-                {
-                    buffer[offset+0x1A]=currFile.currentCluster & 0xFF;
-                    buffer[offset+0x1B]=currFile.currentCluster>>8;
+                    storage_write_sector(self->buffer, currSec);
 
-                    mmc::writeSector(buffer, currSec);
+                    storage_read_sector(self->buffer, self->BS.fat1Start + (self->currFile.currentCluster>>8));
+                    self->buffer[(self->currFile.currentCluster & 0xFF) * 2] = 0xFF;
+                    self->buffer[((self->currFile.currentCluster & 0xFF) * 2) + 1] = 0xFF;
+                    storage_write_sector(self->buffer, self->BS.fat1Start + (self->currFile.currentCluster>>8));
 
-                    mmc::readSector(buffer, BS.fat1Start+(currFile.currentCluster>>8));
-                    buffer[(currFile.currentCluster & 0xFF)*2]=0xFF;
-                    buffer[((currFile.currentCluster & 0xFF)*2)+1]=0xFF;
-                    mmc::writeSector(buffer, BS.fat1Start+(currFile.currentCluster>>8));
+                    storage_read_sector(self->buffer, self->BS.fat2Start + (self->currFile.currentCluster>>8));
+                    self->buffer[(self->currFile.currentCluster & 0xFF) * 2] = 0xFF;
+                    self->buffer[((self->currFile.currentCluster & 0xFF) * 2) + 1] = 0xFF;
+                    storage_write_sector(self->buffer, self->BS.fat2Start + (self->currFile.currentCluster>>8));
 
-                    mmc::readSector(buffer, BS.fat2Start+(currFile.currentCluster>>8));
-                    buffer[(currFile.currentCluster & 0xFF)*2]=0xFF;
-                    buffer[((currFile.currentCluster & 0xFF)*2)+1]=0xFF;
-                    mmc::writeSector(buffer, BS.fat2Start+(currFile.currentCluster>>8));
-
-                    done=true;
+                    done = true;
                 }
             }
-
         }
 
-        if ((((currFile.fileSize % 512)+strlen(st))<=510) and ((currFile.fileSize % (long(BS.sectorsPerCluster)*512)!=0) or (currFile.fileSize==0)))
+        if ((((self->currFile.fileSize % STORAGE_SECTOR_SIZE) + strlen(st))<=510)
+                && ((self->currFile.fileSize % (self->BS.sectorsPerCluster * STORAGE_SECTOR_SIZE) != 0)
+                    || (self->currFile.fileSize == 0)))
         {
-            currSec=(BS.reservedSectors+(BS.fatCopies*BS.sectorsPerFAT)+((BS.rootDirectoryEntries*32)/512)+((currFile.currentCluster-2)*BS.sectorsPerCluster)+BS.hiddenSectors)+((currFile.fileSize/512) % BS.sectorsPerCluster);
-            mmc::readSector(buffer, currSec);
-            for (int i=0; i<strlen(st); i++)
-                buffer[(currFile.fileSize%512)+i]=st[i];
-            buffer[(currFile.fileSize%512)+strlen(st)]=0x0D;
-            buffer[(currFile.fileSize%512)+strlen(st)+1]=0x0A;
-            mmc::writeSector(buffer, currSec);
-        }
-        else
-        {
-            currSec=(BS.reservedSectors+(BS.fatCopies*BS.sectorsPerFAT)+((BS.rootDirectoryEntries*32)/512)+((currFile.currentCluster-2)*BS.sectorsPerCluster)+BS.hiddenSectors)+((currFile.fileSize/512) % BS.sectorsPerCluster);
+            currSec = (self->BS.reservedSectors
+                    + (self->BS.fatCopies * self->BS.sectorsPerFAT)
+                    + ((self->BS.rootDirectoryEntries * 32) / STORAGE_SECTOR_SIZE)
+                    + ((self->currFile.currentCluster-2) * self->BS.sectorsPerCluster)
+                    + self->BS.hiddenSectors)
+                + ((self->currFile.fileSize / STORAGE_SECTOR_SIZE) % self->BS.sectorsPerCluster);
+            storage_read_sector(self->buffer, currSec);
+            for (int i = 0; i<strlen(st); i++)
+                self->buffer[(self->currFile.fileSize%STORAGE_SECTOR_SIZE) + i] = st[i];
+            self->buffer[(self->currFile.fileSize%STORAGE_SECTOR_SIZE) + strlen(st)] = 0x0D;
+            self->buffer[(self->currFile.fileSize%STORAGE_SECTOR_SIZE) + strlen(st) + 1] = 0x0A;
+            storage_write_sector(self->buffer, currSec);
+        } else {
+            currSec = (self->BS.reservedSectors
+                    + (self->BS.fatCopies * self->BS.sectorsPerFAT)
+                    + ((self->BS.rootDirectoryEntries * 32) / STORAGE_SECTOR_SIZE)
+                    + ((self->currFile.currentCluster-2) * self->BS.sectorsPerCluster)
+                    + self->BS.hiddenSectors)
+                + ((self->currFile.fileSize / STORAGE_SECTOR_SIZE) % self->BS.sectorsPerCluster);
 
-            if ((currFile.fileSize%512)!=0)
-            {
-                mmc::readSector(buffer, currSec);
-                for (int i=0; i<(512-(currFile.fileSize%512)); i++)
+            if ((self->currFile.fileSize%STORAGE_SECTOR_SIZE) != 0) {
+                storage_read_sector(self->buffer, currSec);
+                for (int i = 0; i < (STORAGE_SECTOR_SIZE-(self->currFile.fileSize%STORAGE_SECTOR_SIZE)); i++)
                 {
-                    buffer[(currFile.fileSize%512)+i]=st[i];
+                    self->buffer[(self->currFile.fileSize%STORAGE_SECTOR_SIZE) + i] = st[i];
                     bufIndex++;
                 }
-                mmc::writeSector(buffer, currSec);
+                storage_write_sector(self->buffer, currSec);
                 currSec++;
-            }
-            else
-                bufIndex=0;
+            } else bufIndex = 0;
 
-            if (((currSec-(BS.reservedSectors+(BS.fatCopies*BS.sectorsPerFAT)+((BS.rootDirectoryEntries*32)/512)+BS.hiddenSectors)) % BS.sectorsPerCluster)==0)
+            if (((currSec-(self->BS.reservedSectors
+                                + (self->BS.fatCopies * self->BS.sectorsPerFAT)
+                                + ((self->BS.rootDirectoryEntries * 32) / STORAGE_SECTOR_SIZE)
+                                + self->BS.hiddenSectors))
+                        % self->BS.sectorsPerCluster) == 0)
             {
-                nextCluster=findFreeCluster();
+                nextCluster = fat32_find_free_cluster();
 
-                mmc::readSector(buffer, BS.fat1Start+(currFile.currentCluster>>8));
-                buffer[(currFile.currentCluster & 0xFF)*2]=nextCluster & 0xFF;
-                buffer[((currFile.currentCluster & 0xFF)*2)+1]=nextCluster>>8;
-                if ((nextCluster>>8)==(currFile.currentCluster>>8))
+                storage_read_sector(self->buffer, self->BS.fat1Start + (self->currFile.currentCluster>>8));
+                self->buffer[(self->currFile.currentCluster & 0xFF) * 2] = nextCluster & 0xFF;
+                self->buffer[((self->currFile.currentCluster & 0xFF) * 2) + 1] = nextCluster>>8;
+                if ((nextCluster>>8) == (self->currFile.currentCluster>>8))
                 {
-                    buffer[(nextCluster & 0xFF)*2]=0xFF;
-                    buffer[((nextCluster & 0xFF)*2)+1]=0xFF;
-                    mmc::writeSector(buffer, BS.fat1Start+(currFile.currentCluster>>8));
+                    self->buffer[(nextCluster & 0xFF) * 2] = 0xFF;
+                    self->buffer[((nextCluster & 0xFF) * 2) + 1] = 0xFF;
+                    storage_write_sector(self->buffer, self->BS.fat1Start + (self->currFile.currentCluster>>8));
                 }
                 else
                 {
-                    mmc::writeSector(buffer, BS.fat1Start+(currFile.currentCluster>>8));
-                    mmc::readSector(buffer, BS.fat1Start+(nextCluster>>8));
-                    buffer[(nextCluster & 0xFF)*2]=0xFF;
-                    buffer[((nextCluster & 0xFF)*2)+1]=0xFF;
-                    mmc::writeSector(buffer, BS.fat1Start+(nextCluster>>8));
+                    storage_write_sector(self->buffer, self->BS.fat1Start + (self->currFile.currentCluster>>8));
+                    storage_read_sector(self->buffer, self->BS.fat1Start + (nextCluster>>8));
+                    self->buffer[(nextCluster & 0xFF) * 2] = 0xFF;
+                    self->buffer[((nextCluster & 0xFF) * 2) + 1] = 0xFF;
+                    storage_write_sector(self->buffer, self->BS.fat1Start + (nextCluster>>8));
                 }
 
-                mmc::readSector(buffer, BS.fat2Start+(currFile.currentCluster>>8));
-                buffer[(currFile.currentCluster & 0xFF)*2]=nextCluster & 0xFF;
-                buffer[((currFile.currentCluster & 0xFF)*2)+1]=nextCluster>>8;
-                if ((nextCluster>>8)==(currFile.currentCluster>>8))
+                storage_read_sector(self->buffer, self->BS.fat2Start + (self->currFile.currentCluster>>8));
+                self->buffer[(self->currFile.currentCluster & 0xFF) * 2] = nextCluster & 0xFF;
+                self->buffer[((self->currFile.currentCluster & 0xFF) * 2) + 1] = nextCluster>>8;
+                if ((nextCluster>>8) == (self->currFile.currentCluster>>8))
                 {
-                    buffer[(nextCluster & 0xFF)*2]=0xFF;
-                    buffer[((nextCluster & 0xFF)*2)+1]=0xFF;
-                    mmc::writeSector(buffer, BS.fat2Start+(currFile.currentCluster>>8));
+                    self->buffer[(nextCluster & 0xFF) * 2] = 0xFF;
+                    self->buffer[((nextCluster & 0xFF) * 2) + 1] = 0xFF;
+                    storage_write_sector(self->buffer, self->BS.fat2Start + (self->currFile.currentCluster>>8));
                 }
                 else
                 {
-                    mmc::writeSector(buffer, BS.fat2Start+(currFile.currentCluster>>8));
-                    mmc::readSector(buffer, BS.fat2Start+(nextCluster>>8));
-                    buffer[(nextCluster & 0xFF)*2]=0xFF;
-                    buffer[((nextCluster & 0xFF)*2)+1]=0xFF;
-                    mmc::writeSector(buffer, BS.fat2Start+(nextCluster>>8));
+                    storage_write_sector(self->buffer, self->BS.fat2Start + (self->currFile.currentCluster>>8));
+                    storage_read_sector(self->buffer, self->BS.fat2Start + (nextCluster>>8));
+                    self->buffer[(nextCluster & 0xFF) * 2] = 0xFF;
+                    self->buffer[((nextCluster & 0xFF) * 2) + 1] = 0xFF;
+                    storage_write_sector(self->buffer, self->BS.fat2Start + (nextCluster>>8));
                 }
 
-                currFile.currentCluster=nextCluster;
+                self->currFile.currentCluster = nextCluster;
 
-                currSec=(BS.reservedSectors+(BS.fatCopies*BS.sectorsPerFAT)+((BS.rootDirectoryEntries*32)/512)+((currFile.currentCluster-2)*BS.sectorsPerCluster)+BS.hiddenSectors);
+                currSec = (self->BS.reservedSectors
+                        + (self->BS.fatCopies * self->BS.sectorsPerFAT)
+                        + ((self->BS.rootDirectoryEntries * 32) / STORAGE_SECTOR_SIZE)
+                        + ((self->currFile.currentCluster-2) * self->BS.sectorsPerCluster)
+                        + self->BS.hiddenSectors);
             }
-            mmc::readSector(buffer, currSec);
-            for (int i=0; i<strlen(st)-bufIndex; i++)
-                buffer[i]=st[i+bufIndex];
-            buffer[strlen(st)-bufIndex]=0x0D;
-            buffer[strlen(st)-bufIndex+1]=0x0A;
-            mmc::writeSector(buffer, currSec);
+            storage_read_sector(self->buffer, currSec);
+            for (int i = 0; i<strlen(st)-bufIndex; i++)
+                self->buffer[i] = st[i + bufIndex];
+            self->buffer[strlen(st)-bufIndex] = 0x0D;
+            self->buffer[strlen(st)-bufIndex + 1] = 0x0A;
+            storage_write_sector(self->buffer, currSec);
 
 
         }
 
-        currFile.fileSize+=(strlen(st)+2);
+        self->currFile.fileSize+=(strlen(st) + 2);
 
-        currSec=firstDirSector;
-        offset=-32;
-        done=false;
-        mmc::readSector(buffer, currSec);
+        currSec = firstDirSector;
+        offset = -32;
+        done = false;
+        storage_read_sector(self->buffer, currSec);
         while (!done)
         {
             offset+=32;
-            if (offset==512)
+            if (offset == STORAGE_SECTOR_SIZE)
             {
                 currSec++;
-                mmc::readSector(buffer, currSec);
+                storage_read_sector(self->buffer, currSec);
                 offset = 0;
             } 
 
-            j=0;
-            for (int i=0; i<8; i++)
+            j = 0;
+            for (int i = 0; i<8; i++)
             {
-                if (buffer[i+offset]!=0x20)
+                if (self->buffer[i + offset]!=0x20)
                 {
-                    tmpFN[j]=buffer[i+offset];
+                    tmpFN[j] = self->buffer[i + offset];
                     j++;
                 }
             }
-            tmpFN[j]='.';
+            tmpFN[j] = '.';
             j++;
-            for (int i=0; i<3; i++)
+            for (int i = 0; i<3; i++)
             {
-                if (buffer[i+0x08+offset]!=0x20)
+                if (self->buffer[i + 0x08 + offset]!=0x20)
                 {
-                    tmpFN[j]=buffer[i+0x08+offset];
+                    tmpFN[j] = self->buffer[i + 0x08 + offset];
                     j++;
                 }
             }
-            tmpFN[j]=0x00;
+            tmpFN[j] = 0x00;
 
-            if (!strcmp(tmpFN, currFile.filename))
+            if (!strcmp(tmpFN, self->currFile.filename))
             {
-                buffer[offset+0x1C]=currFile.fileSize & 0xFF;
-                buffer[offset+0x1D]=(currFile.fileSize & 0xFF00)>>8;
-                buffer[offset+0x1E]=(currFile.fileSize & 0xFF0000)>>16;
-                buffer[offset+0x1F]=currFile.fileSize>>24;
+                self->buffer[offset + 0x1C] = self->currFile.fileSize & 0xFF;
+                self->buffer[offset + 0x1D] = (self->currFile.fileSize & 0xFF00)>>8;
+                self->buffer[offset + 0x1E] = (self->currFile.fileSize & 0xFF0000)>>16;
+                self->buffer[offset + 0x1F] = self->currFile.fileSize>>24;
 
-                mmc::writeSector(buffer, currSec);
+                storage_write_sector(self->buffer, currSec);
 
-                done=true;
+                done = true;
             }
         }
 
         return NO_ERROR;
-    }
-    else
-        if (currFile.fileMode==0x00)
-            return ERROR_NO_FILE_OPEN;
-        else
-            return ERROR_WRONG_FILEMODE;
+    } else if (self->currFile.fileMode == 0x00) return ERROR_NO_FILE_OPEN;
+    else return ERROR_WRONG_FILEMODE;
 }
 
-static void fat32_close_file(void) {
-    currFile.filename[0]=0x00;
-    currFile.fileMode=0x00;
+static void fs_close_file(struct fat32_t *self, void) {
+    self->currFile.filename[0] = 0x00;
+    self->currFile.fileMode = 0x00;
 }
 
-static uint8_t	fat32_exists(char *fn) {
+static uint8_t fs_exists(struct fat32_t *self, char *fn) {
     _directory_entry tmpDE;
     char tmpFN[13];
     byte res;
     int i, j;
 
-    for (i=0; i<strlen(fn); i++)
-        fn[i]=uCase(fn[i]);
+    for (i = 0; i<strlen(fn); i++)
+        fn[i] = fat32_uCase(fn[i]);
 
-    res=findFirstFile(&tmpDE);
-    if (res==ERROR_NO_MORE_FILES)
-        return false;
-    else
-    {
-        i=0;
-        j=0;
-        while ((tmpDE.filename[i]!=0x20) and (i<8))
-        {
-            tmpFN[i]=tmpDE.filename[i];
-            i++;
-        }
-        tmpFN[i]='.';
-        i++;
-        while ((tmpDE.fileext[j]!=0x20) and (j<3))
-        {
-            tmpFN[i]=tmpDE.fileext[j];
-            i++;
-            j++;
-        }
-        tmpFN[i]=0x00;
+    res = findFirstFile(&tmpDE);
+    if (res == ERROR_NO_MORE_FILES) return false;
+    else {
+        i = j = 0;
+        while ((tmpDE.filename[i]!=0x20) && (i<8))
+            tmpFN[i] = tmpDE.filename[i++];
+        tmpFN[i++] = '.';
+        while ((tmpDE.fileext[j]!=0x20) && (j<3))
+            tmpFN[i++] = tmpDE.fileext[j++];
+        tmpFN[i] = 0x00;
         if (!strcmp(tmpFN,fn))
             return true;
-        while (res==NO_ERROR)
-        {
+        while (res == NO_ERROR) {
             res = file.findNextFile(&tmpDE);
-            if (res==NO_ERROR)
-            {
-                i=0;
-                j=0;
-                while ((tmpDE.filename[i]!=0x20) and (i<8))
-                {
-                    tmpFN[i]=tmpDE.filename[i];
-                    i++;
-                }
-                tmpFN[i]='.';
-                i++;
-                while ((tmpDE.fileext[j]!=0x20) and (j<3))
-                {
-                    tmpFN[i]=tmpDE.fileext[j];
-                    i++;
-                    j++;
-                }
-                tmpFN[i]=0x00;
+            if (res == NO_ERROR) {
+                i = j = 0;
+                while ((tmpDE.filename[i]!=0x20) && (i<8))
+                    tmpFN[i] = tmpDE.filename[i++];
+                tmpFN[i++] = '.';
+                while ((tmpDE.fileext[j]!=0x20) && (j<3))
+                    tmpFN[i++] = tmpDE.fileext[j++];
+                tmpFN[i] = 0x00;
                 if (!strcmp(tmpFN,fn))
                     return true;
             }
@@ -683,301 +620,226 @@ static uint8_t	fat32_exists(char *fn) {
     return false;
 }
 
-static uint8_t	fat32_rename(char *fn1, char *fn2) {
+static uint8_t fs_rename(struct fat32_t *self, char *fn1, char *fn2) {
     unsigned long currSec = firstDirSector;
-    word offset = -32;
+    uint16_t offset = -32;
     char tmpFN[13];
     int i, j;
-    boolean done=false;
+    uint8_t done = false;
 
-    for (i=0; i<strlen(fn1); i++)
-        fn1[i]=uCase(fn1[i]);
+    for (i = 0; i<strlen(fn1); i++)
+        fn1[i] = fat32_uCase(fn1[i]);
 
-    for (i=0; i<strlen(fn2); i++)
-    {
-        fn2[i]=uCase(fn2[i]);
-        if (!validChar(fn2[i]))
+    for (i = 0; i<strlen(fn2); i++)
+        if (!fat32_valid_char(fn2[i] = fat32_uCase(fn2[i])))
             return false;
-    }
 
-    if (exists(fn1))
-    {
-        mmc::readSector(buffer, currSec);
+    if (exists(fn1)) {
+        storage_read_sector(self->buffer, currSec);
         while (!done)
         {
             offset+=32;
-            if (offset==512)
-            {
-                currSec++;
-                mmc::readSector(buffer, currSec);
+            if (offset == STORAGE_SECTOR_SIZE) {
+                storage_read_sector(self->buffer, ++currSec);
                 offset = 0;
             } 
 
-            j=0;
-            for (int i=0; i<8; i++)
-            {
-                if (buffer[i+offset]!=0x20)
-                {
-                    tmpFN[j]=buffer[i+offset];
-                    j++;
-                }
-            }
-            tmpFN[j]='.';
-            j++;
-            for (int i=0; i<3; i++)
-            {
-                if (buffer[i+0x08+offset]!=0x20)
-                {
-                    tmpFN[j]=buffer[i+0x08+offset];
-                    j++;
-                }
-            }
-            tmpFN[j]=0x00;
-            if (!strcmp(tmpFN, fn1))
-            {
-                for (int i=0; i<11; i++)
-                {
-                    buffer[i+offset]=0x20;
-                }
-                j=0;
-                for (int i=0; i<strlen(fn2); i++)
-                {
-                    if (fn2[i]=='.')
-                        j=8;
-                    else
-                    {
-                        buffer[j+offset]=fn2[i];
-                        j++;
-                    }
-                }
-                mmc::writeSector(buffer, currSec);
-                done=true;
+            j = 0;
+            for (int i = 0; i<8; i++)
+                if (self->buffer[i + offset]!=0x20)
+                    tmpFN[j++] = self->buffer[i + offset];
+            tmpFN[j++] = '.';
+            for (int i = 0; i<3; i++)
+                if (self->buffer[i + 0x08 + offset]!=0x20)
+                    tmpFN[j++] = self->buffer[i + 0x08 + offset];
+            tmpFN[j] = 0x00;
+            if (!strcmp(tmpFN, fn1)) {
+                for (int i = 0; i < 11; i++)
+                    self->buffer[i + offset] = 0x20;
+                j = 0;
+                for (int i = 0; i<strlen(fn2); i++)
+                    if (fn2[i] == '.') j = 8;
+                    else self->buffer[(j++) + offset] = fn2[i];
+                storage_write_sector(self->buffer, currSec);
+                done = true;
             }
         }
-
         return true;
-    }
-    else
-        return false;
+    } else return false;
 }
 
-static uint8_t	fat32_del_file(char *fn) {
+static uint8_t fs_del_file(struct fat32_t *self, char *fn) {
     unsigned long currSec = firstDirSector;
     uint16_t firstCluster, currCluster, nextCluster;
-    word offset = -32;
+    uint16_t offset = -32;
     char tmpFN[13];
     int j;
-    boolean done=false;
+    uint8_t done = false;
 
-    for (int i=0; i<strlen(fn); i++)
-        fn[i]=uCase(fn[i]);
+    for (int i = 0; i<strlen(fn); i++)
+        fn[i] = fat32_uCase(fn[i]);
 
-    if (exists(fn))
-    {
-        mmc::readSector(buffer, currSec);
+    if (exists(fn)) {
+        storage_read_sector(self->buffer, currSec);
         while (!done)
         {
-            offset+=32;
-            if (offset==512)
-            {
-                currSec++;
-                mmc::readSector(buffer, currSec);
+            offset += 32;
+            if (offset == STORAGE_SECTOR_SIZE) {
+                storage_read_sector(self->buffer, ++currSec);
                 offset = 0;
             } 
 
-            j=0;
-            for (int i=0; i<8; i++)
-            {
-                if (buffer[i+offset]!=0x20)
-                {
-                    tmpFN[j]=buffer[i+offset];
-                    j++;
-                }
-            }
-            tmpFN[j]='.';
-            j++;
-            for (int i=0; i<3; i++)
-            {
-                if (buffer[i+0x08+offset]!=0x20)
-                {
-                    tmpFN[j]=buffer[i+0x08+offset];
-                    j++;
-                }
-            }
-            tmpFN[j]=0x00;
-            if (!strcmp(tmpFN, fn))
-            {
-                buffer[offset]=0xE5;
-                firstCluster = uint16_t(buffer[0x1A + offset]) + (uint16_t(buffer[0x1B + offset])<<8);
-                mmc::writeSector(buffer, currSec);
+            j = 0;
+            for (int i = 0; i<8; i++)
+                if (self->buffer[i + offset] != 0x20)
+                    tmpFN[j++] = self->buffer[i + offset];
+            tmpFN[j++] = '.';
+            for (int i = 0; i<3; i++)
+                if (self->buffer[i + 0x08 + offset]!=0x20)
+                    tmpFN[j++] = self->buffer[i + 0x08 + offset];
+            tmpFN[j] = 0x00;
+            if (!strcmp(tmpFN, fn)) {
+                self->buffer[offset] = 0xE5;
+                firstCluster = uint16_t(self->buffer[0x1A + offset]) + (uint16_t(self->buffer[0x1B + offset])<<8);
+                storage_write_sector(self->buffer, currSec);
 
-                if (firstCluster!=0)
-                {
-                    currSec=firstCluster/256;
-                    mmc::readSector(buffer, BS.fat1Start+currSec);
-                    currCluster=firstCluster;
-                    nextCluster=0;
+                if (firstCluster!=0) {
+                    currSec = firstCluster / 256;
+                    storage_read_sector(self->buffer, self->BS.fat1Start + currSec);
+                    currCluster = firstCluster;
+                    nextCluster = 0;
                     while (nextCluster!=0xFFFF)
                     {
-                        nextCluster = buffer[(currCluster % 256)*2] + (buffer[((currCluster % 256)*2)+1]<<8);
-                        buffer[(currCluster % 256)*2]=0;
-                        buffer[((currCluster % 256)*2)+1]=0;
-                        if (((currCluster/256) != (nextCluster/256)) and (nextCluster!=0xFFFF))
+                        nextCluster = self->buffer[(currCluster % 256) * 2]
+                            + (self->buffer[((currCluster % 256) * 2) + 1]<<8);
+                        self->buffer[(currCluster % 256) * 2] = 0;
+                        self->buffer[((currCluster % 256) * 2) + 1] = 0;
+                        if (((currCluster / 256) != (nextCluster / 256)) && (nextCluster!=0xFFFF))
                         {
-                            mmc::writeSector(buffer, BS.fat1Start+currSec);
-                            currSec=nextCluster/256;
-                            mmc::readSector(buffer, BS.fat1Start+currSec);
+                            storage_write_sector(self->buffer, self->BS.fat1Start + currSec);
+                            currSec = nextCluster / 256;
+                            storage_read_sector(self->buffer, self->BS.fat1Start + currSec);
 
                         }
-                        currCluster=nextCluster;
+                        currCluster = nextCluster;
                     }
-                    mmc::writeSector(buffer, BS.fat1Start+currSec);
+                    storage_write_sector(self->buffer, self->BS.fat1Start + currSec);
 
-                    currSec=firstCluster/256;
-                    mmc::readSector(buffer, BS.fat2Start+currSec);
-                    currCluster=firstCluster;
-                    nextCluster=0;
-                    while (nextCluster!=0xFFFF)
+                    currSec = firstCluster / 256;
+                    storage_read_sector(self->buffer, self->BS.fat2Start + currSec);
+                    currCluster = firstCluster;
+                    nextCluster = 0;
+                    while (nextCluster != 0xFFFF)
                     {
-                        nextCluster = buffer[(currCluster % 256)*2] + (buffer[((currCluster % 256)*2)+1]<<8);
-                        buffer[(currCluster % 256)*2]=0;
-                        buffer[((currCluster % 256)*2)+1]=0;
-                        if (((currCluster/256) != (nextCluster/256)) and (nextCluster!=0xFFFF))
+                        nextCluster = self->buffer[(currCluster % 256) * 2]
+                            + (self->buffer[((currCluster % 256) * 2) + 1]<<8);
+                        self->buffer[(currCluster % 256) * 2] = 0;
+                        self->buffer[((currCluster % 256) * 2) + 1] = 0;
+                        if (((currCluster / 256) != (nextCluster / 256)) && (nextCluster!=0xFFFF))
                         {
-                            mmc::writeSector(buffer, BS.fat2Start+currSec);
-                            currSec=nextCluster/256;
-                            mmc::readSector(buffer, BS.fat2Start+currSec);
+                            storage_write_sector(self->buffer, self->BS.fat2Start + currSec);
+                            currSec = nextCluster / 256;
+                            storage_read_sector(self->buffer, self->BS.fat2Start + currSec);
 
                         }
-                        currCluster=nextCluster;
+                        currCluster = nextCluster;
                     }
-                    mmc::writeSector(buffer, BS.fat2Start+currSec);
+                    storage_write_sector(self->buffer, self->BS.fat2Start + currSec);
                 }
 
-                done=true;
+                done = true;
             }
         }
-
         return true;
-    }
-    else
-        return false;
+    } else return false;
 }
 
-static uint8_t	fat32_create(char *fn) {
+static uint8_t fs_create(struct fat32_t *self, char *fn) {
     unsigned long currSec;
-    word offset = 0;
-    boolean done=false;
+    uint16_t offset = 0;
+    uint8_t done = false;
     int j;
 
-    for (int i=0; i<strlen(fn); i++)
-    {
-        fn[i]=uCase(fn[i]);
-        if (!validChar(fn[i]))
+    for (int i = 0; i<strlen(fn); i++)
+        if (!fat32_valid_char(fn[i] = fat32_uCase(fn[i])))
             return false;
-    }
 
-    if (!exists(fn))
-    {
+    if (!exists(fn)) {
         currSec = firstDirSector;
-        mmc::readSector(buffer, currSec);
+        storage_read_sector(self->buffer, currSec);
         offset = -32;
-        while (!done)
-        {
+        while (!done) {
             offset+=32;
-            if (offset==512)
-            {
-                currSec++;
-                mmc::readSector(buffer, currSec);
+            if (offset == STORAGE_SECTOR_SIZE) {
+                storage_read_sector(self->buffer, ++currSec);
                 offset = 0;
             } 
 
-            if ((buffer[offset]==0x00) or (buffer[offset]==0xE5))
-            {
-                for (int i=0; i<11; i++)
-                {
-                    buffer[i+offset]=0x20;
-                }
-                j=0;
-                for (int i=0; i<strlen(fn); i++)
-                {
-                    if (fn[i]=='.')
-                        j=8;
-                    else
-                    {
-                        buffer[j+offset]=fn[i];
-                        j++;
-                    }
-                }
+            if ((self->buffer[offset] == 0x00) || (self->buffer[offset] == 0xE5)) {
+                for (int i = 0; i<11; i++)
+                    self->buffer[i + offset] = 0x20;
+                j = 0;
+                for (int i = 0; i<strlen(fn); i++)
+                    if (fn[i] == '.') j = 8;
+                    else self->buffer[(j++) + offset] = fn[i];
 
-                for (int i=0x0b; i<0x20; i++)
-                    buffer[offset+i]=0;
-                buffer[offset+0x0b]=0x20;
-                buffer[offset+0x0f]=0x60;
-                buffer[offset+0x10]=0x21;
-                buffer[offset+0x11]=0x3E;
-                buffer[offset+0x12]=0x21;
-                buffer[offset+0x13]=0x3E;
-                buffer[offset+0x17]=0x60;
-                buffer[offset+0x18]=0x21;
-                buffer[offset+0x19]=0x3E;
+                for (int i = 0x0b; i<0x20; i++)
+                    self->buffer[offset + i] = 0;
+                self->buffer[offset + 0x0b] = 0x20;
+                self->buffer[offset + 0x0f] = 0x60;
+                self->buffer[offset + 0x10] = 0x21;
+                self->buffer[offset + 0x11] = 0x3E;
+                self->buffer[offset + 0x12] = 0x21;
+                self->buffer[offset + 0x13] = 0x3E;
+                self->buffer[offset + 0x17] = 0x60;
+                self->buffer[offset + 0x18] = 0x21;
+                self->buffer[offset + 0x19] = 0x3E;
 
-                mmc::writeSector(buffer, currSec);
+                storage_write_sector(self->buffer, currSec);
 
-                done=true;
+                done = true;
             }
         }
         return true;
-    }
-    else
-        return false;
+    } else return false;
 }
 
-static void fat32_setSSpin(uint8_t pin) {
-    if (_inited==false)
-        mmc::setSSpin(pin);
-}
-
-
-static uint16_t fat32_find_next_cluster(uint16_t cc) {
+static uint16_t fat32_find_next_cluster(struct fat32_t *self, uint16_t cc) {
     uint16_t nc;
-    mmc::readSector(buffer, BS.fat1Start+int(cc/256));
-    nc = buffer[(cc % 256)*2] + (buffer[((cc % 256)*2)+1]<<8);
+    storage_read_sector(self->buffer, self->BS.fat1Start + int(cc / 256));
+    nc = self->buffer[(cc % 256) * 2] + (self->buffer[((cc % 256) * 2) + 1]<<8);
     return nc;
 }
 
 static char fat32_uCase(char c) {
-    if ((c>='a') && (c<='z'))
-        return (c-0x20);
-    else
-        return c;
+    if ((c >= 'a') && (c <= 'z')) return (c - 0x20);
+    else return c;
 }
 
 static uint8_t fat32_valid_char(char c) {
-    char valid[]= "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$&'()-@^_`{}~.";
+    const static char valid[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$&'()-@^_`{}~.";
 
-    for (int i=0; i<strlen(valid); i++)
-        if (c==valid[i])
+    for (int i = 0; i<strlen(valid); i++)
+        if (c == valid[i])
             return true;
     return false;
 }
 
-static uint16_t fat32_find_free_cluster(void) {
-    unsigned long currSec=0;
-    word firstFreeCluster=0;
-    word offset=0;
+static uint16_t fat32_find_free_cluster(struct fat32_t *self) {
+    unsigned long currSec = 0;
+    uint16_t firstFreeCluster = 0;
+    uint16_t offset = 0;
 
-    while ((firstFreeCluster==0) and (currSec<=BS.sectorsPerFAT))
+    while ((firstFreeCluster == 0) && (currSec<=self->BS.sectorsPerFAT))
     {
-        mmc::readSector(buffer, BS.fat1Start+currSec);
-        while ((firstFreeCluster==0) and (offset<=512))
+        storage_read_sector(self->buffer, self->BS.fat1Start + currSec);
+        while ((firstFreeCluster == 0) && (offset<=STORAGE_SECTOR_SIZE))
         {
-            if ((buffer[offset] + (buffer[offset+1]<<8))==0)
-                firstFreeCluster=(currSec<<8)+(offset/2);
-            else
-                offset+=2;
+            if ((self->buffer[offset] + (self->buffer[offset + 1]<<8)) == 0)
+                firstFreeCluster = (currSec<<8) + (offset / 2);
+            else offset+=2;
         }
-        offset=0;
+        offset = 0;
         currSec++;
     }
 }

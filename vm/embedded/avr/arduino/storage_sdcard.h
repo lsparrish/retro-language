@@ -5,6 +5,8 @@
 #endif
 #define STORAGE_ACTIVATED
 
+#define STORAGE_SECTOR_SIZE     512
+
 #define CONFIG_SD_AUTO_RETRIES 5
 #define SD_SUPPLY_VOLTAGE (1L<<18)
 
