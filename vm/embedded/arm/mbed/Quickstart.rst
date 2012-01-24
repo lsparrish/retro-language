@@ -54,3 +54,13 @@ Enter this:
 
 The four LED should light up and then turn off.
 
+
+-----------
+Limitations
+-----------
+* 32 cells for data stack
+* 128 cells for address stack
+* Filenames max at 80 chars (including terminator)
+* Max of 4 open files
+* Filenames must have a /local/ prefix
+
