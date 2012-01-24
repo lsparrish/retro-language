@@ -232,6 +232,9 @@ int main(void)
     CELL address[ADDRESSES];
     CELL ports[PORTS];
     CELL a, b;
+#ifdef FILESYSTEM_ACTIVATED
+    struct fs_t *fs;
+#endif
 
 #ifndef BOARD_native
     _delay_ms(1000);
@@ -337,6 +340,30 @@ int main(void)
                         switch (ports[4]) {
                             case 1: ports[4] = save_to_eeprom(); break;
                             case 2: ports[4] = load_from_eeprom(); break;
+#ifdef FILESYSTEM_ACTIVATED
+                            case -1:
+                                a = S_TOS; b = S_NOS; S_DROP; S_DROP;
+                                if (fs != NULL) ports[4] = 0;
+                                else {
+                                    fs = (struct fs_t *)malloc(sizeof(struct fs_t));
+                                    if (fs == NULL) ports[4] = 0;
+                                    else {
+                                        img_string(b, string_buffer, STRING_BUFFER_SIZE);
+                                        if (a == 0)
+                                            b = fs_open_file(fs, string_buffer, FS_FILEMODE_TEXT_READ);
+                                        else if (a == 1)
+                                            b = fs_open_file(fs, string_buffer, FS_FILEMODE_TEXT_WRITE);
+                                        else b = FS_ERROR_WRONG_FILEMODE;
+                                    }
+                                    if (b != FS_NO_ERROR) ports[4] = 0;
+                                    else ports[4] = 1;
+                                }
+                                if (ports[4] == 0) {
+                                    free(fs);
+                                    fs = NULL;
+                                }
+                                break;
+#endif
                             default: ports[4] = 0;
                         }
                     }
