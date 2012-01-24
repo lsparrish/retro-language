@@ -12,11 +12,13 @@ CORE 0000 + constant TIB
 TIB   256 + constant HEAP
 
 ( Initial Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-mark variable last  ( Pointer to the most recent dictionary header            )
-HEAP variable: heap ( Starting address of the data/code heap                  )
-variable compiler   ( Is the compiler on or off?                              )
-variable which      ( Pointer to dictionary header of the most recently       )
-                    ( looked up word                                          )
+mark variable last    ( Pointer to the most recent dictionary header          )
+HEAP variable: heap   ( Starting address of the data/code heap                )
+variable compiler     ( Is the compiler on or off?                            )
+variable which        ( Pointer to dictionary header of the most recently     )
+                      ( looked up word                                        )
+TIB  variable: <tib>  ( Start of default text input buffer                    )
+
 pad
 label: copytag   "Retro" $,
 label: version   "11.3" $,
@@ -95,7 +97,7 @@ variable break                           ( Holds the delimiter for 'accept'   )
 -1 variable: eatLeading?                 ( Eat leading delimiters?            )
 -1 variable: tabAsWhitespace
 
-t: tib ( -a ) TIB # ;
+t: tib ( -a ) <tib> # @, ;
 
 t: remapKeys ( c-c ) ;
 t: ws        ( c-c )
@@ -308,7 +310,7 @@ patch
 
 ( Finish Metacompiled Part ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 main: run-on-boot jump: listen
-endKernel bootNew
+endKernel shrink bootNew
 
 
 ( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )

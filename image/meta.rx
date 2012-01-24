@@ -1,5 +1,5 @@
 ( Retro ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-( Copyright [c] 2008 - 2011, Charles Childers                                 )
+( Copyright [c] 2008 - 2012, Charles Childers                                 )
 ( Copyright [c] 2009 - 2010, Luke Parrish                                     )
 ( Copyright [c] 2010,        Marc Simpson                                     )
 ( Copyright [c] 2010,        Jay Skeer                                        )
@@ -36,6 +36,8 @@ variables| target origin 'WORD 'MACRO 'DATA 'PRIM link chain |
 : #           ( n-  ) lit, m, ;
 : __#         ( $-  ) lit, toNumber m, ; parsing
 : $,          ( $-  ) withLength [ @+ m, ] times 0 m, drop ;
+: shrink      (  -  ) t-here "\nShrinking kernel to %d cells\n" puts
+                      t-here @origin 6 + ! t-here 256 + @origin 3 + ! ;
 
 ( Metacompiler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : t: ( "-  ) label: nop, nop, &m, reclass ;

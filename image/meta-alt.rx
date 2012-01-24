@@ -36,6 +36,7 @@
 : label:      ( "-  ) t-here constant ;
 : #           ( n-  ) lit, m, ;
 : $,          ( $-  ) withLength for @+ m, next 0 m, drop ;
+: shrink      (  -  ) t-here origin @ 6 + ! t-here 256 + origin @ 3 + ! ;
 
 ( Metacompiler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : t: ( "-  ) label: nop, nop, ['] m, last @ d->class ! ;
