@@ -6,10 +6,11 @@
 ( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 
 ( Assembler and Metacompiler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-2560 constant IMAGE-SIZE
+8 1024 * constant IMAGE-SIZE
 
 ( Assembler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 variables| target origin 'WORD 'MACRO 'DATA 'PRIM link chain |
+here [ !target ] [ !origin ] bi IMAGE-SIZE allot
 
 : m,  ( n-  ) @target !+ !target ;
 : vm: ( n"- ) ` : .data ` m, ` ; ;
@@ -84,6 +85,5 @@ variables| target origin 'WORD 'MACRO 'DATA 'PRIM link chain |
 
 ( Setup target memory for new image ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : ; ( - ) ;, ;, ;; [[
-here [ !target ] [ !origin ] bi IMAGE-SIZE allot
 jump, 0 m,
 reset

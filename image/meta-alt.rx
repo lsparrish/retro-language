@@ -6,7 +6,7 @@
 ( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 
 ( Assembler and Metacompiler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-: IMAGE-SIZE 2560 ;
+: IMAGE-SIZE 8 1024 * ;
 
 : for      ( n-   )  here 5 , ;  ' .macro last @ d->class !
 : next     (  -   )  6 , 7 , , ; ' .macro last @ d->class !
@@ -15,6 +15,10 @@
 
 ( Assembler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 8 elements target origin 'WORD 'MACRO 'DATA 'PRIM link chain
+
+here dup target ! origin !
+IMAGE-SIZE allot
+
 : m,  ( n-  ) target @ !+ target ! ;
 : vm: ( n"- ) ['] : do .data ['] m, , ['] ; do ;
    0 vm: nop,          1 vm: lit,          2 vm: dup,
@@ -83,7 +87,5 @@
 
 ( Setup target memory for new image ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : ; ( - ) ;, ;, ;; [[
-here dup target ! origin !
-IMAGE-SIZE allot
 jump, 0 m,
 reset
