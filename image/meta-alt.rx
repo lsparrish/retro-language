@@ -6,7 +6,7 @@
 ( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 
 ( Assembler and Metacompiler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-: IMAGE-SIZE 8 1024 * ;
+: IMAGE-SIZE 3 1024 * ;
 
 : for      ( n-   )  here 5 , ;  ' .macro last @ d->class !
 : next     (  -   )  6 , 7 , , ; ' .macro last @ d->class !
