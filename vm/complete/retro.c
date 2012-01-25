@@ -666,6 +666,15 @@ int main(int argc, char **argv) {
       vm->shrink = 1;
     if (strcmp(argv[i], "--stats") == 0)
       wantsStats = 1;
+    if (strcmp(argv[i], "--help") == 0)
+    {
+      printf("--with filename    Add filename to the input stack\n");
+      printf("--image filename   Use filename as the image to load\n");
+      printf("--shrink           When saving, don't save unused cells\n");
+      printf("--stats            Display opcode usage and stack summaries upon exit\n");
+      printf("--help             Display this text\n");
+      exit(1);
+    }
   }
 
   if (rxLoadImage(vm, vm->filename) == 0) {
