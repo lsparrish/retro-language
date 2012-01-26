@@ -85,23 +85,21 @@ typedef struct CHANGE_TABLE {
     change_element_t *elements;
 } change_table_t;
 
-static change_table_t change_table[CHANGE_TABLE_SIZE];
-static struct { CELL key; CELL value; } image_cache[IMAGE_CACHE_SIZE];
-static CELL _cache_pos_temp;
 
-#define img_put(k, v) _img_put(k, v)
-static void _img_put(CELL k, CELL v);
-#define img_get(k) \
-    ( image_cache[_cache_pos_temp = (k % IMAGE_CACHE_SIZE)].key == k ? \
-      image_cache[_cache_pos_temp].value : _img_get(k) )
-static CELL _img_get(CELL k);
+static inline CELL img_get(CELL k);
+static inline void img_put(CELL k, CELL v);
+static void img_sync(void);
 
 /* Board and image setup ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 #ifdef BOARD_mega2560
 
 #include "console_mega2560.h"
+
+#ifdef IMAGE_MODE_roflash
 #include "image.hex.h"
+#endif
+
 #include "eeprom_atmel.h"
 
 #ifdef DISPLAY_nokia3110
@@ -186,9 +184,21 @@ static uint32_t spi_transfer_long(uint32_t data) {
 }
 
 #endif
+
 /* Image read and write ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-static CELL _img_get(CELL k) {
+static struct {
+    CELL key;
+    CELL value;
+} image_cache[IMAGE_CACHE_SIZE];
+
+#ifdef IMAGE_MODE_roflash
+
+static change_table_t change_table[CHANGE_TABLE_SIZE];
+
+static inline CELL img_get(CELL k) {
     uint16_t i = 0, p = k % IMAGE_CACHE_SIZE;
+    if (image_cache[p].key == k)
+        return image_cache[p].value;
     image_cache[p].key = k;
     change_table_t *tbl = &(change_table[(k % CHANGE_TABLE_SIZE)]);
     for (; i < tbl->full && tbl->elements[i].key != k; ++i);
@@ -197,10 +207,10 @@ static CELL _img_get(CELL k) {
     return (image_cache[p].value = tbl->elements[i].value);
 }
 
-static void _img_put(CELL k, CELL v) {
+static inline void img_put(CELL k, CELL v) {
     uint16_t i = 0, p = k % IMAGE_CACHE_SIZE;
     change_table_t *tbl;
-    if (_img_get(k) == v) return;
+    if (img_get(k) == v) return;
     tbl = &(change_table[(k % CHANGE_TABLE_SIZE)]);
     for (; i < tbl->full && tbl->elements[i].key != k; ++i);
     if (i == tbl->full) {
@@ -215,6 +225,70 @@ static void _img_put(CELL k, CELL v) {
     image_cache[p].key = k;
     image_cache[p].value = v;
 }
+
+static void image_sync(void) {
+}
+
+#else
+#ifdef IMAGE_MODE_rwstorage
+
+#ifndef STORAGE_ACTIVATED
+#error "Image mode 'rwstorage' is needs an enabled storage."
+#endif
+
+#define IMAGE_SECTOR_SIZE _(STORAGE_SECTOR_SIZE/sizeof(CELL))
+
+static CELL *image_sector_data;
+static struct {
+    uint8_t changed:1;
+    uint32_t sector_num:31;
+} image_sector_flags;
+
+static inline CELL img_get(CELL k) {
+    uint32_t sec;
+    CELL p = k % IMAGE_CACHE_SIZE;
+    if (image_cache[p].key == k)
+        return image_cache[p].value;
+    sec = k / IMAGE_SECTOR_SIZE;
+    if (sec != image_sector_flags.sector_num) {
+        if (image_sector_flags.changed != 0) {
+            if (0 != storage_write_sector(
+                        (uint8_t*) image_sector_data,
+                        image_sector_flags.sector_num))
+                console_puts("\nERROR: failed to write sector ")
+            else image_sector_flags.changed = 0;
+        }
+        if (image_sector_flags.changed != 0) {
+            if (0 != storage_read_sector((uint8_t*) image_sector_data, sec))
+                console_puts("\nERROR: failed to read sector ");
+            else image_sector_flags.sector_num = sec;
+        }
+    }
+    return image_sector_data[k % IMAGE_SECTOR_SIZE];
+}
+
+static inline CELL img_put(CELL k, CELL v) {
+    CELL p;
+    if (v == img_get(k)) return;
+    p = k % IMAGE_CACHE_SIZE;
+    image_cache[p].key = k;
+    image_cache[p].value = v;
+    image_sector_data[k % IMAGE_SECTOR_SIZE] = v;
+    image_sector_flags.changed = 1;
+}
+
+static void image_sync(void) {
+    if (image_sector_flags.changed != 0)
+        if (0 != storage_write_sector(
+                    (uint8_t*) image_sector_data,
+                    image_sector_flags.sector_num))
+            console_puts("\nERROR: failed to write sector ");
+}
+
+#else
+#error "Unsupported image mode."
+#endif
+#endif
 
 void img_string(CELL starting, char *buffer, CELL buffer_len)
 {
@@ -259,7 +333,10 @@ int main(void)
     storage_initialize(SPI_SPEED);
 #endif
 
+#ifdef IMAGE_MODE_roflash
     for (j = 0; j < IMAGE_CACHE_SIZE; ++j) image_cache[j].key = -1;
+#endif
+
     for (j = 0; j < STACK_DEPTH; ++j) data[j] = 0;
     for (j = 0; j < ADDRESSES; ++j) address[j] = 0;
     for (j = 0; j < PORTS; ++j) ports[j] = 0;
@@ -463,6 +540,7 @@ int main(void)
         ports[3] = 1;
     }
 
+    img_sync();
     console_puts("\n\nNgaro VM is down.\n");
     console_finish();
 #ifndef BOARD_native
