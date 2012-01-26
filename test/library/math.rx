@@ -24,7 +24,17 @@ with assertion'
   100 25 ^math'divisor? -1 assert=
   100 31 ^math'divisor?  0 assert= ; assertion
 
+: a4
+  "Testing even? : " puts
+  100 ^math'even? -1 assert=
+  109 ^math'even?  0 assert= ; assertion
+
+: a5
+  "Testing odd? : " puts
+  100 ^math'odd?  0 assert=
+  109 ^math'odd? -1 assert= ; assertion
+
 : go
-  cr a0 a1 a2 a3 bye ;
+  cr a0 a1 a2 a3 a4 a5 bye ;
 
 go
