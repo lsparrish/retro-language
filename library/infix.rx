@@ -1,7 +1,7 @@
 ( Infix Math for Retro ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 chain: infix'
 {{
-  : common getToken toNumber .data ;
+  : common getNumber .data ;
 ---reveal---
   : add  ( n"-n ) common ` + ; immediate
   : sub  ( n"-n ) common ` - ; immediate
