@@ -30,9 +30,6 @@ Registers
 ---------
 Ngaro exposes no registers directly.
 
-Internally, it may have registers for the *instruction pointer*, *data stack
-pointer*, and *address stack pointer*.
-
 
 ------
 Stacks
