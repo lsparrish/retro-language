@@ -1,6 +1,7 @@
-RxSQL
-=====
-RxSQL provides a bridge between an SQLite3 database and Retro.
+sqlite bindings for Retro
+=========================
+This tool and vocabulary provide a bridge between an SQLite3
+database and Retro.
 
 
 Server
