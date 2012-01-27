@@ -53,6 +53,15 @@ Characters
 Strings
 =======
 
+Standard
+--------
+
+::
+
+  "this is a string"
+  "   this string has leading and trailing whitespace   "
+
+
 Whitespace Delimited
 --------------------
 
