@@ -9,8 +9,9 @@ Abstract
 Ngaro is a minimalistic virtual machine emulating a dual stack computer with
 a simple instruction set and a few basic I/O devices.
 
-At present, there are full implementations in C, Go, Python, and Ruby, and
-partial implementations in C#, Forth, Common Lisp, Lua, JavaScript, and Java.
+At present, there are full implementations in Assembly (x86), C, F#, Go, Common
+Lisp, PHP, Python, and Ruby, and minimal implementations in C#, Forth, Lua, JavaScript,
+Java, Perl, and Scheme.
 
 
 -------------
@@ -55,6 +56,9 @@ Image Files
 On startup, Ngaro will load an *image file*. This is a flat, linear array of
 signed integer values. On disk, images are stored in little endian format, but
 the VM may convert them to big endian internally.
+
+If an implementation uses big endian internally, this must be reported via the
+queries I/O port.
 
 The first value loaded is mapped to address zero, and subsequent values are
 loaded to sequential addresses in the Ngaro memory space.
