@@ -36,6 +36,7 @@ Mixed
 ::
 
   1 2 3 "%d - %d = %d\n" puts
+  "Charles"  "Hello %s\n" puts
 
 
 -----
@@ -51,6 +52,15 @@ Characters
 
 Strings
 =======
+
+Standard
+--------
+
+::
+
+  "this is a string"
+  "   this string has leading and trailing whitespace   "
+
 
 Whitespace Delimited
 --------------------
