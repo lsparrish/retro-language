@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils 0.7: http://docutils.sourceforge.net/" />
-<title>Arrays</title>
+<title>diet'</title>
 <style type="text/css">
 
 body {
@@ -227,53 +227,21 @@ table.corefunc th {
 </style>
 </head>
 <body>
-<div class="document" id="arrays">
-<h1 class="title">Arrays</h1>
+<div class="document" id="diet">
+<h1 class="title">diet'</h1>
 
 <div class="section" id="overview">
 <h1>Overview</h1>
-<p>This library provides a vocabulary for working with arrays.</p>
-</div>
-<div class="section" id="implementation">
-<h1>Implementation</h1>
-<p>Arrays are stored as a linear sequence of values. In memory, they
-are represented like:</p>
-<pre class="literal-block">
-+---+--------------------+
-| 0 | number of elements |
-+---+--------------------+
-| 1 | first value        |
-+---+--------------------+
-| 2 | second value       |
-+---+--------------------+
-| n | ... nth value ...  |
-+---+--------------------+
-</pre>
+<p>This library reduces overall memory consumption by reducing the string length
+and number of string buffers.</p>
+<p>While easy enough to do manually, this automates the process and makes it
+easily reversible.</p>
 </div>
 <div class="section" id="loading">
 <h1>Loading</h1>
 <p>The following should suffice:</p>
 <pre class="literal-block">
-needs array'
-</pre>
-</div>
-<div class="section" id="examples">
-<h1>Examples</h1>
-<pre class="literal-block">
-( Create an array with four elements )
-^array'new{ 1 2 3 4 } constant a
-
-( Add 10 to each element in an array )
-a [ 10 + ] ^array'map
-
-( Display an array )
-a ^array'display
-
-( Average the values in an array )
-^array'new{ 1 2 3 4 5 } [ ^array'sum ] [ ^array'length ] bi /
-
-( Create an array of strings )
-[ &quot;abc&quot;  &quot;def&quot;  &quot;ghi&quot; ] ^array'fromQuote
+needs diet'
 </pre>
 </div>
 <div class="section" id="functions">
@@ -291,64 +259,20 @@ a ^array'display
 </tr>
 </thead>
 <tbody valign="top">
-<tr><td>new{</td>
-<td>&quot;-a</td>
-<td>Create a new array. Parses and adds numbers to
-the array until &quot;}&quot; is reached. Returns a
-pointer to the new array.</td>
+<tr><td>shrink</td>
+<td><tt class="docutils literal">-</tt></td>
+<td>Reduce string length. This is invoked during
+the initial load of the library</td>
 </tr>
-<tr><td>display</td>
-<td>a-</td>
-<td>Display all values in the array</td>
+<tr><td>extreme</td>
+<td><tt class="docutils literal">-</tt></td>
+<td>Further reductions of string length and reduces
+the buffers</td>
 </tr>
-<tr><td>in?</td>
-<td>na-</td>
-<td>Returns -1 if value (n) is a value in the array</td>
-</tr>
-<tr><td>stringIn?</td>
-<td>$n-</td>
-<td>Returns -1 if string ($) is a string in the
-array</td>
-</tr>
-<tr><td>map</td>
-<td>aq-</td>
-<td>Apply quote to each item in the array. Updates
-the array with the values returned by the quote</td>
-</tr>
-<tr><td>apply</td>
-<td>aq-</td>
-<td>Apply quote to each item in the array. Does not
-modify the array contents.</td>
-</tr>
-<tr><td>sum</td>
-<td>a-n</td>
-<td>Add all values in an array</td>
-</tr>
-<tr><td>length</td>
-<td>a-n</td>
-<td>Get the number of items in an array</td>
-</tr>
-<tr><td>reverse</td>
-<td>a-</td>
-<td>Reverse the order of all elements in an array</td>
-</tr>
-<tr><td>append</td>
-<td>aa-a</td>
-<td>Append two arrays and return a new one</td>
-</tr>
-<tr><td>fromQuote</td>
-<td>q-a</td>
-<td>Generate an array from the values returned by a
-quote</td>
-</tr>
-<tr><td>toQuote</td>
-<td>a-q</td>
-<td>Generate a quote from the values stored in an
-array</td>
-</tr>
-<tr><td>sort:bubble</td>
-<td>a-</td>
-<td>Sort the items in an array using bubble sort</td>
+<tr><td>bloat</td>
+<td><tt class="docutils literal">-</tt></td>
+<td>Restore buffers and string length to the
+default</td>
 </tr>
 </tbody>
 </table>
