@@ -1,0 +1,35 @@
+needs array'
+
+[ "Be Mine"
+  "Love" 
+  "It's Love" 
+  "All Mine" 
+  "Kiss Me" 
+  "You & Me" 
+  "Awesome" 
+  "My Baby" 
+  "Love Me" 
+  "All Star" 
+  "My Way" 
+  "Love You" 
+  "For You" 
+  "Cool" 
+  "I Hope" 
+  "Love Life" 
+  "Angel" 
+  "Sweet Talk" 
+  "True Love" 
+  "Be Good" 
+  "How Nice" 
+  "Let's Kiss" 
+  "#1 Fan" 
+  "Be True" 
+  "Love Her" ] ^array'fromQuote constant wordarr
+
+wordarr ^array'length constant #wordarr
+
+
+: choose  ( -$ )
+  random #wordarr mod wordarr 1+ + @ ;
+
+
