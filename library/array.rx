@@ -133,6 +133,9 @@ Examples
   ( Average the values in an array )
   ^array'new{ 1 2 3 4 5 } [ ^array'sum ] [ ^array'length ] bi /
 
+  ( Create an array of strings )
+  [ "abc"  "def"  "ghi" ] ^array'fromQuote
+
 
 ---------
 Functions
