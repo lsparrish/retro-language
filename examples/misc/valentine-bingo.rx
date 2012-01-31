@@ -1,4 +1,8 @@
 ( Port of http://groups.google.com/group/comp.lang.forth/browse_frm/thread/f37aff28d9a3102e )
+( This is a pretty simple Bingo card generator using an array of words/phrases.             )
+( We start by setting up an array of strings, then randomly sort this into a secondary      )
+( array. The "free space" location is manually patched, and then the resulting array is     )
+( rendered as HTML.                                                                         )
 
 needs array'
 
@@ -30,11 +34,6 @@ needs array'
 
 WORDS ^array'length constant #WORDS
 
-"Free Square" string FREE
-
-create SELECTED
-  #WORDS dup , FREE , allot
-
 create CARD
   #WORDS dup , allot
 
@@ -44,23 +43,17 @@ create CARD
 : rnd  ( -n )
   random #WORDS mod ;
 
-variables| array bucket |
+: obtain  ( -$ )
+  0 [ drop rnd WORDS nth dup CARD ^array'stringIn? ] while ;
 
-: obtain  ( ab-$ )
-  !bucket !array
-  0 [ drop rnd @array nth dup @bucket ^array'stringIn? ] while ;
+: populate  ( - )
+  CARD 1+ #WORDS [ obtain swap !+ ] times drop "Free Square" CARD 13 + ! ;
 
-: fill  ( - )
-  SELECTED 2 + #WORDS [ WORDS SELECTED obtain swap !+ ] times drop ;
-
-: final
-  CARD 1+ #WORDS [ SELECTED CARD obtain swap !+ ] times drop ;
-
-: card
-  fill final CARD 1+
+: card  ( - )
+  populate CARD 1+
   5 [ "<tr>" puts 5 [ @+ "<td>%s</td>" puts cr ] times "</td>" puts ] times cr ;
 
-: head
+: header  ( - )
   "\n<html>\n" puts
   "<body>\n" puts
   "<table border=1 height=500 width=500>\n" puts
@@ -72,11 +65,11 @@ variables| array bucket |
   "<th width='20%'>O</th>\n" puts
   "</tr>\n" puts ;
 
-: footer
+: footer  ( - )
   "</table>\n" puts
   "</body>\n" puts
   "</html>\n" puts ;
 
-: bingo  head card footer bye ;
+: bingo  ( - )  header card footer bye ;
 bingo
 
