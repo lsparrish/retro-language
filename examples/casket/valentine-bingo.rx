@@ -4,6 +4,7 @@
 ( array. The "free space" location is manually patched, and then the resulting array is     )
 ( rendered as HTML.                                                                         )
 
+needs casket'
 needs array'
 
 [ "Be Mine"
@@ -51,18 +52,18 @@ create CARD
 
 : card  ( - )
   populate CARD 1+
-  5 [ "<tr>" puts 5 [ @+ "<td>%s</td>" puts cr ] times "</td>" puts ] times cr ;
+  5 [ "<tr align='center'>" puts 5 [ @+ "<td>%s</td>" puts cr ] times "</td>" puts ] times cr ;
 
 : header  ( - )
   "\n<html>\n" puts
   "<body>\n" puts
   "<table border=1 height=500 width=500>\n" puts
   "<tr style='color: red'>\n" puts
-  "<th width='20%'>B</th>\n" puts
-  "<th width='20%'>I</th>\n" puts
-  "<th width='20%'>N</th>\n" puts
-  "<th width='20%'>G</th>\n" puts
-  "<th width='20%'>O</th>\n" puts
+  "<th width='20\%'>B</th>\n" puts
+  "<th width='20\%'>I</th>\n" puts
+  "<th width='20\%'>N</th>\n" puts
+  "<th width='20\%'>G</th>\n" puts
+  "<th width='20\%'>O</th>\n" puts
   "</tr>\n" puts ;
 
 : footer  ( - )
@@ -70,6 +71,14 @@ create CARD
   "</body>\n" puts
   "</html>\n" puts ;
 
-: bingo  ( - )  header card footer bye ;
-bingo
+with casket'
+: /bingo  ( - )
+  Content-type: text/html
+  header card footer ;
+
+[ ( -$ ) "/home/crc/apps/bingo/" ] is casket:root
+[ ( -$ ) "http://rx-core.org/dev/bingo" ] is casket:url
+&/bingo is /
+&dispatch is boot
+save bye
 
