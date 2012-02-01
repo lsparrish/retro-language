@@ -1,5 +1,5 @@
 /* Ngaro VM ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   Copyright (c) 2008 - 2011, Charles Childers
+   Copyright (c) 2008 - 2012, Charles Childers
    Copyright (c) 2009 - 2010, Luke Parrish
    Copyright (c) 2010,        Marc Simpson
    Copyright (c) 2010,        Jay Skeer
@@ -13,76 +13,18 @@
 #include <string.h>
 #include <termios.h>
 #include <sys/ioctl.h>
-/* ATH */
-#include <sys/stat.h>
-#include <errno.h>
 
-/* Configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-                +---------+---------+---------+
-                | 16 bit  | 32 bit  | 64 bit  |
-   +------------+---------+---------+---------+
-   | IMAGE_SIZE | 32000   | 1000000 | 1000000 |
-   +------------+---------+---------+---------+
-   | CELL       | int16_t | int32_t | int64_t |
-   +------------+---------+---------+---------+
-
-   If memory is tight, cut the MAX_FILE_NAME and MAX_REQUEST_LENGTH.
-
-   You can also cut the ADDRESSES stack size down, but if you have
-   heavy nesting or recursion this may cause problems. If you do modify
-   it and experience odd problems, try raising it a bit higher.
-
-   Use -DRX16 to select defaults for 16-bit, or -DRX64 to select the
-   defaults for 64-bit. Without these, the compiler will generate a
-   standard 32-bit VM.
-
-   Use -DRXBE to enable the BE suffix for big endian images. This is
-   only useful on big endian systems.
-   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-#define CELL            int32_t
-#define IMAGE_SIZE      1000000
-#define ADDRESSES          1024
+#define CELL            int16_t
+#define IMAGE_SIZE        20000
+#define ADDRESSES           512
 #define STACK_DEPTH         128
 #define PORTS                12
 #define MAX_FILE_NAME      1024
 #define MAX_REQUEST_LENGTH 1024
 #define MAX_OPEN_FILES        8
-#define LOCAL                 "retroImage"
-#define CELLSIZE             32
-
-#ifdef RX64
-#undef CELL
-#undef CELLSIZE
-#undef LOCAL
-#define CELL     int64_t
-#define CELLSIZE 64
-#define LOCAL    "retroImage64"
-#endif
-
-#ifdef RX16
-#undef CELL
-#undef CELLSIZE
-#undef LOCAL
-#undef IMAGE_SIZE
-#define CELL        int16_t
-#define CELLSIZE    16
-#define IMAGE_SIZE  32000
-#define LOCAL       "retroImage16"
-#endif
-
-#ifdef RXBE
-#define LOCAL_FNAME (LOCAL "BE")
-#define VM_ENDIAN 1
-#else
-#define LOCAL_FNAME (LOCAL)
-#define VM_ENDIAN 0
-#endif
-
-#undef LOCAL
-#undef IMAGE_SIZE
-#define LOCAL "/lib/retroImage"
-#define IMAGE_SIZE 10000
+#define LOCAL                 "/lib/retroImage"
+#define CELLSIZE             16
+#define VM_ENDIAN             0
 
 
 enum vm_opcode {VM_NOP, VM_LIT, VM_DUP, VM_DROP, VM_SWAP, VM_PUSH, VM_POP,
@@ -659,13 +601,9 @@ int main(int argc, char **argv) {
   VM *vm;
   int i, wantsStats;
 
-  /* ATH */
-  char *env;
-  struct stat sts;
-
   wantsStats = 0;
   vm = calloc(sizeof(VM), sizeof(char));
-  strcpy(vm->filename, LOCAL_FNAME);
+  strcpy(vm->filename, LOCAL);
 
   rxPrepareInput(vm);
 
@@ -690,26 +628,6 @@ int main(int argc, char **argv) {
     }
   }
 
-  /* ATH - 26 January 2012
-   *
-   * Check for the existence of the file name held in vm->filename.
-   * If it does not exist read the env variable RETROIMAGE and check for the existence of that file.
-   * If that does not exists exit with an error.
-   *
-   */
-
-  if ( ( stat( vm->filename, &sts) == -1 ) && errno == ENOENT ) {
-      // File doesn't exist, get the environment variable.
-      //
-      env = (char *)getenv("RETROIMAGE");
-      if( !env ) {
-        fprintf(stderr,"No image file and environment variable RETROIMAGE not set.\n");
-        exit(1);
-      } else {
-          strncpy(vm->filename, env,sizeof(vm->filename));
-          fprintf(stderr,"Loading image from %s\n", env);
-      }
-  }
   if (rxLoadImage(vm, vm->filename) == 0) {
     printf("Sorry, unable to find %s\n", vm->filename);
     free(vm);

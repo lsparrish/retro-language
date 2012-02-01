@@ -1,27 +1,13 @@
-TOPSRC		= $(shell cd ../..; pwd)
-include $(TOPSRC)/target.mk
-
-CFLAGS		+= -Werror -Wall
-
-SRCS		= retro.c
-OBJS		= retro.o
-BIN             = retroforth
-LIBS            += -ltermcap
-
-all:            install-lib
-
-$(BIN).elf:     ${OBJS}
-		${CC} ${LDFLAGS} -o $(BIN).elf $(OBJS) ${LIBS}
-
-$(BIN).dis:     $(BIN).elf
-		${OBJDUMP} -S $(BIN).elf > $(BIN).dis
-		${SIZE} $(BIN).elf
-
-../$(BIN):      $(BIN).dis
-		${ELF2AOUT} $(BIN).elf $@
-
-install-lib:    ../$(BIN)
-		cp retroImage $(TOPSRC)/lib
+default: clean
+	ln -s ../../../../retro .
+	ln -s ../../../../library .
+	cp ../../../../retroImage .
+	./retro --with image.rx --shrink
+	$(CC) ../../../../tools/convert.c -o convert
+	./convert
+	rm -f convert retroImage*BE retroImage64 retroImage
+	mv retroImage16 retro-src/retroImage
 
 clean:
-		rm -f *.o *.elf ../$(BIN) *.elf *.dis *~ retro.c $(TOPSRC)/lib/retroImage
+	rm -f retro library
+	rm -f retro-src/retroImage
