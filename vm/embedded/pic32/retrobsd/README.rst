@@ -11,5 +11,6 @@ This is an implementation of Retro for use with RetroBSD.
 ----------
 Setting Up
 ----------
-Copy these files and the retroImage to a subdirectory under src/ in your
-copy of the retrobsd source tree. Switch to that directory and run make.
+Copy the retro-src directory to the src directory in your copy of the
+RetroBSD source tree. Switch to that directory and run *make*.
+
