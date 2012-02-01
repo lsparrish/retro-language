@@ -1,8 +1,8 @@
-Using the casket::html' library which allows creation of HTML using quotes and combinators:
+Using the decompose' library which allows creation of HTML using quotes and combinators:
 
-  needs casket::html'
+  needs decompose'
+  with  decompose'
 
-  with casket::html'
   : rnd ( -$ ) random 1000 mod toString ;
 
   [ [ [     ] td [ "x" ] td [ "y" ] td [ "z" ] td ] tr
