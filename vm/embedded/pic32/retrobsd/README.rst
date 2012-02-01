@@ -8,6 +8,14 @@ Overview
 This is an implementation of Retro for use with RetroBSD.
 
 
+-----------
+Constraints
+-----------
+This build uses a 16-bit image and provides 20k cells of memory. The
+default image used is running ^diet'extreme to reduce the number of
+string buffers to 4 and cap string length at 80 characters.
+
+
 ----------
 Setting Up
 ----------
