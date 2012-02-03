@@ -22,7 +22,7 @@ TIB  variable: <tib>  ( Start of default text input buffer                    )
 pad
 label: copytag   "Retro" $,
 label: version   "11.3" $,
-label: build     "2012.01.24" $,
+label: build     "2012.02.03" $,
 label: okmsg     "ok  " $,
 
 ( Primitives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
@@ -399,6 +399,7 @@ here
 ( Additional Combinators ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : []      (    -    ) ` [ ` ] ; immediate
 : while   (   q-    ) [ repeat dup dip swap 0; drop again ] do drop ;
+: until   (   q-    ) [ repeat dup dip swap not 0; drop again ] do drop ;
 : curry   (  nq-q   ) [ [ ` [ ] dip .data ] dip , ` ] ;
 : take    (  qq-q   ) swap [ [ ` [ ] dip , ] dip .data ` ] ;
 : bi      (  xqq-   ) &sip dip do ;
