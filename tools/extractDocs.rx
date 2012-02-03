@@ -1,4 +1,4 @@
-2 elements in out
+variables| in out |
 
 : seekDocBlock ( - )
   [ @in ^files'readLine "doc{" compare not ] while ;
