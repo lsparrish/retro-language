@@ -1,5 +1,30 @@
 *This is a random collection of notes and snippits related to things I'm working on*
 
+== Website ==
+
+I'm going for a simpler design. I'd like to use a simplified markup language and generate
+the HTML from that. Should I do this from within Retro? Perhaps a Casket/Decompose based
+approach?
+
+Realistically, the site should serve a couple of points:
+
+- basic information about Retro
+- point to the documentation
+- point to downloads
+- provide pointers to helping develop it
+- provide some code samples
+- and special pages for embedded targets, mobile targets, etc
+
+Graphics should be kept to a minimum.
+
+
+== Documentation ==
+
+I want to rewrite a lot of this, but time is lacking. There's still a good amount of
+time before 11.3 though, so it seems likely that I'll at least have a decent start
+by then.
+
+
 == Embedded Boards ==
 
 arduino
@@ -7,20 +32,33 @@ mega 2560
 ATmega2560
 16MHz, 256K flash (8K for bootloader), 8K RAM, 4K EEPRON
 
+Oleksandr is working on an implementation for this.
+
 
 mbed
 NXP LPX1768
 Cortex-M3
 96MHz, 512K flash, 32K RAM, ARM
 
+On the mbed LPX1768, we have 14000 cells for the image. This is sufficient, once the
+diet' vocabulary is loaded. You'll have around 3k cells for your application. Or a bit
+more if you do a ^diet'extreme before saving the image and converting to 16-bit. 
+
 NXP LPC11U24
 Cortex-M0
 48MHz, 32K flash, 8K RAM, ARM
+
+The mbed implemenation does not support this board. If we adapt the VM to use an SD
+card as the memory, read/write caching, and take some care, we could probably make it
+work slowly. I don't have plans for this though.
 
 
 ubw32
 PIC32MX795
 80MHz, 512K Flash, 128K RAM, MIPS
+
+This one looks like a nice target. Not too pricey, lots of RAM, and plenty of flash.
+As of February 1, Retro is able to run under RetroBSD on this (and similar) boards.
 
 
 == Images for Embedded Use ==

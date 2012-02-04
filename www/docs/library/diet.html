@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils 0.7: http://docutils.sourceforge.net/" />
-<title>Decompose: HTML Generation</title>
+<title>diet'</title>
 <style type="text/css">
 
 body {
@@ -227,32 +227,55 @@ table.corefunc th {
 </style>
 </head>
 <body>
-<div class="document" id="decompose-html-generation">
-<h1 class="title">Decompose: HTML Generation</h1>
+<div class="document" id="diet">
+<h1 class="title">diet'</h1>
 
 <div class="section" id="overview">
 <h1>Overview</h1>
-<p>The core Casket framework provides minimal templating, but no easy way to
-generate HTML from code.</p>
-<p>This vocabulary provides support for generating HTML using a series of
-combinators. Textual data returned will be displayed (using <strong>^casket'tputs</strong>),
-and various attributes are supported.</p>
+<p>This library reduces overall memory consumption by reducing the string length
+and number of string buffers.</p>
+<p>While easy enough to do manually, this automates the process and makes it
+easily reversible.</p>
 </div>
 <div class="section" id="loading">
 <h1>Loading</h1>
+<p>The following should suffice:</p>
 <pre class="literal-block">
-needs decompose'
+needs diet'
 </pre>
 </div>
-<div class="section" id="example">
-<h1>Example</h1>
-<pre class="literal-block">
-: /index
-  Content-type: text/html
-  [ [ [ &quot;Hello&quot; ] title ] head
-    [ [ &quot;Welcome&quot; ] h1
-      [ &quot;This is a paragraph.&quot; ] p ] body ] html ;
-</pre>
+<div class="section" id="functions">
+<h1>Functions</h1>
+<table border="1" class="docutils">
+<colgroup>
+<col width="18%" />
+<col width="15%" />
+<col width="67%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Name</th>
+<th class="head">Stack</th>
+<th class="head">Usage</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>shrink</td>
+<td><tt class="docutils literal">-</tt></td>
+<td>Reduce string length. This is invoked during
+the initial load of the library</td>
+</tr>
+<tr><td>extreme</td>
+<td><tt class="docutils literal">-</tt></td>
+<td>Further reductions of string length and reduces
+the buffers</td>
+</tr>
+<tr><td>bloat</td>
+<td><tt class="docutils literal">-</tt></td>
+<td>Restore buffers and string length to the
+default</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </body>

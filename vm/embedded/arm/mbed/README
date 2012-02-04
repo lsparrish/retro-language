@@ -5,10 +5,13 @@ board. The mbed board used is the LPC1768, which has an ARM processor, 32 KiB
 of RAM, and 512 KiB of flash memory. The CPU is a Cortex-M3, running at 96MHz,
 so it's fast enough for most purposes.
 
-The current implementation loads the image into RAM. This does not leave much
-room for user level code. It would be better to keep the image on an external
-memory device (such as an SD card), and leave the limited internal RAM for
-caches and VM use.
+Current Features
+----------------
+* 16-bit image
+* 10,333 cells consumed for image + buffers (thanks to ^diet'extreme)
+* About 3,500 cells free for user-level code
+* File I/O support off of mbed filesystem
+* Image fits (up to 14,000 cells) in RAM
 
 Known Bugs:
 

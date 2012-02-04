@@ -9,9 +9,9 @@ chain: math'
 }}
 
 : gcd ( ab-n ) [ tuck mod dup ] while drop ;
-: lcm ( ab-n ) 2over gcd [ * ] dip / ;
+: lcm ( ab-n ) 2over gcd &* dip / ;
 : divisor? ( ab-f ) mod 0 = ;
-: */  ( abc-d )  [ * ] dip / ;
+: */  ( abc-d )  &* dip / ;
 : even?  ( n-f )  2 mod 0 =  ;
 : odd?   ( n-f )  2 mod 0 <> ;
 ;chain

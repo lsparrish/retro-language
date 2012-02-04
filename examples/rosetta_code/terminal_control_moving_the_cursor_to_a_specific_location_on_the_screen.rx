@@ -1,2 +1,5 @@
-with console'
-: hello 3 6 at-xy "Hello" puts ;
+( This assumes that you have a VT100 or ANSI style terminal emulator )
+
+needs console'
+
+: hello 3 6 ^console'at-xy "Hello" puts ;

@@ -279,7 +279,7 @@ function rxHandleDevices (&$ip, &$stack, &$address,
         $memory [$dest] =  0;
         $i = 0;
         
-        while ($i < count ($req)) {
+        while ($i < strlen ($req)) {
             $memory [$dest] = ord ($req [$i]);
             $i    += 1; 
             $dest += 1;

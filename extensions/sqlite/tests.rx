@@ -7,7 +7,7 @@ with sql'
 
 : displayQueryResults ( - )
   loadResults
-  [ cr getRow itemize [ 1- :column puts '| putc ] iter ] times finished ;
+  [ cr getRow itemize [ 1- :column "%s|" puts ] iter ] times finished ;
 
 : displayBooksByAuthor ( $- )
   "select * from catalog where author like '%" ^strings'prepend

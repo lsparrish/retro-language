@@ -717,6 +717,10 @@ TEST: while
   [ 1 2 3 4 5 [ 3 <> ] while ] expected: { 2 1 }
 results
 
+TEST: until
+  [ 1 2 3 4 5 [ 3 = ] until ] expected: { 2 1 }
+results
+
 TEST: curry
   [ 5 [ 6 ] curry do ] expected: { 6 5 }
 results

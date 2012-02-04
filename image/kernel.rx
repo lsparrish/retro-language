@@ -9,19 +9,21 @@
 ( Kernel Begins ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 IMAGE-SIZE  constant CORE
 CORE 0000 + constant TIB
-TIB   512 + constant HEAP
+TIB   256 + constant HEAP
 
 ( Initial Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-mark variable last  ( Pointer to the most recent dictionary header            )
-HEAP variable: heap ( Starting address of the data/code heap                  )
-variable compiler   ( Is the compiler on or off?                              )
-variable which      ( Pointer to dictionary header of the most recently       )
-                    ( looked up word                                          )
-pad
+mark variable last    ( Pointer to the most recent dictionary header          )
+HEAP variable: heap   ( Starting address of the data/code heap                )
+variable compiler     ( Is the compiler on or off?                            )
+variable which        ( Pointer to dictionary header of the most recently     )
+                      ( looked up word                                        )
+TIB  variable: <tib>  ( Start of default text input buffer                    )
+
 label: copytag   "Retro" $,
 label: version   "11.3" $,
-label: build     "2012.01.18" $,
+label: build     "2012.02.03" $,
 label: okmsg     "ok  " $,
+pad
 
 ( Primitives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 t: dup  (  n-nn )  dup,  ;      t: 1+   (  n-n  )  1+,   ;
@@ -95,7 +97,7 @@ variable break                           ( Holds the delimiter for 'accept'   )
 -1 variable: eatLeading?                 ( Eat leading delimiters?            )
 -1 variable: tabAsWhitespace
 
-t: tib ( -a ) TIB # ;
+t: tib ( -a ) <tib> # @, ;
 
 t: remapKeys ( c-c ) ;
 t: ws        ( c-c )
@@ -172,7 +174,7 @@ t: count       ( a-a ) repeat @+ 0; drop, again ;
 t: getLength   ( a-n ) dup, count 1-, swap, -, ;
 t: withLength  ( a-an ) dup, getLength ;
 t: keepString  ( a-a ) withLength 3 # +, here +, 8 # , , here swap, $ ;
-t: STRING-LENGTH  ( -n )  512 # ;
+t: STRING-LENGTH  ( -n )  256 # ;
 t: STRING-BUFFERS ( -n )   12 # ;
 
 ( Numbers [Parsing & Display] ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
@@ -308,7 +310,7 @@ patch
 
 ( Finish Metacompiled Part ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 main: run-on-boot jump: listen
-endKernel bootNew
+endKernel shrink bootNew
 
 
 ( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
@@ -397,6 +399,7 @@ here
 ( Additional Combinators ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : []      (    -    ) ` [ ` ] ; immediate
 : while   (   q-    ) [ repeat dup dip swap 0; drop again ] do drop ;
+: until   (   q-    ) [ repeat dup dip swap not 0; drop again ] do drop ;
 : curry   (  nq-q   ) [ [ ` [ ] dip .data ] dip , ` ] ;
 : take    (  qq-q   ) swap [ [ ` [ ] dip , ] dip .data ` ] ;
 : bi      (  xqq-   ) &sip dip do ;

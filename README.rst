@@ -13,6 +13,21 @@ under the ISC License unless otherwise noted in the source. Please
 feel free to take, use, and modify Retro as you see fit.
 
 
+-----------
+Development
+-----------
+Development is managed using the Bazaar version control system. Our
+primary repository is hosted on Launchpad.net
+
+You can obtain a current copy of the code by doing:
+
+::
+
+  bzr branch lp:retro-language
+
+We also publish hourly snapshots of the code to the website.
+
+
 -------------
 Documentation
 -------------
@@ -40,4 +55,5 @@ public archive, are at http://groups.google.com/group/retro-10
 -----------
 Bug Reports
 -----------
-Bugs can be reported to the irc channel or mailing list.
+Bugs can be reported on the Launchpad project pages, to the irc
+channel or to the mailing list.

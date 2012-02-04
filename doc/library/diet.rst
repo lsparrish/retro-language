@@ -1,20 +1,3 @@
-chain: diet'
-  : shrink  ( - )
-    [ 128 ] &STRING-LENGTH :is
-    [   6 ] &STRING-BUFFERS :is ;
-
-  : extreme  ( - )
-    [ 80 ] &STRING-LENGTH :is
-    [  4 ] &STRING-BUFFERS :is ;
-
-  : bloat   ( - )
-    &STRING-LENGTH :devector
-    &STRING-BUFFERS :devector ;
-
-  shrink
-;chain
-
-doc{
 =====
 diet'
 =====
@@ -56,5 +39,3 @@ Functions
 | bloat       | ``-``     | Restore buffers and string length to the       |
 |             |           | default                                        |
 +-------------+-----------+------------------------------------------------+
-}doc
-

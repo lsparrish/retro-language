@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils 0.7: http://docutils.sourceforge.net/" />
-<title>Decompose: HTML Generation</title>
+<title>Contributing</title>
 <style type="text/css">
 
 body {
@@ -227,32 +227,66 @@ table.corefunc th {
 </style>
 </head>
 <body>
-<div class="document" id="decompose-html-generation">
-<h1 class="title">Decompose: HTML Generation</h1>
+<div class="document" id="contributing">
+<h1 class="title">Contributing</h1>
 
-<div class="section" id="overview">
-<h1>Overview</h1>
-<p>The core Casket framework provides minimal templating, but no easy way to
-generate HTML from code.</p>
-<p>This vocabulary provides support for generating HTML using a series of
-combinators. Textual data returned will be displayed (using <strong>^casket'tputs</strong>),
-and various attributes are supported.</p>
+<p>Starting with the 11.3 release, we are using the services of Launchpad to
+manage the repositories and bug tracking. While not mandatory, it is
+recommended that you create a Launchpad account if you plan to contribute
+to the main repository.</p>
+<div class="section" id="bug-reports">
+<h1>Bug Reports</h1>
+<p>Bugs can be reported to the mailing list or via the bug tracker on
+Launchpad. I would prefer use of the bug tracker.</p>
 </div>
-<div class="section" id="loading">
-<h1>Loading</h1>
+<div class="section" id="bazaar">
+<h1>Bazaar</h1>
+<p>With 11.3, we have moved development to a Bazaar repository. This should
+make handling incoming patchs somewhat easier. You can make a branch, and
+we can merge it into the main repository as necessary.</p>
+<ul class="simple">
+<li>Create a Launchpad account</li>
+<li>Register an SSH key</li>
+</ul>
+<p>Then:</p>
 <pre class="literal-block">
-needs decompose'
+bzr branch lp:retro-language retro-language
 </pre>
+<p>In your branch, make changes and commit:</p>
+<pre class="literal-block">
+bzr add &lt;files&gt;
+bzr status
+bzr commit -m &quot;commit message&quot;
+</pre>
+<p>I recommend using <strong>bzr status</strong> to check exactly which files are being
+committed.</p>
+<p>And push to a new branch:</p>
+<pre class="literal-block">
+bzr push lp:~&lt;username&gt;/retro-language/&lt;branchname&gt;
+</pre>
+<p>Replace &lt;username&gt; and &lt;branchname&gt; with your Launchpad account name and
+the name of your branch. Once this is done, future <strong>bzr push</strong> invokations
+should use the specified branch by default.</p>
+<p>When you're ready for me to merge, file a merge request on Launchpad, or
+send me an email.</p>
 </div>
-<div class="section" id="example">
-<h1>Example</h1>
-<pre class="literal-block">
-: /index
-  Content-type: text/html
-  [ [ [ &quot;Hello&quot; ] title ] head
-    [ [ &quot;Welcome&quot; ] h1
-      [ &quot;This is a paragraph.&quot; ] p ] body ] html ;
-</pre>
+<div class="section" id="patches">
+<h1>Patches</h1>
+<p>If you can not use Bazaar and Launchpad, you can email patches (or modified
+files and instructions) to <a class="reference external" href="mailto:crc&#64;retroforth.org">crc&#64;retroforth.org</a>. Note that patches will take
+longer to merge into the main repository.</p>
+</div>
+<div class="section" id="legal">
+<h1>Legal</h1>
+<p>Retro is distributed under the ISC license. This is provided in the LICENSE
+file. Unless otherwise noted, any contributions are added under this license.
+If this is not acceptable, please advise with any emails or merge requests.
+I am willing to accept code under other permissive licenses (e.g., the modern
+BSD licenses, MIT/X11 license), but will not include code that is GPL'd or
+LGPL'd.</p>
+<p>If contributing, please add your name to the end of the LICENSE file, along with
+the current year(s). It's also recommended that you add your name and copyright
+year(s) to any modified source files.</p>
 </div>
 </div>
 </body>
