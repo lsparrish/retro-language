@@ -1,97 +1,64 @@
-#ifndef STORAGE_SDCARD_H
-#define STORAGE_SDCARD_H
+#ifndef STORAGE_SD_H
+#define STORAGE_SD_H
 #ifdef STORAGE_ACTIVATED
 #error "Only one storage device can be activated."
 #endif
 #define STORAGE_ACTIVATED
 
-#define STORAGE_SECTOR_SIZE     512
+#define STORAGE_SECTOR_SIZE 512
+#define STORAGE_SECTOR_SHIFT 9
 
-#define CONFIG_SD_AUTO_RETRIES 5
-#define SD_SUPPLY_VOLTAGE (1L<<18)
+#ifndef BOARD_native
 
-#define STA_NOINIT 0x01 	/* Drive not initialized */
-#define STA_NODISK 0x02 	/* No medium in the drive */
-#define STA_PROTECT 0x04 	/* Write protected */
+#define SD_NORM 0
+#define SD_BUSY 1
+#define SD_DESS 1
+#define SD_CONT 0
 
-#define GO_IDLE_STATE           0
-#define SEND_OP_COND            1
-#define SWITCH_FUNC             6
-#define SEND_IF_COND            8
-#define SEND_CSD                9
-#define SEND_CID               10
-#define STOP_TRANSMISSION      12
-#define SEND_STATUS            13
-#define SET_BLOCKLEN           16
-#define READ_SINGLE_BLOCK      17
-#define READ_MULTIPLE_BLOCK    18
-#define WRITE_BLOCK            24
-#define WRITE_MULTIPLE_BLOCK   25
-#define PROGRAM_CSD            27
-#define SET_WRITE_PROT         28
-#define CLR_WRITE_PROT         29
-#define SEND_WRITE_PROT        30
-#define ERASE_WR_BLK_STAR_ADDR 32
-#define ERASE_WR_BLK_END_ADDR  33
-#define ERASE                  38
-#define LOCK_UNLOCK            42
-#define APP_CMD                55
-#define GEN_CMD                56
-#define READ_OCR               58
-#define CRC_ON_OFF             59
+#define SD_CMD_GO_IDLE_STATE 0
+#define SD_CMD_SEND_OP_COND 1
+#define SD_CMD_SD_SEND_OP_COND 41
+#define SD_CMD_NEXT_ACMD 55
+#define SD_CMD_SET_BLOCKLEN 16
+#define SD_CMD_READ_SINGLE_BLOCK 17
+#define SD_CMD_WRITE_BLOCK 24
 
-#define SD_STATUS                 13
-#define SD_SEND_NUM_WR_BLOCKS     22
-#define SD_SET_WR_BLK_ERASE_COUNT 23
-#define SD_SEND_OP_COND           41
-#define SD_SET_CLR_CARD_DETECT    42
-#define SD_SEND_SCR               51
+static struct {
+    union {
+        struct {
+            unsigned int cmd:6;
+            unsigned int bit6:1;
+            unsigned int bit7:1;
+        } dat;
+        unsigned int byte:8;
+    } command;
+    union {
+        struct {
+            unsigned int arg4:8;
+            unsigned int arg3:8;
+            unsigned int arg2:8;
+            unsigned int arg1:8;
+        } dat;
+        uint32_t value:32;
+    } argument;
+    unsigned int crc:8;
+} sdcard_command;
 
-#define STATUS_IN_IDLE          1
-#define STATUS_ERASE_RESET      2
-#define STATUS_ILLEGAL_COMMAND  4
-#define STATUS_CRC_ERROR        8
-#define STATUS_ERASE_SEQ_ERROR 16
-#define STATUS_ADDRESS_ERROR   32
-#define STATUS_PARAMETER_ERROR 64
+static union {
+    struct {
+        unsigned int in_idle_state:1;
+        unsigned int erase_reset:1;
+        unsigned int illegal_command:1;
+        unsigned int crc_error:1;
+        unsigned int erase_seq_error:1;
+        unsigned int address_error:1;
+        unsigned int parameter_error:1;
+        unsigned int start_bit:1;
+    } dat;
+    unsigned int byte:8;
+} sdcard_response;
 
-typedef enum {
-  RES_OK = 0,		/* 0: Successful */
-  RES_ERROR,		/* 1: R/W Error */
-  RES_WRPRT,		/* 2: Write Protected */
-  RES_NOTRDY,		/* 3: Not Ready */
-  RES_PARERR		/* 4: Invalid Parameter */
-} 
-DRESULT;
-
-enum diskstates
-{ 
-  DISK_CHANGED = 0,
-  DISK_REMOVED,
-  DISK_OK,
-  DISK_ERROR
-};
-
-static volatile enum diskstates disk_state;
-
-static char sd_response(uint8_t expected) {
-    unsigned short count = 0x0FFF;
-    while ((spi_transfer_byte(0xFF) != expected) && count--);
-    return (count != 0);
-}
-
-static char sd_wait_write_finish(void) {
-    unsigned short count = 0xFFFF;
-    while ((spi_transfer_byte(0xFF) == 0) && count--);
-    return (count != 0);
-}
-
-static void sd_deselect_card(void) {
-    SDCARD_PORT |= (1<<SDCARD_SS);
-    spi_transfer_byte(0xff);
-}
-
-static uint8_t crc7update(uint8_t crc, uint8_t data) {
+static uint8_t sdcard_crc7update(uint8_t crc, uint8_t data) {
     uint8_t i;
     uint8_t bit;
     uint8_t c;
@@ -99,193 +66,261 @@ static uint8_t crc7update(uint8_t crc, uint8_t data) {
     c = data;
     for (i = 0x80; i > 0; i >>= 1) {
         bit = crc & 0x40;
-        if (c & i) {
-            bit = !bit;
-        }
+        if (c & i) bit = !bit;
         crc <<= 1;
-        if (bit) {
-            crc ^= 0x09;
-        }
+        if (bit) crc ^= 0x09;
     }
     crc &= 0x7f;
     return crc & 0x7f;
 }
 
-static int sd_send_command(uint8_t command, uint32_t parameter, uint8_t deselect) {
-    union { unsigned long l; unsigned char c[4]; } long2char;
-    uint8_t i, crc, errorcount;
-    uint16_t counter;
-
-    long2char.l = parameter;
-    crc = crc7update(0  , 0x40+command);
-    crc = crc7update(crc, long2char.c[3]);
-    crc = crc7update(crc, long2char.c[2]);
-    crc = crc7update(crc, long2char.c[1]);
-    crc = crc7update(crc, long2char.c[0]);
-    crc = (crc << 1) | 1;
-
-    errorcount = 0;
-    while (errorcount < CONFIG_SD_AUTO_RETRIES) {
-        SDCARD_PORT &= ~(1<<SDCARD_SS);
-        spi_transfer_byte(0x40+command);
-        spi_transfer_long(parameter);
-        spi_transfer_byte(crc);
-        counter = 0;
-        do { i = spi_transfer_byte(0xff); counter++; } 
-        while (i & 0x80 && counter < 0x1000);
-        if (deselect && (i & STATUS_CRC_ERROR)) {
-            sd_deselect_card();
-            errorcount++;
-            continue;
-        }
-
-        if (deselect) sd_deselect_card();
-        break;
-    }
-
-    return i;
+static inline void sdcard_print_r1(char *msg)
+{
+    console_puts(msg);
+    console_putc(' ');
+    if (sdcard_response.dat.start_bit == 1) console_putc('1'); else console_putc('0');
+    if (sdcard_response.dat.parameter_error == 1) console_putc('1'); else console_putc('0');
+    if (sdcard_response.dat.address_error == 1) console_putc('1'); else console_putc('0');
+    if (sdcard_response.dat.erase_seq_error == 1) console_putc('1'); else console_putc('0');
+    if (sdcard_response.dat.crc_error == 1) console_putc('1'); else console_putc('0');
+    if (sdcard_response.dat.illegal_command == 1) console_putc('1'); else console_putc('0');
+    if (sdcard_response.dat.erase_reset == 1) console_putc('1'); else console_putc('0');
+    if (sdcard_response.dat.in_idle_state == 1) console_putc('1'); else console_putc('0');
+    console_putc(' ');
 }
 
-static uint8_t storage_initialize(uint8_t speed) {
-    uint8_t  i;
-    uint16_t counter;
-    uint32_t answer;
+static inline void sdcard_call_r1(
+        uint8_t cmdnum,
+        uint32_t val,
+        uint8_t busy,
+        uint8_t deselect)
+{
+    unsigned int i;
+    //char buf[100];
 
-    disk_state = DISK_ERROR;
+    /* Select SD card */
+    SDCARD_PORT &= ~(1<<SDCARD_SS);
+
+    sdcard_command.command.dat.bit7 = 0;
+    sdcard_command.command.dat.bit6 = 1;
+    sdcard_command.command.dat.cmd = cmdnum;
+    sdcard_command.argument.value = val;
+
+    sdcard_command.crc = sdcard_crc7update(0, sdcard_command.command.byte);
+    sdcard_command.crc = sdcard_crc7update(sdcard_command.crc, sdcard_command.argument.dat.arg1);
+    sdcard_command.crc = sdcard_crc7update(sdcard_command.crc, sdcard_command.argument.dat.arg2);
+    sdcard_command.crc = sdcard_crc7update(sdcard_command.crc, sdcard_command.argument.dat.arg3);
+    sdcard_command.crc = sdcard_crc7update(sdcard_command.crc, sdcard_command.argument.dat.arg4);
+    sdcard_command.crc = (sdcard_command.crc << 1) | 1;
+
+    /*sprintf(buf, "\n#CMD %hhx %hhx %hhx %lu %hhx %hhx %hhx %hhx %hhx ",
+            busy, deselect,
+            sdcard_command.command.byte,
+            sdcard_command.argument.value,
+            sdcard_command.argument.dat.arg1,
+            sdcard_command.argument.dat.arg2,
+            sdcard_command.argument.dat.arg3,
+            sdcard_command.argument.dat.arg4,
+            sdcard_command.crc);*/
+
+    /* send command */
+    spi_transfer_byte(sdcard_command.command.byte);
+    spi_transfer_byte(sdcard_command.argument.dat.arg1);
+    spi_transfer_byte(sdcard_command.argument.dat.arg2);
+    spi_transfer_byte(sdcard_command.argument.dat.arg3);
+    spi_transfer_byte(sdcard_command.argument.dat.arg4);
+    spi_transfer_byte(sdcard_command.crc);
+
+    /* recive response */
+    for (i = 0; i < 200; ++i) {
+        sdcard_response.byte = spi_transfer_byte(0xFF);
+        if (sdcard_response.dat.start_bit == 0)
+            break;
+        _delay_ms(1);
+    }
+    //sdcard_print_r1(buf);
+
+    if (busy && sdcard_response.dat.start_bit == 0) {
+        console_putc('>');
+        if (sdcard_response.dat.start_bit != 0)
+            return;
+        while (spi_transfer_byte(0xFF) == 0xFF);
+        spi_transfer_byte(0xFF);
+        console_putc('<');
+    }
+
+    if (deselect) {
+        SDCARD_PORT |= (1<<SDCARD_SS);
+        spi_transfer_byte(0xFF);
+    }
+}
+
+static uint8_t storage_init(void) {
+    unsigned int i;
+
+    SDCARD_DDR |= (1<<SDCARD_SS);
+    SDCARD_PORT |= (1<<SDCARD_SS);
+    for (i = 0; i < 10; i++)
+        spi_transfer_byte(0xFF);
+
+    _delay_ms(1000);
+
+    for (;;) {
+        sdcard_call_r1(SD_CMD_GO_IDLE_STATE, 0, SD_NORM, SD_DESS);
+        if (sdcard_response.byte == 1) break;
+    }
+
+    for (;;) {
+        /* First try the ACMD41 */
+        sdcard_call_r1(SD_CMD_NEXT_ACMD, 0, SD_NORM, SD_DESS);
+        sdcard_call_r1(SD_CMD_SD_SEND_OP_COND, 0, SD_NORM, SD_DESS);
+        if (sdcard_response.dat.start_bit == 0) {
+            if (sdcard_response.byte == 0) break;
+            if (sdcard_response.dat.illegal_command == 1) {
+                /* SD_CMD_SD_SEND_OP_COND seams to be illigal,
+                 * switch to SD_CMD_SEND_OP_COND */
+                for (;;) {
+                    sdcard_call_r1(SD_CMD_SEND_OP_COND, 0, SD_NORM, SD_DESS);
+                    if (sdcard_response.byte == 0) break;
+                }
+                break;
+            }
+        }
+    }
+
+    /* Set block length to 512 */
+    for (;;) {
+        sdcard_call_r1(SD_CMD_SET_BLOCKLEN, STORAGE_SECTOR_SIZE, SD_NORM, SD_DESS);
+        if (sdcard_response.byte == 0) break;
+    }
+    return 0;
+}
+
+static uint8_t storage_read_sector(unsigned char *data, uint32_t addr) {
+    char buf[14];
+    unsigned int i;
+    unsigned char a, b;
+
+    sprintf(buf, "\n$R %ld ", addr);
+    console_puts(buf);
+
+    /* convert sector number to byte address */
+    addr <<= STORAGE_SECTOR_SHIFT;
+
+    /* send read sector command */
+    for (;;) {
+        sdcard_call_r1(SD_CMD_READ_SINGLE_BLOCK, addr, SD_NORM, SD_CONT);
+        if (sdcard_response.byte == 0) break;
+    }
+
+    /* send and recive data tocken */
+    spi_transfer_byte(0xFE);
+
+    /* recv data */
+    //console_puts("\n$R ");
+    for (i = 0; i < STORAGE_SECTOR_SIZE; ++i) {
+        data[i] = spi_transfer_byte(0xFF);
+        /*a = (data[i] >> 4);
+        b = data[i] & 0xF;
+        if (a > 9) console_putc('A' - 10 + a);
+        else console_putc('0' + a);
+        if (b > 9) console_putc('A' - 10 + b);
+        else console_putc('0' + b);*/
+    }
+    //console_putc(' ');
+
+    /* recv crc (2 bytes) */
+    spi_transfer_byte(0xFF);
+    spi_transfer_byte(0xFF);
 
     SDCARD_PORT |= (1<<SDCARD_SS);
-
-    for (i=0; i<10; i++) spi_transfer_byte(0xFF);
-
-    i = sd_send_command(GO_IDLE_STATE, 0, 1);
-    if (i != 1) return STA_NOINIT | STA_NODISK;
-
-    counter = 0xffff;
-    do { i = sd_send_command(READ_OCR, 0, 0); } 
-    while (i > 1 && counter-- > 0);
-
-    if (counter > 0) {
-        answer = spi_transfer_long(0);
-        if (!(answer & SD_SUPPLY_VOLTAGE)) {
-            sd_deselect_card();
-            return STA_NOINIT | STA_NODISK;
-        }
-    }
-
-    counter = 0xffff;
-    do { i = sd_send_command(SEND_OP_COND, 1L<<30, 1); counter--; } 
-    while (i != 0 && counter > 0);
-
-    if (counter==0) return STA_NOINIT | STA_NODISK;
-    i = sd_send_command(SET_BLOCKLEN, 512, 1);
-    if (i != 0) return STA_NOINIT | STA_NODISK;
-    disk_state = DISK_OK;
-    return RES_OK;
+    spi_transfer_byte(0xFF);
+    return 0;
 }
 
-static uint8_t storage_read_sector(uint8_t *buffer, uint32_t sector)
-{
-    uint8_t res,tmp,errorcount;
-    uint16_t crc,recvcrc;
+static uint8_t storage_write_sector(unsigned char *data, uint32_t addr) {
+    unsigned int i;
 
-    errorcount = 0;
-    while (errorcount < CONFIG_SD_AUTO_RETRIES)
-    {
-        res = sd_send_command(READ_SINGLE_BLOCK, (sector) << 9, 0);
+    /* convert sector number to byte address */
+    addr <<= STORAGE_SECTOR_SHIFT;
 
-        if (res != 0)
-        {
-            SDCARD_PORT |= (1 << SDCARD_SS);
-            disk_state = DISK_ERROR;
-            return RES_ERROR;
-        }
+    /* wait if the card is busy */
+    // while (spi_transfer_byte(0xFF) == 0xFF);
 
-        // Wait for data token
-        if (!sd_response(0xFE))
-        {
-            SDCARD_PORT |= (1 << SDCARD_SS);
-            disk_state = DISK_ERROR;
-            return RES_ERROR;
-        }
-
-        uint16_t i;
-
-        // Get data
-        crc = 0;
-        for (i=0; i<512; i++)
-        {
-            tmp = spi_transfer_byte(0xff);
-            *(buffer++) = tmp;
-        }
-
-        // Check CRC
-        recvcrc = (spi_transfer_byte(0xFF) << 8) + spi_transfer_byte(0xFF);
-
-        break;
+    /* send read sector command */
+    for (;;) {
+        sdcard_call_r1(SD_CMD_WRITE_BLOCK, addr, SD_NORM, SD_CONT);
+        if (sdcard_response.dat.start_bit == 0) break;
+        _delay_ms(10);
     }
-    sd_deselect_card();
 
-    if (errorcount >= CONFIG_SD_AUTO_RETRIES) return RES_ERROR;
+    /* send data token */
+    spi_transfer_byte(0xFE);
 
-    return RES_OK;
+    /* send data */
+    for (i = 0; i < 512; ++i)
+        spi_transfer_byte(data[i]);
+
+    /* send crc */
+    spi_transfer_byte(0);
+    spi_transfer_byte(0);
+
+    SDCARD_PORT |= (1<<SDCARD_SS);
+    spi_transfer_byte(0xFF);
+    return 0;
 }
 
-static uint8_t storage_write_sector(uint8_t *buffer, uint32_t sector)
-{
-    uint8_t res,errorcount,status;
-    uint16_t crc;
+#else
+/* We have native compilation */
 
-    errorcount = 0;
-    while (errorcount < CONFIG_SD_AUTO_RETRIES)
-    {
-        res = sd_send_command(WRITE_BLOCK, (sector)<<9, 0);
+#include <unistd.h>
 
-        if (res != 0)
-        {
-            SDCARD_PORT |= (1<<SDCARD_SS);
-            disk_state = DISK_ERROR;
-            return RES_ERROR;
-        }
+#define STORAGE_IMAGE_FILE "retroSD2"
 
-        // Send data token
-        spi_transfer_byte(0xFE);
+static FILE *fd;
 
-        uint16_t i;
-        uint8_t *oldbuffer = buffer;
-
-        // Send data
-        crc = 0;
-        for (i=0; i<512; i++)
-        {
-            spi_transfer_byte(*(buffer++));
-        }
-
-        // Send CRC
-        spi_transfer_byte(crc >> 8);
-        spi_transfer_byte(crc & 0xff);
-
-        // Get and check status feedback
-        status = spi_transfer_byte(0xFF);
-
-        // Retry if neccessary
-        if ((status & 0x0F) != 0x05)
-        {
-            sd_deselect_card();
-            errorcount++;
-            buffer = oldbuffer;
-            continue;
-        }
-
-        // Wait for write finish
-        if (!sd_wait_write_finish())
-        {
-            SDCARD_PORT |= (1<<SDCARD_SS);
-            disk_state = DISK_ERROR;
-            return RES_ERROR;
-        }
-        break;
-    }
-    return RES_OK;
+static uint8_t storage_init() {
+    fd = fopen(STORAGE_IMAGE_FILE, "r+");
+    return 0;
 }
+
+static uint8_t storage_read_sector(uint8_t *buffer, uint32_t sector) {
+    char buf[14];
+    //unsigned char a, b;
+    if (0 != fseek(fd, sector * STORAGE_SECTOR_SIZE, SEEK_SET)) {
+        perror("fseek");
+        return 1;
+    }
+    for (int i = 0; i < STORAGE_SECTOR_SIZE; ++i)
+        buffer[i] = 0;
+    fread(buffer, STORAGE_SECTOR_SIZE, 1, fd);
+    sprintf(buf, "\n$R %ld ", sector);
+    console_puts(buf);
+    /*for (int i = 0; i < STORAGE_SECTOR_SIZE; ++i) {
+        a = (buffer[i] >> 4);
+        b = buffer[i] & 0xF;
+        if (a > 9) console_putc('A' - 10 + a);
+        else console_putc('0' + a);
+        if (b > 9) console_putc('A' - 10 + b);
+        else console_putc('0' + b);
+    }
+    console_putc(' ');*/
+    return 0;
+}
+
+static uint8_t storage_write_sector(uint8_t *buffer, uint32_t sector) {
+    if (0 != fseek(fd, sector * STORAGE_SECTOR_SIZE, SEEK_SET)) {
+        perror("fwrite");
+        return 1;
+    }
+    if (1 != fwrite(buffer, STORAGE_SECTOR_SIZE, 1, fd)) {
+        perror("fwrite");
+        return 2;
+    }
+    fsync(fileno(fd));
+    return 0;
+}
+
+#endif
 
 #endif

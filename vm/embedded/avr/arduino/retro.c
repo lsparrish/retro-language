@@ -4,7 +4,8 @@
 /* Configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #define CELL            int16_t
 #define IMAGE_SIZE        31000
-#define IMAGE_CACHE_SIZE    181
+//#define IMAGE_CACHE_SIZE    181
+#define IMAGE_CACHE_SIZE    777
 #define CHANGE_TABLE_SIZE   457
 #define ADDRESSES            64
 #define STACK_DEPTH          64
@@ -31,7 +32,7 @@
 #define SPI_MOSI     PB2
 #define SPI_SCK      PB1
 #define SPI_SS       PB0
-#define SPI_SPEED    1
+#define SPI_SPEED    0
 
 #define DISPLAY_PORT PORTL
 #define DISPLAY_DDR  DDRL
@@ -39,9 +40,9 @@
 #define DISPLAY_DC   PL1
 #define DISPLAY_RST  PL0
 
-#define SDCARD_PORT  SPI_PORT
-#define SDCARD_DDR   SPI_DDR
-#define SDCARD_SS    SPI_SS
+#define SDCARD_PORT  PORTL
+#define SDCARD_DDR   DDRL
+#define SDCARD_SS    PL7
 
 #else
 #ifdef BOARD_native
@@ -85,7 +86,7 @@ typedef struct CHANGE_TABLE {
     change_element_t *elements;
 } change_table_t;
 
-
+/* Image operations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 static inline CELL img_get(CELL k);
 static inline void img_put(CELL k, CELL v);
 static void img_sync(void);
@@ -98,36 +99,35 @@ static void img_sync(void);
 
 #ifdef IMAGE_MODE_roflash
 #include "image.hex.h"
-#endif
-
 #include "eeprom_atmel.h"
+#endif
 
 #ifdef DISPLAY_nokia3110
 #include "display_nokia3110.h"
-#endif
-
-#ifdef STORAGE_sdcard
-#include "storage_sdcard.h"
-#endif
-
-#ifdef FILESYSTEM_fat32
-#include "filesystem_fat32.h"
 #endif
 
 #else
 #ifdef BOARD_native
 
 #include "console_native.h"
+
 #define PROGMEM
 #define prog_int32_t int32_t
 #define prog_int16_t int16_t
 #define pgm_read_word(x) (*(x))
 #define _SFR_IO8(x) SFR_IO8[x]
 static int SFR_IO8[64];
+
+#ifdef IMAGE_MODE_roflash
 #include "image.hex.h"
 #include "eeprom_native.h"
+#endif
 
 #endif
+#endif
+
+#ifdef STORAGE_sdcard
+#include "storage_sdcard.h"
 #endif
 
 /* Macros ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -150,6 +150,7 @@ static void spi_master_init(void) {
     SPI_DDR |=  (1 << SPI_MOSI);
     SPI_DDR |=  (1 << SPI_SCK);
     SPI_DDR |=  (1 << SPI_SS);
+    SPI_PORT |= (1 << SPI_SS);
     SPCR = (1 << SPE) | (1 << MSTR) | SPI_SPEED;
 }
 
@@ -158,16 +159,17 @@ static void spi_slave_init(void) {
     SPI_DDR &= ~(1 << SPI_MOSI);
     SPI_DDR &= ~(1 << SPI_SCK);
     SPI_DDR &= ~(1 << SPI_SS);
+    SPI_PORT &= ~(1 << SPI_SS);
     SPCR = (1 << SPE) | SPI_SPEED;
 }
 
-static uint8_t spi_transfer_byte(uint8_t data) {
+static inline uint8_t spi_transfer_byte(uint8_t data) {
     SPDR = data;
     while ((SPSR & (1 << SPIF)) == 0);
     return SPDR;
 }
 
-static CELL spi_transfer_cell(CELL data) {
+static inline CELL spi_transfer_cell(CELL data) {
     union { CELL l; uint8_t c[sizeof(CELL)]; } d;
     d.l = data;
     for (int8_t i = sizeof(CELL) - 1; i >= 0; --i)
@@ -175,7 +177,7 @@ static CELL spi_transfer_cell(CELL data) {
     return d.l;
 }
 
-static uint32_t spi_transfer_long(uint32_t data) {
+static inline uint32_t spi_transfer_long(uint32_t data) {
     union { uint32_t l; uint8_t c[sizeof(long)]; } d;
     d.l = data;
     for (int8_t i = sizeof(uint32_t) - 1; i >= 0; --i)
@@ -222,11 +224,9 @@ static inline void img_put(CELL k, CELL v) {
         tbl->elements[i].key = k; tbl->full += 1;
     }
     tbl->elements[i].value = v;
-    image_cache[p].key = k;
-    image_cache[p].value = v;
 }
 
-static void image_sync(void) {
+static void img_sync(void) {
 }
 
 #else
@@ -236,7 +236,7 @@ static void image_sync(void) {
 #error "Image mode 'rwstorage' is needs an enabled storage."
 #endif
 
-#define IMAGE_SECTOR_SIZE _(STORAGE_SECTOR_SIZE/sizeof(CELL))
+#define IMAGE_SECTOR_SIZE (STORAGE_SECTOR_SIZE/sizeof(CELL))
 
 static CELL *image_sector_data;
 static struct {
@@ -244,32 +244,45 @@ static struct {
     uint32_t sector_num:31;
 } image_sector_flags;
 
-static inline CELL img_get(CELL k) {
-    uint32_t sec;
-    CELL p = k % IMAGE_CACHE_SIZE;
-    if (image_cache[p].key == k)
-        return image_cache[p].value;
-    sec = k / IMAGE_SECTOR_SIZE;
+static inline void img_load(uint32_t sec) {
     if (sec != image_sector_flags.sector_num) {
         if (image_sector_flags.changed != 0) {
             if (0 != storage_write_sector(
                         (uint8_t*) image_sector_data,
-                        image_sector_flags.sector_num))
-                console_puts("\nERROR: failed to write sector ")
-            else image_sector_flags.changed = 0;
+                        image_sector_flags.sector_num)) {
+                console_puts("\nERROR: failed to write sector ");
+#ifndef BOARD_native
+                _delay_ms(1000);
+#else
+                sleep(10);
+#endif
+            } else image_sector_flags.changed = 0;
         }
-        if (image_sector_flags.changed != 0) {
-            if (0 != storage_read_sector((uint8_t*) image_sector_data, sec))
+        if (image_sector_flags.changed == 0) {
+            if (0 != storage_read_sector((uint8_t*) image_sector_data, sec)) {
                 console_puts("\nERROR: failed to read sector ");
-            else image_sector_flags.sector_num = sec;
+#ifndef BOARD_native
+                _delay_ms(1000);
+#else
+                sleep(10);
+#endif
+            } else image_sector_flags.sector_num = sec;
         }
     }
+}
+
+static inline CELL img_get(CELL k) {
+    CELL p = k % IMAGE_CACHE_SIZE;
+    if (image_cache[p].key == k)
+        return image_cache[p].value;
+    img_load(k / IMAGE_SECTOR_SIZE);
     return image_sector_data[k % IMAGE_SECTOR_SIZE];
 }
 
-static inline CELL img_put(CELL k, CELL v) {
+static inline void img_put(CELL k, CELL v) {
     CELL p;
     if (v == img_get(k)) return;
+    img_load(k / IMAGE_SECTOR_SIZE);
     p = k % IMAGE_CACHE_SIZE;
     image_cache[p].key = k;
     image_cache[p].value = v;
@@ -277,12 +290,18 @@ static inline CELL img_put(CELL k, CELL v) {
     image_sector_flags.changed = 1;
 }
 
-static void image_sync(void) {
+static void img_sync(void) {
     if (image_sector_flags.changed != 0)
         if (0 != storage_write_sector(
                     (uint8_t*) image_sector_data,
-                    image_sector_flags.sector_num))
+                    image_sector_flags.sector_num)) {
             console_puts("\nERROR: failed to write sector ");
+#ifndef BOARD_native
+            _delay_ms(1000);
+#else
+            sleep(10);
+#endif
+        }
 }
 
 #else
@@ -324,26 +343,43 @@ int main(void)
 #ifndef BOARD_native
     spi_master_init();
 #endif
+
 #ifdef DISPLAY_ACTIVATED
     display_init();
     display_clear();
     display_set_xy(0, 0);
 #endif
+
 #ifdef STORAGE_ACTIVATED
-    storage_initialize(SPI_SPEED);
+    if (0 != storage_init()) {
+        console_puts("\nERROR: failed to initialize storage ");
+        goto finish;
+    }
 #endif
 
 #ifdef IMAGE_MODE_roflash
-    for (j = 0; j < IMAGE_CACHE_SIZE; ++j) image_cache[j].key = -1;
+    for (j = 0; j < IMAGE_CACHE_SIZE; ++j)
+        image_cache[j].key = -1;
+    for (j = 0; j < CHANGE_TABLE_SIZE; ++j) {
+        change_table[j].full = change_table[j].size = 0;
+        change_table[j].elements = NULL;
+    }
+#endif
+
+#ifdef IMAGE_MODE_rwstorage
+    image_sector_data = (CELL*)malloc(STORAGE_SECTOR_SIZE);
+    if (image_sector_data == NULL) {
+        console_puts("\nERROR: failed to allocate sector buffer ");
+        goto finish;
+    }
+    image_sector_flags.changed = 0;
+    image_sector_flags.sector_num = 1;
+    img_load(0);
 #endif
 
     for (j = 0; j < STACK_DEPTH; ++j) data[j] = 0;
     for (j = 0; j < ADDRESSES; ++j) address[j] = 0;
     for (j = 0; j < PORTS; ++j) ports[j] = 0;
-    for (j = 0; j < CHANGE_TABLE_SIZE; ++j) {
-        change_table[j].full = change_table[j].size = 0;
-        change_table[j].elements = NULL;
-    }
 
 
     for (S_IP = 0; S_IP >= 0 && S_IP < IMAGE_SIZE; ++S_IP) {
@@ -415,31 +451,9 @@ int main(void)
                     if (ports[4] != 0) {
                         ports[0] = 1;
                         switch (ports[4]) {
+#ifdef IMAGE_MODE_roflash
                             case 1: ports[4] = save_to_eeprom(); break;
                             case 2: ports[4] = load_from_eeprom(); break;
-#ifdef FILESYSTEM_ACTIVATED
-                            case -1:
-                                a = S_TOS; b = S_NOS; S_DROP; S_DROP;
-                                if (fs != NULL) ports[4] = 0;
-                                else {
-                                    fs = (struct fs_t *)malloc(sizeof(struct fs_t));
-                                    if (fs == NULL) ports[4] = 0;
-                                    else {
-                                        img_string(b, string_buffer, STRING_BUFFER_SIZE);
-                                        if (a == 0)
-                                            b = fs_open_file(fs, string_buffer, FS_FILEMODE_TEXT_READ);
-                                        else if (a == 1)
-                                            b = fs_open_file(fs, string_buffer, FS_FILEMODE_TEXT_WRITE);
-                                        else b = FS_ERROR_WRONG_FILEMODE;
-                                    }
-                                    if (b != FS_NO_ERROR) ports[4] = 0;
-                                    else ports[4] = 1;
-                                }
-                                if (ports[4] == 0) {
-                                    free(fs);
-                                    fs = NULL;
-                                }
-                                break;
 #endif
                             default: ports[4] = 0;
                         }
@@ -540,6 +554,7 @@ int main(void)
         ports[3] = 1;
     }
 
+finish:
     img_sync();
     console_puts("\n\nNgaro VM is down.\n");
     console_finish();
