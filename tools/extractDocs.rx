@@ -1,11 +1,11 @@
-2 elements in out
+variables| in out |
 
 : seekDocBlock ( - )
-  [ @in ^files'readLine "doc{" compare not ] while ;
+  [ @in ^files'readLine "doc{" compare ] until ;
 
 : extractDocBlock ( - )
   [ @in ^files'readLine dup
-    "}doc" compare [ drop 0 ] [ @out ^files'writeLine -1 ] if ] while ;
+    "}doc" compare [ drop -1 ] [ @out ^files'writeLine 0 ] if ] until ;
 
 : changeSuffix ( $-$ )
   3 [ ^strings'chop ] times ".rst" ^strings'append ;

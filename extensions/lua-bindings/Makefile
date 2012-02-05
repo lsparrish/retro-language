@@ -40,18 +40,18 @@ tgz:
 
 
 # «lua»  (to ".lua")
-# Download and build lua5.1.
+# Download and build lua5.2.
 # From: (find-dn4 "Makefile" "lua")
 wget      = wget
 S         = $(PWD)/snarf
 USRC      = $(PWD)/usrc
 
-LUAURL    =    http://www.lua.org/ftp/lua-5.1.4.tar.gz
-LUATGZ    = $(S)/http/www.lua.org/ftp/lua-5.1.4.tar.gz
+LUAURL    =    http://www.lua.org/ftp/lua-5.2.0.tar.gz
+LUATGZ    = $(S)/http/www.lua.org/ftp/lua-5.2.0.tar.gz
 LUATGZDIR = $(S)/http/www.lua.org/ftp/
-LUASRC    = $(USRC)/lua-5.1.4
-LUA51_    = $(LUASRC)/bin/lua
-LUA51     = $(PWD)/lua51
+LUASRC    = $(USRC)/lua-5.2.0
+LUA52_    = $(LUASRC)/src/lua
+LUA52     = $(PWD)/lua52
 LUAOS     = linux
 
 luadownload: $(LUATGZ)
@@ -63,15 +63,15 @@ $(LUATGZ):
 cleanluabuild:
 	rm -Rfv $(LUASRC)/
 
-luabuild: $(LUA51_)
-$(LUA51_): $(LUATGZ)
+luabuild: $(LUA52_)
+$(LUA52_): $(LUATGZ)
 	rm -Rfv $(LUASRC)/
 	mkdir -p $(USRC)/
 	tar   -C $(USRC)/ -xvzf $(LUATGZ)
 	cd $(LUASRC) && make $(LUAOS) local test
 
-lua51 $(LUA51): $(LUA51_)
-	cp -v $(LUA51_) $(LUA51)
+lua52 $(LUA52): $(LUA52_)
+	cp -v $(LUA52_) $(LUA52)
 
 
 
@@ -98,7 +98,7 @@ cleanluarocksbuild:
 	rm -Rfv $(LUAROCKSDIR)/
 
 luarocksbuild: $(LUAROCKSBIN_)
-$(LUAROCKSBIN_): lua51 $(LUAROCKSTGZ)
+$(LUAROCKSBIN_): lua52 $(LUAROCKSTGZ)
 	rm -Rfv $(LUAROCKSSRC)/
 	mkdir -p $(USRC)/
 	tar   -C $(USRC)/ -xvzf $(LUAROCKSTGZ)
@@ -142,18 +142,18 @@ test: test.c
 # «retro.so»  (to ".retro.so")
 # Here we build a lua library ("retro.so") from libretro.c and
 # luaretro.c, and we load it from lua.
-# Note that the dependency "lua51" downloads and builds lua in the
+# Note that the dependency "lua52" downloads and builds lua in the
 # current directory.
 # (find-RETRO "luaretro.c")
 # (find-RETRO "test.lua")
 libretro.o: libretro.c
 	gcc -g -O0 -Wall -fPIC -DNOMAIN            -c libretro.c -o libretro.o
-luaretro.o: lua51 luaretro.c
-	gcc -g -O0 -Wall -fPIC -I$(LUASRC)/include -c luaretro.c -o luaretro.o
-retro.so: lua51 libretro.o luaretro.o
-	gcc $(SHARED) -o retro.so -L$(LUASRC)/lib -llua libretro.o luaretro.o
-runluatest: lua51 retro.so image
-	$(LUA51) test.lua
+luaretro.o: lua52 luaretro.c
+	gcc -g -O0 -Wall -fPIC -I$(LUASRC)/src -c luaretro.c -o luaretro.o
+retro.so: lua52 libretro.o luaretro.o
+	gcc $(SHARED) -o retro.so -L$(LUASRC)/src -llua libretro.o luaretro.o
+runluatest: lua52 retro.so image
+	$(LUA52) test.lua
 image:
 	ln -s ../../retroImage
 
@@ -166,7 +166,7 @@ clean:
 
 # The "cleanlocal" targets don't delete anything outside the local dirs
 cleanlocallua:
-	rm -Rfv usr/lua-5.1.4/ lua51
+	rm -Rfv usr/lua-5.2.0/ lua52
 
 cleanlocaldownloads:
 	rm -rf usrc/* snarf/*

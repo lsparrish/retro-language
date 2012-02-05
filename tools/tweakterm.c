@@ -60,10 +60,16 @@ int main(int argc, char **argv)
 {
   if (argc < 2)
     return -1;
-  if (strcmp(argv[1], "set") == 0)
+  if (strcmp(argv[1], "--set") == 0)
     setTerm();
-  if (strcmp(argv[1], "restore") == 0)
+  if (strcmp(argv[1], "--restore") == 0)
     restoreTerm();
+  if (strcmp(argv[1], "--help") == 0)
+  {
+    printf("terminal tweaks\n");
+    printf("--set       set non-buffered keyboard input\n");
+    printf("--restore   revert to default settings\n");
+  }
 
   return 0;
 }
