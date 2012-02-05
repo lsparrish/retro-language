@@ -1,9 +1,9 @@
-RX = ../
+RX = ..
 
 default: clean
-	@echo Copying Retro from $(RX)
-	@cp $(RX)/retro .
-	@cp $(RX)/retroImage .
+	@echo Linking Retro from $(RX)
+	@ln -s $(RX)/retro .
+	@ln -s $(RX)/retroImage .
 	@ln -s $(RX)/library .
 
 clean:
