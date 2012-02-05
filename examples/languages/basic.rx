@@ -95,12 +95,12 @@ create nvars
   8 , getNumber lines + , &; do ;
 
 {{
-  : strPrepend ^strings'prepend ;
+  : strAppend ^strings'append ;
   : assignValue ( af"- )
     [ eatLeading? off getc putc '" accept tib keepString eatLeading? on ]
     [ getNumber ] if 2# &! , &; do ;
   : addVariable  ( af"- )
-    [ getVariable drop over # &@ , # &@ , &strPrepend , # &! , &; do ]
+    [ getVariable drop over # &@ , # &@ , &strAppend , # &! , &; do ]
     [ getVariable drop over # &@ , # &@ , &+ ,          # &! , &; do ] if ;
   : subVariable  ( af"- )
     [ "\nERROR\n" puts ]
