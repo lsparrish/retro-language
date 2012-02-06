@@ -288,8 +288,10 @@ static inline void img_put(CELL k, CELL v) {
     cell_cache_element_t *elem;
     HASH_FIND(hh, cell_cache, &k, sizeof(k), elem);
     if (elem != NULL) {
-        elem->value = v;
-        elem->changed = 1;
+        if (elem->value != v) {
+            elem->value = v;
+            elem->changed = 1;
+        }
     } else {
         _cache_add(k, 1, v);
         if (HASH_COUNT(cell_cache) > IMAGE_CACHE_SIZE) {
