@@ -54,6 +54,9 @@ LUA52_    = $(LUASRC)/src/lua
 LUA52     = $(PWD)/lua52
 LUAOS     = linux
 
+libretro.c:
+	ln -s ../../vm/experimental/libretro.c
+
 luadownload: $(LUATGZ)
 $(LUATGZ):
 	mkdir -p $(LUATGZDIR)
@@ -172,7 +175,7 @@ cleanlocaldownloads:
 	rm -rf usrc/* snarf/*
 
 veryclean: clean cleanlocallua cleanlocaldownloads
-
+	rm -f libretro.c
 
 
 # Local Variables:

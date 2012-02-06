@@ -39,17 +39,20 @@ static int lua_peek(lua_State* L) {
   lua_pushlstring(L, (void *)addr, len);
   return 1;
 }
+
 static int lua_poke(lua_State* L) {
   int addr = luaL_checkint(L, 1);
   int len = 0; const char* straddr = luaL_checklstring(L, 2, &len);
   memcpy((void *)addr, straddr, len);
   return 0;
 }
+
 static int lua_malloc(lua_State* L) {
   int len = luaL_checkint(L, 1);
   lua_pushinteger(L, (int)malloc(len));
   return 1;
 }
+
 static int lua_free(lua_State* L) {
   int addr = luaL_checkint(L, 1);
   free((void *)addr);
