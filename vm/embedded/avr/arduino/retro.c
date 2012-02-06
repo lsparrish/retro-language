@@ -193,7 +193,7 @@ static inline uint32_t spi_transfer_long(uint32_t data) {
 
 static inline CELL img_storage_get(CELL k) { return image_read(k); }
 static inline uint8_t img_storage_put(CELL k, CELL v) { return 0; }
-static void img_sync(void) { }
+static void img_storage_sync(void) { }
 
 #else
 #ifdef IMAGE_MODE_rwstorage
@@ -249,7 +249,7 @@ static inline uint8_t img_storage_put(CELL k, CELL v) {
     return 1;
 }
 
-static void img_sync(void) {
+static void img_storage_sync(void) {
     if (image_sector_flags.changed != 0)
         if (0 != storage_write_sector(
                     (uint8_t*) image_sector_data,
@@ -308,7 +308,18 @@ static inline void img_put(CELL k, CELL v) {
     }
 }
 
-void img_string(CELL starting, char *buffer, CELL buffer_len)
+static inline void img_sync() {
+    cell_cache_element_t *elem, *temp;
+    HASH_ITER(hh, cell_cache, elem, temp) {
+        if (elem->changed) {
+            img_storage_put(elem->key, elem->value);
+            elem->changed = 0;
+        }
+    }
+    img_storage_sync();
+}
+
+static inline void img_string(CELL starting, char *buffer, CELL buffer_len)
 {
     CELL i = 0, j = starting;
     for(; i < buffer_len && 0 != (buffer[i] = img_get(j)); ++i, ++j);
