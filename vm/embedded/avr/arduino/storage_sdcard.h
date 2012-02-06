@@ -197,12 +197,12 @@ static uint8_t storage_init(void) {
 }
 
 static uint8_t storage_read_sector(unsigned char *data, uint32_t addr) {
-    char buf[14];
+    //char buf[14];
     unsigned int i;
-    unsigned char a, b;
+    //unsigned char a, b;
 
-    sprintf(buf, "\n$R %ld ", addr);
-    console_puts(buf);
+    //sprintf(buf, "R%ld ", addr);
+    //console_puts(buf);
 
     /* convert sector number to byte address */
     addr <<= STORAGE_SECTOR_SHIFT;
@@ -285,7 +285,7 @@ static uint8_t storage_init() {
 }
 
 static uint8_t storage_read_sector(uint8_t *buffer, uint32_t sector) {
-    char buf[14];
+    //char buf[14];
     //unsigned char a, b;
     if (0 != fseek(fd, sector * STORAGE_SECTOR_SIZE, SEEK_SET)) {
         perror("fseek");
@@ -294,8 +294,8 @@ static uint8_t storage_read_sector(uint8_t *buffer, uint32_t sector) {
     for (int i = 0; i < STORAGE_SECTOR_SIZE; ++i)
         buffer[i] = 0;
     fread(buffer, STORAGE_SECTOR_SIZE, 1, fd);
-    sprintf(buf, "\n$R %ld ", sector);
-    console_puts(buf);
+    //sprintf(buf, "R%d ", sector);
+    //console_puts(buf);
     /*for (int i = 0; i < STORAGE_SECTOR_SIZE; ++i) {
         a = (buffer[i] >> 4);
         b = buffer[i] & 0xF;

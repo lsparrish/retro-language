@@ -233,7 +233,7 @@ do {                                                                            
 #define HASH_ADD_STR(head,strfield,add)                                          \
     HASH_ADD(hh,head,strfield,strlen(add->strfield),add)
 #define HASH_FIND_INT(head,findint,out)                                          \
-    HASH_FIND(hh,head,findint,sizeof(int),out)
+    HASH sizeof(key),_FIND(hh,head,findint,sizeof(int),out)
 #define HASH_ADD_INT(head,intfield,add)                                          \
     HASH_ADD(hh,head,intfield,sizeof(int),add)
 #define HASH_FIND_PTR(head,findptr,out)                                          \

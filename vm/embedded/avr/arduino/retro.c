@@ -4,9 +4,7 @@
 /* Configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #define CELL            int16_t
 #define IMAGE_SIZE        31000
-//#define IMAGE_CACHE_SIZE    181
-#define IMAGE_CACHE_SIZE    777
-#define CHANGE_TABLE_SIZE   457
+#define IMAGE_CACHE_SIZE    800
 #define ADDRESSES            64
 #define STACK_DEPTH          64
 #define PORTS                15
@@ -16,6 +14,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+/* Hash table ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+#define HASH_FUNCTION HASH_BER
+#include "uthash.h"
 
 /* Board specific includes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #ifdef BOARD_mega2560
@@ -75,16 +77,14 @@ static uint32_t spi_transfer_long(uint32_t data);
 #endif
 
 /* Change store ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-typedef struct CHANGE_ELEMENT {
+typedef struct {
+    uint8_t changed;
     CELL key;
     CELL value;
-} change_element_t;
+    UT_hash_handle hh;
+} cell_cache_element_t;
 
-typedef struct CHANGE_TABLE {
-    uint8_t full;
-    uint8_t size;
-    change_element_t *elements;
-} change_table_t;
+static cell_cache_element_t *cell_cache;
 
 /* Image operations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 static inline CELL img_get(CELL k);
@@ -188,46 +188,12 @@ static inline uint32_t spi_transfer_long(uint32_t data) {
 #endif
 
 /* Image read and write ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-static struct {
-    CELL key;
-    CELL value;
-} image_cache[IMAGE_CACHE_SIZE];
 
 #ifdef IMAGE_MODE_roflash
 
-static change_table_t change_table[CHANGE_TABLE_SIZE];
-
-static inline CELL img_get(CELL k) {
-    uint16_t i = 0, p = k % IMAGE_CACHE_SIZE;
-    if (image_cache[p].key == k)
-        return image_cache[p].value;
-    image_cache[p].key = k;
-    change_table_t *tbl = &(change_table[(k % CHANGE_TABLE_SIZE)]);
-    for (; i < tbl->full && tbl->elements[i].key != k; ++i);
-    if (i == tbl->full)
-        return (image_cache[p].value = image_read(k));
-    return (image_cache[p].value = tbl->elements[i].value);
-}
-
-static inline void img_put(CELL k, CELL v) {
-    uint16_t i = 0, p = k % IMAGE_CACHE_SIZE;
-    change_table_t *tbl;
-    if (img_get(k) == v) return;
-    tbl = &(change_table[(k % CHANGE_TABLE_SIZE)]);
-    for (; i < tbl->full && tbl->elements[i].key != k; ++i);
-    if (i == tbl->full) {
-        if (tbl->size == tbl->full) {
-            tbl->size += 5;
-            tbl->elements = (change_element_t*)realloc(tbl->elements,
-                    tbl->size * sizeof(change_element_t));
-        }
-        tbl->elements[i].key = k; tbl->full += 1;
-    }
-    tbl->elements[i].value = v;
-}
-
-static void img_sync(void) {
-}
+static inline CELL img_storage_get(CELL k) { return image_read(k); }
+static inline uint8_t img_storage_put(CELL k, CELL v) { return 0; }
+static void img_sync(void) { }
 
 #else
 #ifdef IMAGE_MODE_rwstorage
@@ -244,7 +210,7 @@ static struct {
     uint32_t sector_num:31;
 } image_sector_flags;
 
-static inline void img_load(uint32_t sec) {
+static inline void img_storage_load(uint32_t sec) {
     if (sec != image_sector_flags.sector_num) {
         if (image_sector_flags.changed != 0) {
             if (0 != storage_write_sector(
@@ -271,43 +237,76 @@ static inline void img_load(uint32_t sec) {
     }
 }
 
-static inline CELL img_get(CELL k) {
-    CELL p = k % IMAGE_CACHE_SIZE;
-    if (image_cache[p].key == k)
-        return image_cache[p].value;
-    img_load(k / IMAGE_SECTOR_SIZE);
+static inline CELL img_storage_get(CELL k) {
+    img_storage_load(k / IMAGE_SECTOR_SIZE);
     return image_sector_data[k % IMAGE_SECTOR_SIZE];
 }
 
-static inline void img_put(CELL k, CELL v) {
-    CELL p;
-    if (v == img_get(k)) return;
-    img_load(k / IMAGE_SECTOR_SIZE);
-    p = k % IMAGE_CACHE_SIZE;
-    image_cache[p].key = k;
-    image_cache[p].value = v;
+static inline uint8_t img_storage_put(CELL k, CELL v) {
+    img_storage_load(k / IMAGE_SECTOR_SIZE);
     image_sector_data[k % IMAGE_SECTOR_SIZE] = v;
     image_sector_flags.changed = 1;
+    return 1;
 }
 
 static void img_sync(void) {
     if (image_sector_flags.changed != 0)
         if (0 != storage_write_sector(
                     (uint8_t*) image_sector_data,
-                    image_sector_flags.sector_num)) {
+                    image_sector_flags.sector_num))
             console_puts("\nERROR: failed to write sector ");
-#ifndef BOARD_native
-            _delay_ms(1000);
-#else
-            sleep(10);
-#endif
-        }
 }
 
 #else
 #error "Unsupported image mode."
 #endif
 #endif
+
+static inline cell_cache_element_t* _cache_add(CELL key, uint8_t changed, CELL value) {
+    cell_cache_element_t *elem = malloc(sizeof(cell_cache_element_t));
+    elem->key = key;
+    elem->changed = changed;
+    elem->value = value;
+    HASH_ADD(hh, cell_cache, key, sizeof(key), elem);
+    return elem;
+}
+
+static inline CELL img_get(CELL k) {
+    cell_cache_element_t *elem;
+    HASH_FIND(hh, cell_cache, &k, sizeof(k), elem);
+    if (elem == NULL) {
+        CELL v = img_storage_get(k);
+        elem = _cache_add(k, 0, v);
+    } else {
+        HASH_DELETE(hh, cell_cache, elem);
+        HASH_ADD(hh, cell_cache, key, sizeof(CELL), elem);
+    }
+    return elem->value;
+}
+
+static inline void img_put(CELL k, CELL v) {
+    cell_cache_element_t *elem;
+    HASH_FIND(hh, cell_cache, &k, sizeof(k), elem);
+    if (elem != NULL) {
+        elem->value = v;
+        elem->changed = 1;
+    } else {
+        _cache_add(k, 1, v);
+        if (HASH_COUNT(cell_cache) > IMAGE_CACHE_SIZE) {
+            cell_cache_element_t *temp;
+            HASH_ITER(hh, cell_cache, elem, temp) {
+                if (elem->changed) {
+                    if (HASH_COUNT(cell_cache) < (IMAGE_CACHE_SIZE+5)) continue;
+                    if (!img_storage_put(k, v)) continue;
+                }
+                HASH_DEL(cell_cache, elem);
+                free(elem);
+                if (HASH_COUNT(cell_cache) < IMAGE_CACHE_SIZE)
+                    break;
+            }
+        }
+    }
+}
 
 void img_string(CELL starting, char *buffer, CELL buffer_len)
 {
@@ -360,10 +359,6 @@ int main(void)
 #ifdef IMAGE_MODE_roflash
     for (j = 0; j < IMAGE_CACHE_SIZE; ++j)
         image_cache[j].key = -1;
-    for (j = 0; j < CHANGE_TABLE_SIZE; ++j) {
-        change_table[j].full = change_table[j].size = 0;
-        change_table[j].elements = NULL;
-    }
 #endif
 
 #ifdef IMAGE_MODE_rwstorage
@@ -374,7 +369,7 @@ int main(void)
     }
     image_sector_flags.changed = 0;
     image_sector_flags.sector_num = 1;
-    img_load(0);
+    img_storage_load(0);
 #endif
 
     for (j = 0; j < STACK_DEPTH; ++j) data[j] = 0;
