@@ -1,0 +1,19 @@
+variables| bold italic underline heading url image |
+
+: display  ( c- )
+  [ '~ = ] [ "<p>" puts ] whend
+  [ '_ = ] [ @underline [ underline off "</u>"  ] [ underline on "<u>" ] if puts ] whend
+  [ '= = ] [ @heading   [ heading   off "</h1>" ] [ heading   on "<h1>" ] if puts ] whend
+  [ '* = ] [ @italic    [ italic    off "</i>"  ] [ italic    on "<i>"  ] if puts ] whend
+  [ '[ = ] [ "<a href='" puts ] whend
+  [ '| = ] [ "'>" puts ] whend
+  [ '] = ] [ "</a>" puts ] whend
+  putc ;
+
+: render  ( $- )
+  [ @ display ] ^types'STRING each@ ;
+
+here "index.rxw" ^files'slurp
+here render
+bye
+

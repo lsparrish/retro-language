@@ -1,0 +1,6 @@
+=hello=
+~ *This is a _test_ of RetroWeb Templating*
+~ foo. bar. baz
+~ [http://google.com|google search]
+~ <http://path/to/image>
+
