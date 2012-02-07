@@ -10,8 +10,6 @@
 #include <time.h>
 #include <unistd.h>
 #include <string.h>
-#include <termios.h>
-#include <sys/ioctl.h>
 
 /* Configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -28,17 +26,52 @@
    You can also cut the ADDRESSES stack size down, but if you have
    heavy nesting or recursion this may cause problems. If you do modify
    it and experience odd problems, try raising it a bit higher.
+
+   Use -DRX16 to select defaults for 16-bit, or -DRX64 to select the
+   defaults for 64-bit. Without these, the compiler will generate a
+   standard 32-bit VM.
+
+   Use -DRXBE to enable the BE suffix for big endian images. This is
+   only useful on big endian systems.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #define CELL            int32_t
 #define IMAGE_SIZE      1000000
 #define ADDRESSES          1024
 #define STACK_DEPTH         128
-#define PORTS                32
+#define PORTS                12
 #define MAX_FILE_NAME      1024
 #define MAX_REQUEST_LENGTH 1024
 #define MAX_OPEN_FILES        8
-#define GLOBAL                "/usr/local/share/retro/retroImage"
 #define LOCAL                 "retroImage"
+#define CELLSIZE             32
+
+#ifdef RX64
+#undef CELL
+#undef CELLSIZE
+#undef LOCAL
+#define CELL     int64_t
+#define CELLSIZE 64
+#define LOCAL    "retroImage64"
+#endif
+
+#ifdef RX16
+#undef CELL
+#undef CELLSIZE
+#undef LOCAL
+#undef IMAGE_SIZE
+#define CELL        int16_t
+#define CELLSIZE    16
+#define IMAGE_SIZE  32000
+#define LOCAL       "retroImage16"
+#endif
+
+#ifdef RXBE
+#define LOCAL_FNAME (LOCAL "BE")
+#define VM_ENDIAN 1
+#else
+#define LOCAL_FNAME (LOCAL)
+#define VM_ENDIAN 0
+#endif
 
 
 enum vm_opcode {VM_NOP, VM_LIT, VM_DUP, VM_DROP, VM_SWAP, VM_PUSH, VM_POP,
@@ -57,23 +90,19 @@ typedef struct {
   FILE *files[MAX_OPEN_FILES];
   FILE *input[MAX_OPEN_FILES];
   CELL isp;
-  CELL inputSource;
-  char *inputString;
-  CELL strIndex;
   CELL image[IMAGE_SIZE];
   CELL shrink, padding;
   int stats[NUM_OPS + 1];
   int max_sp, max_rsp;
   char filename[MAX_FILE_NAME];
   char request[MAX_REQUEST_LENGTH];
-  struct termios new_termios, old_termios;
 } VM;
 
 /* Macros ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #define IP   vm->ip
 #define SP   vm->sp
 #define RSP  vm->rsp
-#define DROP vm->data[SP] = 0; if (--SP < 0) IP = IMAGE_SIZE;
+#define DROP { vm->data[SP] = 0; if (--SP < 0) IP = IMAGE_SIZE; }
 #define TOS  vm->data[SP]
 #define NOS  vm->data[SP-1]
 #define TORS vm->address[RSP]
@@ -99,21 +128,12 @@ void rxWriteConsole(VM *vm, CELL c) {
 
 CELL rxReadConsole(VM *vm) {
   CELL c;
-  if (vm->inputSource == 0) {
-    if ((c = getc(vm->input[vm->isp])) == EOF && vm->input[vm->isp] != stdin) {
-      fclose(vm->input[vm->isp--]);
-      c = 0;
-    }
-    if (c == EOF && vm->input[vm->isp] == stdin)
-      exit(0);
+  if ((c = getc(vm->input[vm->isp])) == EOF && vm->input[vm->isp] != stdin) {
+    fclose(vm->input[vm->isp--]);
+    c = 0;
   }
-  else {
-    c = vm->inputString[vm->strIndex++];
-    if (c == '\0') {
-      c = 32;
-      vm->inputSource = 0;
-    }
-  }
+  if (c == EOF && vm->input[vm->isp] == stdin)
+    exit(0);
   return c;
 }
 
@@ -129,18 +149,9 @@ void rxPrepareInput(VM *vm) {
 }
 
 void rxPrepareOutput(VM *vm) {
-  tcgetattr(0, &vm->old_termios);
-  vm->new_termios = vm->old_termios;
-  vm->new_termios.c_iflag &= ~(BRKINT+ISTRIP+IXON+IXOFF);
-  vm->new_termios.c_iflag |= (IGNBRK+IGNPAR);
-  vm->new_termios.c_lflag &= ~(ICANON+ISIG+IEXTEN+ECHO);
-  vm->new_termios.c_cc[VMIN] = 1;
-  vm->new_termios.c_cc[VTIME] = 0;
-  tcsetattr(0, TCSANOW, &vm->new_termios);
 }
 
 void rxRestoreIO(VM *vm) {
-  tcsetattr(0, TCSANOW, &vm->old_termios);
 }
 
 /* File I/O Support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -160,9 +171,10 @@ void rxAddInputSource(VM *vm) {
 }
 
 CELL rxOpenFile(VM *vm) {
-  CELL slot = rxGetFileHandle(vm);
-  CELL mode = TOS; DROP;
-  CELL name = TOS; DROP;
+  CELL slot, mode, name;
+  slot = rxGetFileHandle(vm);
+  mode = TOS; DROP;
+  name = TOS; DROP;
   rxGetString(vm, name);
   if (slot > 0)
   {
@@ -185,9 +197,10 @@ CELL rxReadFile(VM *vm) {
 }
 
 CELL rxWriteFile(VM *vm) {
-  CELL slot = TOS; DROP;
-  CELL c = TOS; DROP;
-  CELL r = fputc(c, vm->files[slot]);
+  CELL slot, c, r;
+  slot = TOS; DROP;
+  c = TOS; DROP;
+  r = fputc(c, vm->files[slot]);
   return (r == EOF) ? 0 : 1;
 }
 
@@ -204,17 +217,19 @@ CELL rxGetFilePosition(VM *vm) {
 }
 
 CELL rxSetFilePosition(VM *vm) {
-  CELL slot = TOS; DROP;
-  CELL pos  = TOS; DROP;
-  CELL r = fseek(vm->files[slot], pos, SEEK_SET);
+  CELL slot, pos, r;
+  slot = TOS; DROP;
+  pos  = TOS; DROP;
+  r = fseek(vm->files[slot], pos, SEEK_SET);
   return r;
 }
 
 CELL rxGetFileSize(VM *vm) {
-  CELL slot = TOS; DROP;
-  CELL current = ftell(vm->files[slot]);
-  CELL r = fseek(vm->files[slot], 0, SEEK_END);
-  CELL size = ftell(vm->files[slot]);
+  CELL slot, current, r, size;
+  slot = TOS; DROP;
+  current = ftell(vm->files[slot]);
+  r = fseek(vm->files[slot], 0, SEEK_END);
+  size = ftell(vm->files[slot]);
   fseek(vm->files[slot], current, SEEK_SET);
   return (r == 0) ? size : 0;
 }
@@ -234,10 +249,8 @@ CELL rxLoadImage(VM *vm, char *image) {
     fclose(fp);
   }
   else {
-    if ((fp = fopen(GLOBAL, "rb")) != NULL) {
-      x = fread(&vm->image, sizeof(CELL), IMAGE_SIZE, fp);
-      fclose(fp);
-    }
+    printf("Unable to find the retroImage!\n");
+    exit(1);
   }
   return x;
 }
@@ -248,9 +261,9 @@ CELL rxSaveImage(VM *vm, char *image) {
 
   if ((fp = fopen(image, "wb")) == NULL)
   {
-    fprintf(stderr, "Sorry, but I couldn't open %s\n", image);
+    printf("Unable to save the retroImage!\n");
     rxRestoreIO(vm);
-    exit(-1);
+    exit(2);
   }
 
   if (vm->shrink == 0)
@@ -264,9 +277,10 @@ CELL rxSaveImage(VM *vm, char *image) {
 
 /* Environment Query ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 void rxQueryEnvironment(VM *vm) {
-  CELL req = TOS;  DROP;
-  CELL dest = TOS; DROP;
+  CELL req, dest;
   char *r;
+  req = TOS;  DROP;
+  dest = TOS; DROP;
 
   rxGetString(vm, req);
   r = getenv(vm->request);
@@ -284,7 +298,6 @@ void rxQueryEnvironment(VM *vm) {
 
 /* Device I/O Handler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 void rxDeviceHandler(VM *vm) {
-  struct winsize w;
   if (vm->ports[0] != 1) {
     /* Input */
     if (vm->ports[0] == 0 && vm->ports[1] == 1) {
@@ -355,11 +368,13 @@ void rxDeviceHandler(VM *vm) {
         case -10: vm->ports[5] = 0;
                   rxQueryEnvironment(vm);
                   break;
-        case -11: ioctl(0, TIOCGWINSZ, &w);
-                  vm->ports[5] = w.ws_col;
+        case -11: vm->ports[5] = 0;
                   break;
-        case -12: ioctl(0, TIOCGWINSZ, &w);
-                  vm->ports[5] = w.ws_row;
+        case -12: vm->ports[5] = 0;
+                  break;
+        case -13: vm->ports[5] = CELLSIZE;
+                  break;
+        case -14: vm->ports[5] = VM_ENDIAN;
                   break;
         default:  vm->ports[5] = 0;
       }
@@ -415,16 +430,11 @@ void rxProcessOpcode(VM *vm) {
          break;
     case VM_LOOP:
          TOS--;
+           IP++;
          if (TOS != 0 && TOS > -1)
-         {
-           IP++;
            IP = vm->image[IP] - 1;
-         }
          else
-         {
-           IP++;
            DROP;
-         }
          break;
     case VM_JUMP:
          IP++;
@@ -525,9 +535,8 @@ void rxProcessOpcode(VM *vm) {
          break;
     case VM_SHR:
          a = TOS;
-         b = NOS;
          DROP
-         TOS = b >>= a;
+         TOS >>= a;
          break;
     case VM_ZERO_EXIT:
          if (TOS == 0) {
@@ -578,8 +587,7 @@ void rxProcessOpcode(VM *vm) {
 /* Stats ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 void rxDisplayStats(VM *vm)
 {
-  int s = 0;
-  int i = 0;
+  int s, i;
 
   printf("Runtime Statistics\n");
   printf("NOP:     %d\n", vm->stats[VM_NOP]);
@@ -622,13 +630,53 @@ void rxDisplayStats(VM *vm)
   printf("Total opcodes processed: %d\n", i);
 }
 
-/* String Evaluation ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-void rxEvaluateString(VM *vm, char *string) {
-  vm->inputString = string;
-  vm->inputSource = 1;
-  vm->strIndex = 0;
-  while ((vm->inputSource != 0) && (IP < IMAGE_SIZE)) {
-    rxProcessOpcode(vm);
-    IP++;
+/* Main ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+int main(int argc, char **argv) {
+  VM *vm;
+  int i, wantsStats;
+
+  wantsStats = 0;
+  vm = calloc(sizeof(VM), sizeof(char));
+  strcpy(vm->filename, LOCAL_FNAME);
+
+  rxPrepareInput(vm);
+
+  /* Parse the command line arguments */
+  for (i = 1; i < argc; i++) {
+    if (strcmp(argv[i], "--with") == 0)
+      rxIncludeFile(vm, argv[++i]);
+    if (strcmp(argv[i], "--image") == 0)
+      strcpy(vm->filename, argv[++i]);
+    if (strcmp(argv[i], "--shrink") == 0)
+      vm->shrink = 1;
+    if (strcmp(argv[i], "--stats") == 0)
+      wantsStats = 1;
+    if (strcmp(argv[i], "--help") == 0)
+    {
+      printf("--with filename    Add filename to the input stack\n");
+      printf("--image filename   Use filename as the image to load\n");
+      printf("--shrink           When saving, don't save unused cells\n");
+      printf("--stats            Display opcode usage and stack summaries upon exit\n");
+      printf("--help             Display this text\n");
+      exit(1);
+    }
   }
+
+  if (rxLoadImage(vm, vm->filename) == 0) {
+    printf("Sorry, unable to find %s\n", vm->filename);
+    free(vm);
+    exit(1);
+  }
+
+  rxPrepareOutput(vm);
+  for (IP = 0; IP < IMAGE_SIZE; IP++)
+    rxProcessOpcode(vm);
+  rxRestoreIO(vm);
+
+  if (wantsStats == 1)
+    rxDisplayStats(vm);
+
+  free(vm);
+  return 0;
 }
+

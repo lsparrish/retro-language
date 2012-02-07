@@ -675,7 +675,7 @@ Loading
 -------
 ::
 
-  needs casket::html'
+  needs decompose'
 
 
 -------
