@@ -58,23 +58,8 @@ static union {
     unsigned int byte:8;
 } sdcard_response;
 
-static uint8_t sdcard_crc7update(uint8_t crc, uint8_t data) {
-    uint8_t i;
-    uint8_t bit;
-    uint8_t c;
-
-    c = data;
-    for (i = 0x80; i > 0; i >>= 1) {
-        bit = crc & 0x40;
-        if (c & i) bit = !bit;
-        crc <<= 1;
-        if (bit) crc ^= 0x09;
-    }
-    crc &= 0x7f;
-    return crc & 0x7f;
-}
-
-static inline void sdcard_print_r1(char *msg)
+#if 0
+static void sdcard_print_r1(char *msg)
 {
     console_puts(msg);
     console_putc(' ');
@@ -88,16 +73,14 @@ static inline void sdcard_print_r1(char *msg)
     if (sdcard_response.dat.in_idle_state == 1) console_putc('1'); else console_putc('0');
     console_putc(' ');
 }
+#endif
 
-static inline void sdcard_call_r1(
+static void  sdcard_call_r1(
         uint8_t cmdnum,
         uint32_t val,
         uint8_t busy,
         uint8_t deselect)
 {
-    unsigned int i;
-    //char buf[100];
-
     /* Select SD card */
     SDCARD_PORT &= ~(1<<SDCARD_SS);
 
@@ -106,22 +89,8 @@ static inline void sdcard_call_r1(
     sdcard_command.command.dat.cmd = cmdnum;
     sdcard_command.argument.value = val;
 
-    sdcard_command.crc = sdcard_crc7update(0, sdcard_command.command.byte);
-    sdcard_command.crc = sdcard_crc7update(sdcard_command.crc, sdcard_command.argument.dat.arg1);
-    sdcard_command.crc = sdcard_crc7update(sdcard_command.crc, sdcard_command.argument.dat.arg2);
-    sdcard_command.crc = sdcard_crc7update(sdcard_command.crc, sdcard_command.argument.dat.arg3);
-    sdcard_command.crc = sdcard_crc7update(sdcard_command.crc, sdcard_command.argument.dat.arg4);
-    sdcard_command.crc = (sdcard_command.crc << 1) | 1;
-
-    /*sprintf(buf, "\n#CMD %hhx %hhx %hhx %lu %hhx %hhx %hhx %hhx %hhx ",
-            busy, deselect,
-            sdcard_command.command.byte,
-            sdcard_command.argument.value,
-            sdcard_command.argument.dat.arg1,
-            sdcard_command.argument.dat.arg2,
-            sdcard_command.argument.dat.arg3,
-            sdcard_command.argument.dat.arg4,
-            sdcard_command.crc);*/
+    if (cmdnum == 0) sdcard_command.crc = 0x95;
+    else sdcard_command.crc = 0;
 
     /* send command */
     spi_transfer_byte(sdcard_command.command.byte);
@@ -132,23 +101,21 @@ static inline void sdcard_call_r1(
     spi_transfer_byte(sdcard_command.crc);
 
     /* recive response */
-    for (i = 0; i < 200; ++i) {
+    for (unsigned int i = 0; i < 200; ++i) {
         sdcard_response.byte = spi_transfer_byte(0xFF);
         if (sdcard_response.dat.start_bit == 0)
             break;
         _delay_ms(1);
     }
-    //sdcard_print_r1(buf);
 
     if (busy && sdcard_response.dat.start_bit == 0) {
-        console_putc('>');
         if (sdcard_response.dat.start_bit != 0)
-            return;
+            goto finish;
         while (spi_transfer_byte(0xFF) == 0xFF);
         spi_transfer_byte(0xFF);
-        console_putc('<');
     }
 
+finish:
     if (deselect) {
         SDCARD_PORT |= (1<<SDCARD_SS);
         spi_transfer_byte(0xFF);
@@ -162,8 +129,6 @@ static uint8_t storage_init(void) {
     SDCARD_PORT |= (1<<SDCARD_SS);
     for (i = 0; i < 10; i++)
         spi_transfer_byte(0xFF);
-
-    _delay_ms(1000);
 
     for (;;) {
         sdcard_call_r1(SD_CMD_GO_IDLE_STATE, 0, SD_NORM, SD_DESS);
@@ -197,11 +162,10 @@ static uint8_t storage_init(void) {
 }
 
 static uint8_t storage_read_sector(unsigned char *data, uint32_t addr) {
-    //char buf[14];
+    //char buf[10];
     unsigned int i;
-    //unsigned char a, b;
 
-    //sprintf(buf, "R%ld ", addr);
+    //sprintf(buf, "\nR%ld ", addr);
     //console_puts(buf);
 
     /* convert sector number to byte address */
@@ -214,20 +178,11 @@ static uint8_t storage_read_sector(unsigned char *data, uint32_t addr) {
     }
 
     /* send and recive data tocken */
-    spi_transfer_byte(0xFE);
+    while (spi_transfer_byte(0xFF) != 0xFE);
 
     /* recv data */
-    //console_puts("\n$R ");
-    for (i = 0; i < STORAGE_SECTOR_SIZE; ++i) {
+    for (i = 0; i < STORAGE_SECTOR_SIZE; ++i)
         data[i] = spi_transfer_byte(0xFF);
-        /*a = (data[i] >> 4);
-        b = data[i] & 0xF;
-        if (a > 9) console_putc('A' - 10 + a);
-        else console_putc('0' + a);
-        if (b > 9) console_putc('A' - 10 + b);
-        else console_putc('0' + b);*/
-    }
-    //console_putc(' ');
 
     /* recv crc (2 bytes) */
     spi_transfer_byte(0xFF);
@@ -235,23 +190,35 @@ static uint8_t storage_read_sector(unsigned char *data, uint32_t addr) {
 
     SDCARD_PORT |= (1<<SDCARD_SS);
     spi_transfer_byte(0xFF);
+
+    /*
+    for (i = 0; i < STORAGE_SECTOR_SIZE; ++i) {
+        unsigned char a, b;
+        a = (data[i] >> 4);
+        b = data[i] & 0xF;
+        if (a > 9) console_putc('A' - 10 + a);
+        else console_putc('0' + a);
+        if (b > 9) console_putc('A' - 10 + b);
+        else console_putc('0' + b);
+    }
+    console_putc(' '); */
     return 0;
 }
 
 static uint8_t storage_write_sector(unsigned char *data, uint32_t addr) {
+    //char buf[10];
     unsigned int i;
+
+    /*sprintf(buf, "\nW%ld ", addr);
+    console_puts(buf);*/
 
     /* convert sector number to byte address */
     addr <<= STORAGE_SECTOR_SHIFT;
-
-    /* wait if the card is busy */
-    // while (spi_transfer_byte(0xFF) == 0xFF);
 
     /* send read sector command */
     for (;;) {
         sdcard_call_r1(SD_CMD_WRITE_BLOCK, addr, SD_NORM, SD_CONT);
         if (sdcard_response.dat.start_bit == 0) break;
-        _delay_ms(10);
     }
 
     /* send data token */
@@ -264,6 +231,9 @@ static uint8_t storage_write_sector(unsigned char *data, uint32_t addr) {
     /* send crc */
     spi_transfer_byte(0);
     spi_transfer_byte(0);
+
+    /* wait while write finished */
+    while(spi_transfer_byte(0xFF) == 0);
 
     SDCARD_PORT |= (1<<SDCARD_SS);
     spi_transfer_byte(0xFF);
@@ -279,14 +249,17 @@ static uint8_t storage_write_sector(unsigned char *data, uint32_t addr) {
 
 static FILE *fd;
 
+static CELL check_data[32000];
+
 static uint8_t storage_init() {
     fd = fopen(STORAGE_IMAGE_FILE, "r+");
+    fread(check_data, sizeof(CELL), 32000, fd);
+    fseek(fd, 0, SEEK_SET);
     return 0;
 }
 
 static uint8_t storage_read_sector(uint8_t *buffer, uint32_t sector) {
-    //char buf[14];
-    //unsigned char a, b;
+    char buf[10];
     if (0 != fseek(fd, sector * STORAGE_SECTOR_SIZE, SEEK_SET)) {
         perror("fseek");
         return 1;
@@ -294,9 +267,11 @@ static uint8_t storage_read_sector(uint8_t *buffer, uint32_t sector) {
     for (int i = 0; i < STORAGE_SECTOR_SIZE; ++i)
         buffer[i] = 0;
     fread(buffer, STORAGE_SECTOR_SIZE, 1, fd);
-    //sprintf(buf, "R%d ", sector);
-    //console_puts(buf);
-    /*for (int i = 0; i < STORAGE_SECTOR_SIZE; ++i) {
+
+    sprintf(buf, "\nR%d ", sector);
+    console_puts(buf);
+    for (unsigned int i = 0; i < STORAGE_SECTOR_SIZE; ++i) {
+        unsigned char a, b;
         a = (buffer[i] >> 4);
         b = buffer[i] & 0xF;
         if (a > 9) console_putc('A' - 10 + a);
@@ -304,7 +279,6 @@ static uint8_t storage_read_sector(uint8_t *buffer, uint32_t sector) {
         if (b > 9) console_putc('A' - 10 + b);
         else console_putc('0' + b);
     }
-    console_putc(' ');*/
     return 0;
 }
 

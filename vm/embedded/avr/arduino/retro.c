@@ -4,7 +4,7 @@
 /* Configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #define CELL            int16_t
 #define IMAGE_SIZE        31000
-#define IMAGE_CACHE_SIZE    800
+#define IMAGE_CACHE_SIZE    100
 #define ADDRESSES            64
 #define STACK_DEPTH          64
 #define PORTS                15
@@ -70,9 +70,8 @@ static void console_puts(char *s);
 
 static void spi_master_init(void);
 static void spi_slave_init(void);
-static uint8_t spi_transfer_byte(uint8_t data);
-static CELL spi_transfer_cell(CELL data);
-static uint32_t spi_transfer_long(uint32_t data);
+static uint8_t __attribute__((always_inline)) spi_transfer_byte(uint8_t data);
+static CELL __attribute__((always_inline)) spi_transfer_cell(CELL data);
 
 #endif
 
@@ -163,24 +162,16 @@ static void spi_slave_init(void) {
     SPCR = (1 << SPE) | SPI_SPEED;
 }
 
-static inline uint8_t spi_transfer_byte(uint8_t data) {
+static uint8_t spi_transfer_byte(uint8_t data) {
     SPDR = data;
     while ((SPSR & (1 << SPIF)) == 0);
     return SPDR;
 }
 
-static inline CELL spi_transfer_cell(CELL data) {
+static CELL spi_transfer_cell(CELL data) {
     union { CELL l; uint8_t c[sizeof(CELL)]; } d;
     d.l = data;
     for (int8_t i = sizeof(CELL) - 1; i >= 0; --i)
-        d.c[i] = spi_transfer_byte(d.c[i]);
-    return d.l;
-}
-
-static inline uint32_t spi_transfer_long(uint32_t data) {
-    union { uint32_t l; uint8_t c[sizeof(long)]; } d;
-    d.l = data;
-    for (int8_t i = sizeof(uint32_t) - 1; i >= 0; --i)
         d.c[i] = spi_transfer_byte(d.c[i]);
     return d.l;
 }
@@ -191,8 +182,8 @@ static inline uint32_t spi_transfer_long(uint32_t data) {
 
 #ifdef IMAGE_MODE_roflash
 
-static inline CELL img_storage_get(CELL k) { return image_read(k); }
-static inline uint8_t img_storage_put(CELL k, CELL v) { return 0; }
+static inline CELL __attribute__((always_inline)) img_storage_get(CELL k) { return image_read(k); }
+static inline uint8_t __attribute__((always_inline)) img_storage_put(CELL k, CELL v) { return 0; }
 static void img_storage_sync(void) { }
 
 #else
@@ -237,12 +228,12 @@ static inline void img_storage_load(uint32_t sec) {
     }
 }
 
-static inline CELL img_storage_get(CELL k) {
+static inline CELL __attribute__((always_inline)) img_storage_get(CELL k) {
     img_storage_load(k / IMAGE_SECTOR_SIZE);
     return image_sector_data[k % IMAGE_SECTOR_SIZE];
 }
 
-static inline uint8_t img_storage_put(CELL k, CELL v) {
+static inline uint8_t __attribute__((always_inline)) img_storage_put(CELL k, CELL v) {
     img_storage_load(k / IMAGE_SECTOR_SIZE);
     image_sector_data[k % IMAGE_SECTOR_SIZE] = v;
     image_sector_flags.changed = 1;
@@ -262,7 +253,7 @@ static void img_storage_sync(void) {
 #endif
 #endif
 
-static inline cell_cache_element_t* _cache_add(CELL key, uint8_t changed, CELL value) {
+static inline cell_cache_element_t* __attribute__((always_inline)) _cache_add(CELL key, uint8_t changed, CELL value) {
     cell_cache_element_t *elem = malloc(sizeof(cell_cache_element_t));
     elem->key = key;
     elem->changed = changed;
@@ -272,7 +263,7 @@ static inline cell_cache_element_t* _cache_add(CELL key, uint8_t changed, CELL v
 }
 
 static inline CELL img_get(CELL k) {
-    cell_cache_element_t *elem;
+    cell_cache_element_t *elem = NULL;
     HASH_FIND(hh, cell_cache, &k, sizeof(k), elem);
     if (elem == NULL) {
         CELL v = img_storage_get(k);
@@ -281,11 +272,17 @@ static inline CELL img_get(CELL k) {
         HASH_DELETE(hh, cell_cache, elem);
         HASH_ADD(hh, cell_cache, key, sizeof(CELL), elem);
     }
+#ifdef BOARD_native
+    if (check_data[k] != elem->value) {
+        console_puts("\nERROR: data read check failed ");
+        abort();
+    }
+#endif
     return elem->value;
 }
 
 static inline void img_put(CELL k, CELL v) {
-    cell_cache_element_t *elem;
+    cell_cache_element_t *elem = NULL;
     HASH_FIND(hh, cell_cache, &k, sizeof(k), elem);
     if (elem != NULL) {
         if (elem->value != v) {
@@ -295,11 +292,12 @@ static inline void img_put(CELL k, CELL v) {
     } else {
         _cache_add(k, 1, v);
         if (HASH_COUNT(cell_cache) > IMAGE_CACHE_SIZE) {
-            cell_cache_element_t *temp;
+            cell_cache_element_t *temp = NULL;
+            elem = NULL;
             HASH_ITER(hh, cell_cache, elem, temp) {
                 if (elem->changed) {
                     if (HASH_COUNT(cell_cache) < (IMAGE_CACHE_SIZE+5)) continue;
-                    if (!img_storage_put(k, v)) continue;
+                    if (!img_storage_put(elem->key, elem->value)) continue;
                 }
                 HASH_DEL(cell_cache, elem);
                 free(elem);
@@ -308,6 +306,9 @@ static inline void img_put(CELL k, CELL v) {
             }
         }
     }
+#ifdef BOARD_native
+    check_data[k] = v;
+#endif
 }
 
 static inline void img_sync() {

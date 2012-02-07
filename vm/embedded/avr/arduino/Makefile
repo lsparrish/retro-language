@@ -4,7 +4,7 @@ DISPLAY=nokia3110
 STORAGE=sdcard
 IMAGE_MODE=rwstorage
 
-CFLAGS=-Os -std=gnu99 -Wall -Wextra -std=gnu9x
+CFLAGS=-O2 -std=gnu99 -Wall -Wextra
 NATCFLAGS=-DBOARD_native
 AVRCFLAGS=$(CFLAGS) -DAVRCPU -DF_CPU=16000000UL -mmcu=atmega2560
 DEPENDS=retro.c console_$(BOARD).h
