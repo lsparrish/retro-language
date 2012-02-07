@@ -13,7 +13,7 @@ variables| bold italic underline heading url image |
   putc ;
 
 : render  ( $- )
-  [ @ display ] ^types'STRING each@ ;
+  cr [ @ display ] ^types'STRING each@ ;
 
 here "index.rxw" ^files'slurp
 here render
