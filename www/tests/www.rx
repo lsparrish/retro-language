@@ -8,6 +8,8 @@ variables| bold italic underline heading url image |
   [ '[ = ] [ "<a href='" puts ] whend
   [ '| = ] [ "'>" puts ] whend
   [ '] = ] [ "</a>" puts ] whend
+  [ '< = ] [ "<img src='" puts ] whend
+  [ '> = ] [ "'>" puts ] whend
   putc ;
 
 : render  ( $- )
