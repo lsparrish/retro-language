@@ -1,6 +1,25 @@
-=hello=
-~ *This is a _test_ of RetroWeb Templating*
-~ foo. bar. baz
-~ [http://google.com|google search]
-~ <http://path/to/image>
+=retro is=
+~a concatenative, stack based language with roots in Forth.
+=retro 11.2=
+
+~The [http://s3.retroforth.org/download/11.x/retro-11.2.tar.gz|latest stable
+ release] was made on January 15, 2012.
+
+~This includes virtual machines in C, C#, Common Lisp, Forth, F#, Go, HTML5,
+ Java, Perl, PHP, Python, Ruby, Scheme, and x86 assembly language. It also
+ includes the standard image, libraries, and documentation in ReStructured
+ Text (ReST) format.
+
+~The [docs.html|documentation] is also provided in HTML formats.
+
+=development=
+~All development is now being managed through [https://launchpad.net/retro-language|Launchpad].
+~We have a Bazaar repository and bug tracker there. Mailing lists are still provided through
+ Google groups, and our [http://webchat.freenode.net/?channels=retro">IRC channel</a> remains active. We provide
+       <a href="http://rx-core.org/dev/rancid">logs</a> of the IRC discussions for the past several years.</p>
+    <p>You can obtain a copy of the repository by doing <tt>bzr branch lp:retro-language</tt>.<p>
+    <p>Users of git can clone a copy of the repository by doing: <tt>git clone https://github.com/crcx/retro-language.git</tt></p>
+    <p>A <a href="snapshot.tar.gz">snapshot</a> of the current code is provided for those who are interested. This
+       is generated from the Bazaar repository and is updated hourly.</p>
+  </td>
 
