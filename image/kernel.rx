@@ -21,7 +21,7 @@ TIB  variable: <tib>  ( Start of default text input buffer                    )
 
 label: copytag   "Retro" $,
 label: version   "11.3" $,
-label: build     "2012.02.07" $,
+label: build     "2012.02.08" $,
 label: okmsg     "ok  " $,
 pad
 
@@ -53,18 +53,18 @@ t: here     (  -a )  heap # @, ;
 t: ,        ( n-  )  here !+ heap # !, ;
 t: ;;       (  -  )  9 # , ;
 t: t-;      (  -  )  ;; ;; compiler # off ;
-t: ($,)     ( a-a )  repeat @+ 0; , again ;
-t: $        ( a-  )  ($,) drop, 0 # , ;
+i: ($,)     ( a-a )  repeat @+ 0; , again ;
+i: $        ( a-  )  ($,) drop, 0 # , ;
 t: push     ( n-  )  5 # , ;
 t: pop      (  -n )  6 # , ;
 
 ( Conditionals and Flow Control ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-t: (if)     ( -a            )  , here 0 # , ;
-t: t-=if    ( R: xy-  C: -a )  12 # jump: (if)
-t: t->if    ( R: xy-  C: -a )  11 # jump: (if)
-t: t-<if    ( R: xy-  C: -a )  10 # jump: (if)
-t: t-!if    ( R: xy-  C: -a )  13 # jump: (if)
-t: t-then   ( R: -    C: a- )  here swap, !, ;
+i: (if)     ( -a            )  , here 0 # , ;
+i: t-=if    ( R: xy-  C: -a )  12 # jump: (if)
+i: t->if    ( R: xy-  C: -a )  11 # jump: (if)
+i: t-<if    ( R: xy-  C: -a )  10 # jump: (if)
+i: t-!if    ( R: xy-  C: -a )  13 # jump: (if)
+i: t-then   ( R: -    C: a- )  here swap, !, ;
 t: t-0;     ( n-n   ||   n- )  25 # , ;
 t: t-repeat ( R: -    C: -a )  here ;
 t: t-again  ( R: -    C: a- )  8 # , , ;
@@ -86,8 +86,8 @@ t: .primitive  (  a- )
 -1 variable: update
 t: redraw (  -  ) update # @, 0; drop, 0 # 3 # out, ;
 t: putc   ( c-  ) 0; 1 # 2 # out, wait redraw ;
-t: cr     (  -  ) 10 # putc ;
-t: (puts) ( a-a ) repeat @+ 0; putc again ;
+i: cr     (  -  ) 10 # putc ;
+i: (puts) ( a-a ) repeat @+ 0; putc again ;
 t: <puts> ( a-  ) (puts) drop, ;
 t: puts   ( a-  ) <puts> ;
 
@@ -107,14 +107,14 @@ t: ws        ( c-c )
    dup,   10 # =if drop, 32 # then
    tabAsWhitespace # @, 0 # !if dup, 9 # =if drop, 32 # then then ;
 
-t: <getc> (  -c ) 1 # 1 # out, wait 1 # in, ;
+i: <getc> (  -c ) 1 # 1 # out, wait 1 # in, ;
 t: getc   (  -c ) repeat <getc> remapKeys dup 0 # !if ws ; then drop, again ;
-t: putc?  ( n-n ) dup, 8 # =if drop, break # @, ; then dup, putc ;
-t: eat    ( a-a )
+i: putc?  ( n-n ) dup, 8 # =if drop, break # @, ; then dup, putc ;
+i: eat    ( a-a )
    eatLeading? # @, 0; drop
    repeat getc putc? dup, break # @, !if swap, !+ ; then drop, again ;
-t: guard? ( n-n ) dup, 1+, tib <if drop, tib ; then 8 # putc ;
-t: (accept) ( a-a )
+i: guard? ( n-n ) dup, 1+, tib <if drop, tib ; then 8 # putc ;
+i: (accept) ( a-a )
    repeat
      getc
      dup, 8 # =if drop, 1-, guard? jump: (accept) then
@@ -146,7 +146,7 @@ t: [        (    -naa ) compiler # @, 8 # , here 0 # , here compiler # on ;
 t: ]        ( naa-q   ) push, ;; here swap, !, compiler # !, pop, .data ;
 
 ( Combinators ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-t: empty    (    -    ) ;
+i: empty    (    -    ) ;
 t: if       ( fqq-    )
    push, swap, pop, swap, 0 # !if drop, do ; then swap, drop, do ;
 t: ifTrue   (  fq-    ) ' empty # if ;
@@ -155,8 +155,8 @@ t: dip      (  nq-n   ) swap, push, do pop, ;
 t: sip      (  nq-n   ) over ' do # dip ;
 
 ( Conditionals ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-t: false (  -n  )  0 # ;
-t: true  (  -n  ) -1 # ;
+i: false (  -n  )  0 # ;
+i: true  (  -n  ) -1 # ;
 t: =    ( xy-f  ) =if jump: true  then jump: false
 t: <>   ( xy-f  ) !if jump: true  then jump: false
 t: >=   ( xy-f  ) >if jump: true  then jump: false
@@ -172,7 +172,7 @@ t: compare  ( $$-f )
      !if drop, drop, dup, xor, ; then
    0 # 12 m, m,
    drop, drop, -1 # ;
-t: count       ( a-a ) repeat @+ 0; drop, again ;
+i: count       ( a-a ) repeat @+ 0; drop, again ;
 t: getLength   ( a-n ) dup, count 1-, swap, -, ;
 t: withLength  ( a-an ) dup, getLength ;
 t: keepString  ( a-a ) withLength 3 # +, here +, 8 # , , here swap, $ ;
@@ -185,20 +185,20 @@ t: STRING-BUFFERS ( -n )   12 # ;
 label: numbers "0123456789ABCDEF" $,
 
 t: nums     ( -a ) numbers # ;
-t: (digits) nums +, @, over =if num # on then ;
-t: digits   1- repeat dup, push, (digits) pop, 0; 1- again ;
-t: valid?   base # @, dup, 16 # <if digits ; then drop, ;
-t: digit?   num # off valid? drop, num # @, ;
-t: toDigit  ( c-n ) '0 # -, base # @, 16 # =if dup, 16 # >if 7 # -, then then ;
-t: isNegative? ( a-a )
+i: (digits) nums +, @, over =if num # on then ;
+i: digits   1- repeat dup, push, (digits) pop, 0; 1- again ;
+i: valid?   base # @, dup, 16 # <if digits ; then drop, ;
+i: digit?   num # off valid? drop, num # @, ;
+i: toDigit  ( c-n ) '0 # -, base # @, 16 # =if dup, 16 # >if 7 # -, then then ;
+i: isNegative? ( a-a )
    dup, @, '- # =if -1 # negate? # !, 1+, ; then 1 # negate? # !, ;
-t: (convert)
+i: (convert)
    repeat
      dup, @, 0; toDigit #value # @, base # @, *, +, #value # !, 1+,
    again ;
 t: toNumber ( $-n )
    isNegative? 0 # #value # !, (convert) drop, #value # @, negate? # @, *, ;
-t: (isnumber)
+i: (isnumber)
    repeat dup, @, 0; digit? flag # @, and, flag # !, 1+, again ;
 t: isNumber? ( $-f ) isNegative? flag # on (isnumber) drop, flag # @, ;
 
@@ -208,8 +208,8 @@ t: isNumber? ( $-f ) isNegative? flag # on (isnumber) drop, flag # @, ;
 t: boot         (  -  )
    copytag # puts 32 # putc version # puts
    32 # putc 40 # putc build # puts 41 # putc cr ;
-t: query        ( n-n ) 5 # out, wait 5 # in, ;
-t: run-on-boot  (  -  )
+i: query        ( n-n ) 5 # out, wait 5 # in, ;
+i: run-on-boot  (  -  )
    -1  # query memory # !,  ( Memory Size     )
    -2  # query fb #     !,  ( Canvas Present? )
    -3  # query fw #     !,  ( Canvas Width    )
@@ -220,19 +220,19 @@ t: run-on-boot  (  -  )
 
 ( Dictionary Search ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 2 elements name found
-t: prepare  ( a-a  ) found # off name # !, last # @, ;
-t: done     (  -af ) which # @, found # @, ;
-t: match?   ( $-$f ) dup, d->name name # @, compare ;
-t: <search> ( $-   )
+i: prepare  ( a-a  ) found # off name # !, last # @, ;
+i: done     (  -af ) which # @, found # @, ;
+i: match?   ( $-$f ) dup, d->name name # @, compare ;
+i: <search> ( $-   )
    repeat match? 0 # !if which # !, found # on ; then @ 0; again ;
 t: find     ( $-af ) prepare <search> done ;
 t: t-'      ( "-a  ) 32 # accept tib find 0 # !if d->xt @, ; then drop, 0 # ;
 
 ( Word Prefixes and "Not Found" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 label: ___   "___" $,
-t: get      ( $-$  ) dup, @, ___ # 2 # +, !, 1+, ;
-t: xt:class ( d-aa ) dup, d->xt @, swap, d->class @, ;
-t: try      (  -   )
+i: get      ( $-$  ) dup, @, ___ # 2 # +, !, 1+, ;
+i: xt:class ( d-aa ) dup, d->xt @, swap, d->class @, ;
+i: try      (  -   )
    tib get find 0 #
    !if d->xt @, ___ # find
       0 # !if xt:class withClass 0 # ; then drop,
@@ -242,10 +242,10 @@ t: notFound   ( -  ) <notFound> 0; drop cr tib puts 32 # putc '? # putc cr ;
 
 ( Listener ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 t: ok      (   - ) compiler # @, not 0; drop, cr okmsg # puts ;
-t: word    (  d- ) xt:class jump: withClass
-t: build#  (   - ) tib toNumber ' .data # withClass ;
-t: number  (   - ) tib isNumber? 0 # !if build# ; then notFound ;
-t: process ( af- ) 0 # !if word ; then drop number ;
+i: word    (  d- ) xt:class jump: withClass
+i: build#  (   - ) tib toNumber ' .data # withClass ;
+i: number  (   - ) tib isNumber? 0 # !if build# ; then notFound ;
+i: process ( af- ) 0 # !if word ; then drop number ;
 t: listen  (   - ) repeat ok 32 # accept tib find process again ;
 
 ( Initial Dictionary ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
