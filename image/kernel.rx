@@ -61,9 +61,6 @@ t: pop      (  -n )  6 # , ;
 ( Conditionals and Flow Control ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 i: (if)     ( -a            )  , here 0 # , ;
 i: t-=if    ( R: xy-  C: -a )  12 # jump: (if)
-i: t->if    ( R: xy-  C: -a )  11 # jump: (if)
-i: t-<if    ( R: xy-  C: -a )  10 # jump: (if)
-i: t-!if    ( R: xy-  C: -a )  13 # jump: (if)
 i: t-then   ( R: -    C: a- )  here swap, !, ;
 t: t-0;     ( n-n   ||   n- )  25 # , ;
 t: t-repeat ( R: -    C: -a )  here ;
@@ -100,7 +97,7 @@ t: puts   ( a-  ) <puts> ;
 t: tib ( -a ) <tib> # @, ;
 
 t: remapKeys ( c-c ) ;
-t: ws        ( c-c )
+i: ws        ( c-c )
    dup,  127 # =if drop,  8 # then
    dup,   13 # =if drop, 10 # then
    remapping # @, 0; drop,
@@ -291,8 +288,7 @@ t: listen  (   - ) repeat ok 32 # accept tib find process again ;
 ' <=             word: <=             ' >=           word: >=
 
 ' t-;            macro: ;             ' ;;           macro: ;;
-' t-=if          macro: =if           ' t->if        macro: >if
-' t-<if          macro: <if           ' t-!if        macro: !if
+' t-=if          macro: =if
 ' t-then         macro: then          ' t-repeat     macro: repeat
 ' t-again        macro: again         ' t-0;         macro: 0;
 ' push           macro: push          ' pop          macro: pop
@@ -392,7 +388,7 @@ here
 
 ( Compiler Macros ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : `     ( "-  )
-  ' dup 0 !if .data @which @d->class , ;; then
+  ' dup 0 <> -1 =if .data @which @d->class , ;; then
   drop tib isNumber? -1
   =if tib toNumber .data &.data , ;; then
   notFound ; compile-only
@@ -826,9 +822,6 @@ chain: types'
 
 ( cleanup ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 hide =if
-hide !if
-hide >if
-hide <if
 hide then
 
 global .s save bye
