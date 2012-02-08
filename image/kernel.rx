@@ -86,13 +86,13 @@ t: .primitive  (  a- )
 -1 variable: update
 t: redraw (  -  ) update # @, 0; drop, 0 # 3 # out, ;
 t: putc   ( c-  ) 0; 1 # 2 # out, wait redraw ;
-i: cr     (  -  ) 10 # putc ;
+t: cr     (  -  ) 10 # putc ;
 i: (puts) ( a-a ) repeat @+ 0; putc again ;
 t: <puts> ( a-  ) (puts) drop, ;
 t: puts   ( a-  ) <puts> ;
 
 ( Console Input ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-variable break                           ( Holds the delimiter for 'accept'   )
+   variable  break                       ( Holds the delimiter for 'accept'   )
 -1 variable: remapping                   ( Allow extended whitespace?         )
 -1 variable: eatLeading?                 ( Eat leading delimiters?            )
 -1 variable: tabAsWhitespace
