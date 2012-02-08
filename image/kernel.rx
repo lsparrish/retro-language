@@ -570,7 +570,7 @@ create dicts 64 allot
 
   ( Main Wrapper ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
   : try      (  -   )
-    flag on tib (split prefix) [ handle ] &drop if @flag ;
+    flag on tib (split prefix) &handle &drop if @flag ;
   &try is <notFound>
 }}
 
@@ -607,7 +607,7 @@ create dicts 64 allot
 ( Formatted String Display ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 -1 variable: formatted
 {{
-  : withBase ( n$q-$ ) [ swap ] dip base [ do ] preserve ;
+  : withBase ( n$q-$ ) &swap dip base &do preserve ;
   : char ( $-$ )
     @+ [ 'n = ] [ cr      ] whend
        [ '' = ] [ '" putc ] whend
@@ -642,7 +642,7 @@ create dicts 64 allot
 }}
 
 {{
-  : list    ( a-  ) [ d->name puts space ] 3 ( LIST ) each@ ;
+  : list    ( a-  ) [ d->name puts space ] 3 ( ^types'LIST ) each@ ;
   : others  (  -  ) @dicts repeat 0; cr dup dicts + list 1- again ;
 ---reveal---
   : words   (  -  ) cr formatted dup [ off others cr last list ] preserve ;
@@ -705,7 +705,7 @@ chain: strings'
   variables| len needle haystack flag right left src |
   : buffer (  -a ) here STRING-LENGTH 4 * + STRING-BUFFERS STRING-LENGTH * + ;
   : trim   ( $-$ )
-    dup withLength + 1- dup @ 32 = [ 0 swap ! dup 1- -- trim ] [ drop ] if ;
+    dup withLength + 1- dup @ 32 = [ 0 swap ! dup 1- -- trim ] &drop if ;
   : place  ( $$n- ) [ copy 0 ] sip here + ! ;
   : prep   (  $$- ) swap !haystack [ getLength !len ] [ !needle ] bi 0 !flag ;
   : move   (    - ) @haystack here @len place haystack ++ ;
@@ -745,7 +745,7 @@ chain: strings'
 }}
   : reverse ( $-$ )
     dup tempString set
-    [ getLength ] [ withLength + 1- ] bi swap
+    &getLength [ withLength + 1- ] bi swap
     [ dup @ add 1- ] times drop
     start tempString ;
   : split ( $n-$$ )
