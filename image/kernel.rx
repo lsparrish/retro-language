@@ -508,7 +508,7 @@ create dicts 64 allot
   2 elements active prior
   create "|" 124 ,  0 ,
   create "%%" 37 , 37 , 0 ,
-  : seal   (  - ) last repeat @ 0; @active over @ =if 0 swap ! ;; then again ;
+  : seal   (  - ) last [ @ 0; @active over @ = ] until 0 swap ! ;
   : revert (  - ) @prior 0; !last 0 !prior ;
   : safety (  - ) "%%" header immediate &revert @last !d->xt ;
 ---reveal---
