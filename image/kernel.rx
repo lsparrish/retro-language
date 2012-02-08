@@ -331,8 +331,9 @@ create list  ( -a )  0 , 0 ,
 : {{ ( - )  last @ dup list ! list 1+ ! ;
 : ---reveal--- ( - ) last @ list 1+ ! ;
 : }} ( - )
-  list @ list 1+ @ =if list @ last ! ;; then
-  list @ [ last repeat @ dup @ list 1+ @ =if ;; then again ] do ! ;
+  list @ list 1+ @ =
+  [ list @ last ! ]
+  [ list @ [ last repeat @ dup @ list 1+ @ <> 0; drop again ] do ! ] if ;
 
 ( Vectored Execution ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : :devector ( a-  ) dup 0 swap ! 1+ 0 swap ! ;
