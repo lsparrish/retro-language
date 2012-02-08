@@ -346,10 +346,10 @@ create list  ( -a )  0 , 0 ,
 {{
   create a 0 , create b 0 , create c 0 , create xt 0 ,
   : skim       ( a-a )
-    last repeat @ over over d->xt @ =if nip ;; then 0; again ;
+    last repeat @ over over d->xt @ = [ nip 0 ] ifTrue 0; again ;
   : getHeaders ( $-  )
     xt ! 0 a ! 0 b ! 0 c !
-    last repeat @ 0; dup d->xt @ xt @ =if dup b ! @ a ! ;; then dup c ! again ;
+    last repeat @ 0; dup d->xt @ xt @ = [ dup b ! @ a ! 0 ] [ -1 ] if 0; drop dup c ! again ;
   : <hide>     ( a-  ) getHeaders b @ 0; drop a @ c @ ! ;
 ---reveal---
   : d'         ( "-a ) ' drop which @ ;
@@ -389,10 +389,10 @@ here
 
 ( Compiler Macros ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : `     ( "-  )
-  ' dup 0 <> -1 =if .data @which @d->class , ;; then
-  drop tib isNumber? -1
-  =if tib toNumber .data &.data , ;; then
-  notFound ; compile-only
+  ' dup 0 <> -1 =
+  [ .data @which @d->class , ]
+  [  drop tib isNumber? -1 =
+    [ tib toNumber .data &.data , ] [ notFound ] if ] if ; compile-only
 : jump: ( "- ) ' 0; 8 , , ; compile-only
 
 ( Additional Combinators ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
