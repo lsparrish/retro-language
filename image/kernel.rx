@@ -21,7 +21,7 @@ TIB  variable: <tib>  ( Start of default text input buffer                    )
 
 label: copytag   "Retro" $,
 label: version   "11.3" $,
-label: build     "2012.02.03" $,
+label: build     "2012.02.07" $,
 label: okmsg     "ok  " $,
 pad
 
@@ -155,12 +155,14 @@ t: dip      (  nq-n   ) swap, push, do pop, ;
 t: sip      (  nq-n   ) over ' do # dip ;
 
 ( Conditionals ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-t: =    ( xy-f  ) =if -1 # ; then 0 # ;
-t: <>   ( xy-f  ) !if -1 # ; then 0 # ;
-t: >=   ( xy-f  ) >if -1 # ; then 0 # ;
-t: <=   ( xy-f  ) <if -1 # ; then 0 # ;
-t: <    ( xy-f  ) >if  0 # ; then -1 # ;
-t: >    ( xy-f  ) <if  0 # ; then -1 # ;
+t: false (  -n  )  0 # ;
+t: true  (  -n  ) -1 # ;
+t: =    ( xy-f  ) =if jump: true  then jump: false
+t: <>   ( xy-f  ) !if jump: true  then jump: false
+t: >=   ( xy-f  ) >if jump: true  then jump: false
+t: <=   ( xy-f  ) <if jump: true  then jump: false
+t: <    ( xy-f  ) >if jump: false then jump: true
+t: >    ( xy-f  ) <if jump: false then jump: true
 
 ( Strings ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 t: compare  ( $$-f )
