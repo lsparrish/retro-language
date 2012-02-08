@@ -1,5 +1,5 @@
 /* Ngaro VM ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   Copyright (c) 2008 - 2011, Charles Childers
+   Copyright (c) 2008 - 2012, Charles Childers
    Copyright (c) 2009 - 2010, Luke Parrish
    Copyright (c) 2010,        Marc Simpson
    Copyright (c) 2010,        Jay Skeer
@@ -13,56 +13,33 @@
 Serial pc(USBTX, USBRX);
 LocalFileSystem local("local");
 
-/* Configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-                +---------+---------+---------+
-                | 16 bit  | 32 bit  | 64 bit  |
-   +------------+---------+---------+---------+
-   | IMAGE_SIZE | 32000   | 1000000 | 1000000 |
-   +------------+---------+---------+---------+
-   | CELL       | int16_t | int32_t | int64_t |
-   +------------+---------+---------+---------+
-
-   If memory is tight, cut the MAX_FILE_NAME and MAX_ENV_QUERY. For
-   most purposes, these can be much smaller.
-
-   You can also cut the ADDRESSES stack size down, but if you have
-   heavy nesting or recursion this may cause problems. If you do modify
-   it and experience odd problems, try raising it a bit higher.
-   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #define CELL          int16_t
-#define IMAGE_SIZE      14000              /* This can be raised to 15k */
-#define ADDRESSES         256
-#define STACK_DEPTH        50
-#define PORTS              24
-#define MAX_FILE_NAME      48
-#define MAX_ENV_QUERY       1
+#define IMAGE_SIZE      14000
+#define ADDRESSES         128
+#define STACK_DEPTH        32
+#define PORTS              16
+#define MAX_FILE_NAME      80
 #define MAX_OPEN_FILES      4
 
-typedef struct {
-  CELL sp, rsp, ip;
-  CELL data[STACK_DEPTH];
-  CELL address[ADDRESSES];
-  CELL ports[PORTS];
-  CELL image[IMAGE_SIZE];
-  char filename[MAX_FILE_NAME];
-} VM;
+CELL sp, rsp, ip;
+CELL data[STACK_DEPTH];
+CELL address[ADDRESSES];
+CELL ports[PORTS];
+CELL image[IMAGE_SIZE];
+char filename[MAX_FILE_NAME];
 
 /* Macros ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-#define IP   vm->ip
-#define SP   vm->sp
-#define RSP  vm->rsp
-#define DROP vm->data[SP] = 0; if (--SP < 0) IP = IMAGE_SIZE;
-#define TOS  vm->data[SP]
-#define NOS  vm->data[SP-1]
-#define TORS vm->address[RSP]
+#define DROP data[sp] = 0; if (--sp < 0) ip = IMAGE_SIZE;
+#define TOS  data[sp]
+#define NOS  data[sp-1]
+#define TORS address[rsp]
 
-enum vm_opcode {VM_NOP, VM_LIT, VM_DUP, VM_DROP, VM_SWAP, VM_PUSH, VM_POP,
-                VM_LOOP, VM_JUMP, VM_RETURN, VM_GT_JUMP, VM_LT_JUMP,
-                VM_NE_JUMP,VM_EQ_JUMP, VM_FETCH, VM_STORE, VM_ADD,
-                VM_SUB, VM_MUL, VM_DIVMOD, VM_AND, VM_OR, VM_XOR, VM_SHL,
-                VM_SHR, VM_ZERO_EXIT, VM_INC, VM_DEC, VM_IN, VM_OUT,
-                VM_WAIT };
+enum opcode {VM_NOP, VM_LIT, VM_DUP, VM_DROP, VM_SWAP, VM_PUSH, VM_POP,
+             VM_LOOP, VM_JUMP, VM_RETURN, VM_GT_JUMP, VM_LT_JUMP,
+             VM_NE_JUMP,VM_EQ_JUMP, VM_FETCH, VM_STORE, VM_ADD,
+             VM_SUB, VM_MUL, VM_DIVMOD, VM_AND, VM_OR, VM_XOR, VM_SHL,
+             VM_SHR, VM_ZERO_EXIT, VM_INC, VM_DEC, VM_IN, VM_OUT,
+             VM_WAIT };
 #define NUM_OPS VM_WAIT + 1
 
 /* Console I/O Support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -108,11 +85,6 @@ void dev_init_input() {
   input[isp] = stdin;
 }
 
-void dev_init_output() {
-}
-
-void dev_cleanup() {
-}
 
 /* File I/O Support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 FILE *files[MAX_OPEN_FILES];
@@ -128,23 +100,22 @@ CELL file_free()
   return 0;
 }
 
-void file_add(VM *vm) {
+void file_add() {
   char s[MAX_FILE_NAME];
   CELL name = TOS; DROP;
   CELL i = 0;
-  while(vm->image[name])
-    s[i++] = (char)vm->image[name++];
+  while(image[name])
+    s[i++] = (char)image[name++];
   s[i] = 0;
   dev_include(s);
 }
 
-CELL file_handle(VM *vm) {
+CELL file_handle() {
   CELL slot = file_free();
   CELL mode = TOS; DROP;
   CELL i, address = TOS; DROP;
-  char filename[MAX_FILE_NAME];
   for (i = 0; i < MAX_FILE_NAME; i++) {
-    filename[i] = vm->image[address+i];
+    filename[i] = image[address+i];
     if (! filename[i]) break;
   }
   if (slot > 0)
@@ -162,7 +133,7 @@ CELL file_handle(VM *vm) {
   return slot;
 }
 
-CELL file_readc(VM *vm) {
+CELL file_readc() {
   CELL c = fgetc(files[TOS]); DROP;
   if ( c == EOF )
     return 0;
@@ -170,7 +141,7 @@ CELL file_readc(VM *vm) {
     return c;
 }
 
-CELL file_writec(VM *vm) {
+CELL file_writec() {
   CELL slot = TOS; DROP;
   CELL c = TOS; DROP;
   CELL r = fputc(c, files[slot]);
@@ -180,26 +151,26 @@ CELL file_writec(VM *vm) {
     return 1;
 }
 
-CELL file_closehandle(VM *vm) {
+CELL file_closehandle() {
   fclose(files[TOS]);
   files[TOS] = 0;
   DROP;
   return 0;
 }
 
-CELL file_getpos(VM *vm) {
+CELL file_getpos() {
   CELL slot = TOS; DROP;
   return (CELL) ftell(files[slot]);
 }
 
-CELL file_seek(VM *vm) {
+CELL file_seek() {
   CELL slot = TOS; DROP;
   CELL pos  = TOS; DROP;
   CELL r = fseek(files[slot], pos, SEEK_SET);
   return r;
 }
 
-CELL file_size(VM *vm) {
+CELL file_size() {
   CELL slot = TOS; DROP;
   CELL current = ftell(files[slot]);
   CELL r = fseek(files[slot], 0, SEEK_END);
@@ -211,12 +182,11 @@ CELL file_size(VM *vm) {
     return 0;
 }
 
-CELL file_delete(VM *vm) {
+CELL file_delete() {
   CELL i, address;
-  char filename[MAX_FILE_NAME];
   address = TOS; DROP;
   for (i = 0; i < MAX_FILE_NAME; i++) {
-    filename[i] = vm->image[address+i];
+    filename[i] = image[address+i];
     if (! filename[i]) break;
   }
   if (remove(filename) == 0)
@@ -225,36 +195,34 @@ CELL file_delete(VM *vm) {
     return 0;
 }
 
-CELL vm_load_image(VM *vm, char *image) {
+CELL load_image() {
   FILE *fp;
   CELL x = -1;
-
-  if ((fp = fopen(image, "rb")) != NULL) {
-    x = fread(&vm->image, sizeof(CELL), IMAGE_SIZE, fp);
+  if ((fp = fopen("/local/retroImg", "rb")) != NULL) {
+    x = fread(&image, sizeof(CELL), IMAGE_SIZE, fp);
     fclose(fp);
   }
   return x;
 }
 
-CELL vm_save_image(VM *vm, char *image) {
+CELL save_image() {
   FILE *fp;
   CELL x = -1;
 
-  if ((fp = fopen(image, "wb")) == NULL)
+  if ((fp = fopen("/local/retroImg", "wb")) == NULL)
   {
-    fprintf(stderr, "Sorry, but I couldn't open %s\n", image);
-    dev_cleanup();
+    printf("Sorry, but I couldn't write to retroImg\n");
     exit(-1);
   }
 
-  x = fwrite(&vm->image, sizeof(CELL), vm->image[3], fp);
+  x = fwrite(&image, sizeof(CELL), image[3], fp);
   fclose(fp);
 
   return x;
 }
 
 /* Environment Query ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-void dev_getenv(VM *vm) {
+void dev_getenv() {
   DROP; DROP;
 }
 
@@ -289,8 +257,8 @@ void dev_getenv(VM *vm) {
   DigitalOut L2(LED2);
   DigitalOut L3(LED3);
   DigitalOut L4(LED4);
-void handle_mbed(VM *vm) {
-  switch (vm->ports[13]) {
+void handle_mbed() {
+  switch (ports[13]) {
     case -1: switch (TOS) {
                case 5: P5.output(); break;
                case 6: P6.output(); break;
@@ -319,7 +287,7 @@ void handle_mbed(VM *vm) {
                case 29: P29.output(); break;
                case 30: P30.output(); break;
              }
-             vm->ports[13] = 0;
+             ports[13] = 0;
              break;
     case -2: switch (TOS) {
                case 5: P5.input(); break;
@@ -349,189 +317,189 @@ void handle_mbed(VM *vm) {
                case 29: P29.input(); break;
                case 30: P30.input(); break;
              }
-             vm->ports[13] = 0;
+             ports[13] = 0;
              break;
-    case  5: P5 = TOS;  DROP; vm->ports[13] = 0; break;
-    case  6: P6 = TOS;  DROP; vm->ports[13] = 0; break;
-    case  7: P7 = TOS;  DROP; vm->ports[13] = 0; break;
-    case  8: P8 = TOS;  DROP; vm->ports[13] = 0; break;
-    case  9: P9 = TOS;  DROP; vm->ports[13] = 0; break;
-    case 10: P10 = TOS; DROP; vm->ports[13] = 0; break;
-    case 11: P11 = TOS; DROP; vm->ports[13] = 0; break;
-    case 12: P12 = TOS; DROP; vm->ports[13] = 0; break;
-    case 13: P13 = TOS; DROP; vm->ports[13] = 0; break;
-    case 14: P14 = TOS; DROP; vm->ports[13] = 0; break;
-    case 15: P15 = TOS; DROP; vm->ports[13] = 0; break;
-    case 16: P16 = TOS; DROP; vm->ports[13] = 0; break;
-    case 17: P17 = TOS; DROP; vm->ports[13] = 0; break;
-    case 18: P18 = TOS; DROP; vm->ports[13] = 0; break;
-    case 19: P19 = TOS; DROP; vm->ports[13] = 0; break;
-    case 20: P20 = TOS; DROP; vm->ports[13] = 0; break;
-    case 21: P21 = TOS; DROP; vm->ports[13] = 0; break;
-    case 22: P22 = TOS; DROP; vm->ports[13] = 0; break;
-    case 23: P23 = TOS; DROP; vm->ports[13] = 0; break;
-    case 24: P24 = TOS; DROP; vm->ports[13] = 0; break;
-    case 25: P25 = TOS; DROP; vm->ports[13] = 0; break;
-    case 26: P26 = TOS; DROP; vm->ports[13] = 0; break;
-    case 27: P27 = TOS; DROP; vm->ports[13] = 0; break;
-    case 28: P28 = TOS; DROP; vm->ports[13] = 0; break;
-    case 29: P29 = TOS; DROP; vm->ports[13] = 0; break;
-    case 30: P30 = TOS; DROP; vm->ports[13] = 0; break;
-    case 31: L1  = TOS; DROP; vm->ports[13] = 0; break;
-    case 32: L2  = TOS; DROP; vm->ports[13] = 0; break;
-    case 33: L3  = TOS; DROP; vm->ports[13] = 0; break;
-    case 34: L4  = TOS; DROP; vm->ports[13] = 0; break;
-    default: vm->ports[13] = 0;
+    case  5: P5 = TOS;  DROP; ports[13] = 0; break;
+    case  6: P6 = TOS;  DROP; ports[13] = 0; break;
+    case  7: P7 = TOS;  DROP; ports[13] = 0; break;
+    case  8: P8 = TOS;  DROP; ports[13] = 0; break;
+    case  9: P9 = TOS;  DROP; ports[13] = 0; break;
+    case 10: P10 = TOS; DROP; ports[13] = 0; break;
+    case 11: P11 = TOS; DROP; ports[13] = 0; break;
+    case 12: P12 = TOS; DROP; ports[13] = 0; break;
+    case 13: P13 = TOS; DROP; ports[13] = 0; break;
+    case 14: P14 = TOS; DROP; ports[13] = 0; break;
+    case 15: P15 = TOS; DROP; ports[13] = 0; break;
+    case 16: P16 = TOS; DROP; ports[13] = 0; break;
+    case 17: P17 = TOS; DROP; ports[13] = 0; break;
+    case 18: P18 = TOS; DROP; ports[13] = 0; break;
+    case 19: P19 = TOS; DROP; ports[13] = 0; break;
+    case 20: P20 = TOS; DROP; ports[13] = 0; break;
+    case 21: P21 = TOS; DROP; ports[13] = 0; break;
+    case 22: P22 = TOS; DROP; ports[13] = 0; break;
+    case 23: P23 = TOS; DROP; ports[13] = 0; break;
+    case 24: P24 = TOS; DROP; ports[13] = 0; break;
+    case 25: P25 = TOS; DROP; ports[13] = 0; break;
+    case 26: P26 = TOS; DROP; ports[13] = 0; break;
+    case 27: P27 = TOS; DROP; ports[13] = 0; break;
+    case 28: P28 = TOS; DROP; ports[13] = 0; break;
+    case 29: P29 = TOS; DROP; ports[13] = 0; break;
+    case 30: P30 = TOS; DROP; ports[13] = 0; break;
+    case 31: L1  = TOS; DROP; ports[13] = 0; break;
+    case 32: L2  = TOS; DROP; ports[13] = 0; break;
+    case 33: L3  = TOS; DROP; ports[13] = 0; break;
+    case 34: L4  = TOS; DROP; ports[13] = 0; break;
+    default: ports[13] = 0;
   }
-  switch (vm->ports[14]) {
-    case  5: SP++; TOS = P5; vm->ports[14] = 0; break;
-    case  6: SP++; TOS = P6; vm->ports[14] = 0; break;
-    case  7: SP++; TOS = P7; vm->ports[14] = 0; break;
-    case  8: SP++; TOS = P8; vm->ports[14] = 0; break;
-    case  9: SP++; TOS = P9; vm->ports[14] = 0; break;
-    case 10: SP++; TOS = P10; vm->ports[14] = 0; break;
-    case 11: SP++; TOS = P11; vm->ports[14] = 0; break;
-    case 12: SP++; TOS = P12; vm->ports[14] = 0; break;
-    case 13: SP++; TOS = P13; vm->ports[14] = 0; break;
-    case 14: SP++; TOS = P14; vm->ports[14] = 0; break;
-    case 15: SP++; TOS = P15; vm->ports[14] = 0; break;
-    case 16: SP++; TOS = P16; vm->ports[14] = 0; break;
-    case 17: SP++; TOS = P17; vm->ports[14] = 0; break;
-    case 18: SP++; TOS = P18; vm->ports[14] = 0; break;
-    case 19: SP++; TOS = P19; vm->ports[14] = 0; break;
-    case 20: SP++; TOS = P20; vm->ports[14] = 0; break;
-    case 21: SP++; TOS = P21; vm->ports[14] = 0; break;
-    case 22: SP++; TOS = P22; vm->ports[14] = 0; break;
-    case 23: SP++; TOS = P23; vm->ports[14] = 0; break;
-    case 24: SP++; TOS = P24; vm->ports[14] = 0; break;
-    case 25: SP++; TOS = P25; vm->ports[14] = 0; break;
-    case 26: SP++; TOS = P26; vm->ports[14] = 0; break;
-    case 27: SP++; TOS = P27; vm->ports[14] = 0; break;
-    case 28: SP++; TOS = P28; vm->ports[14] = 0; break;
-    case 29: SP++; TOS = P29; vm->ports[14] = 0; break;
-    case 30: SP++; TOS = P30; vm->ports[14] = 0; break;
-    default: vm->ports[14] = 0;
+  switch (ports[14]) {
+    case  5: sp++; TOS = P5; ports[14] = 0; break;
+    case  6: sp++; TOS = P6; ports[14] = 0; break;
+    case  7: sp++; TOS = P7; ports[14] = 0; break;
+    case  8: sp++; TOS = P8; ports[14] = 0; break;
+    case  9: sp++; TOS = P9; ports[14] = 0; break;
+    case 10: sp++; TOS = P10; ports[14] = 0; break;
+    case 11: sp++; TOS = P11; ports[14] = 0; break;
+    case 12: sp++; TOS = P12; ports[14] = 0; break;
+    case 13: sp++; TOS = P13; ports[14] = 0; break;
+    case 14: sp++; TOS = P14; ports[14] = 0; break;
+    case 15: sp++; TOS = P15; ports[14] = 0; break;
+    case 16: sp++; TOS = P16; ports[14] = 0; break;
+    case 17: sp++; TOS = P17; ports[14] = 0; break;
+    case 18: sp++; TOS = P18; ports[14] = 0; break;
+    case 19: sp++; TOS = P19; ports[14] = 0; break;
+    case 20: sp++; TOS = P20; ports[14] = 0; break;
+    case 21: sp++; TOS = P21; ports[14] = 0; break;
+    case 22: sp++; TOS = P22; ports[14] = 0; break;
+    case 23: sp++; TOS = P23; ports[14] = 0; break;
+    case 24: sp++; TOS = P24; ports[14] = 0; break;
+    case 25: sp++; TOS = P25; ports[14] = 0; break;
+    case 26: sp++; TOS = P26; ports[14] = 0; break;
+    case 27: sp++; TOS = P27; ports[14] = 0; break;
+    case 28: sp++; TOS = P28; ports[14] = 0; break;
+    case 29: sp++; TOS = P29; ports[14] = 0; break;
+    case 30: sp++; TOS = P30; ports[14] = 0; break;
+    default: ports[14] = 0;
   }
 }
 
 /* Device I/O Handler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-void handle_devices(VM *vm) {
-  if (vm->ports[0] != 1) {
+void handle_devices() {
+  if (ports[0] != 1) {
     /* Input */
-    if (vm->ports[0] == 0 && vm->ports[1] == 1) {
-      vm->ports[1] = dev_getch();
-      vm->ports[0] = 1;
+    if (ports[0] == 0 && ports[1] == 1) {
+      ports[1] = dev_getch();
+      ports[0] = 1;
     }
 
     /* Output (character generator) */
-    if (vm->ports[2] == 1) {
+    if (ports[2] == 1) {
       dev_putch(TOS); DROP
-      vm->ports[2] = 0;
-      vm->ports[0] = 1;
+      ports[2] = 0;
+      ports[0] = 1;
     }
 
     /* File IO and Image Saving */
-    if (vm->ports[4] != 0) {
-      vm->ports[0] = 1;
-      switch (vm->ports[4]) {
-        case  1: vm_save_image(vm, vm->filename);
-                 vm->ports[4] = 0;
+    if (ports[4] != 0) {
+      ports[0] = 1;
+      switch (ports[4]) {
+        case  1: save_image();
+                 ports[4] = 0;
                  break;
-        case  2: file_add(vm);
-                 vm->ports[4] = 0;
+        case  2: file_add();
+                 ports[4] = 0;
                  break;
-        case -1: vm->ports[4] = file_handle(vm);
+        case -1: ports[4] = file_handle();
                  break;
-        case -2: vm->ports[4] = file_readc(vm);
+        case -2: ports[4] = file_readc();
                  break;
-        case -3: vm->ports[4] = file_writec(vm);
+        case -3: ports[4] = file_writec();
                  break;
-        case -4: vm->ports[4] = file_closehandle(vm);
+        case -4: ports[4] = file_closehandle();
                  break;
-        case -5: vm->ports[4] = file_getpos(vm);
+        case -5: ports[4] = file_getpos();
                  break;
-        case -6: vm->ports[4] = file_seek(vm);
+        case -6: ports[4] = file_seek();
                  break;
-        case -7: vm->ports[4] = file_size(vm);
+        case -7: ports[4] = file_size();
                  break;
-        case -8: vm->ports[4] = file_delete(vm);
+        case -8: ports[4] = file_delete();
                  break;
-        default: vm->ports[4] = 0;
+        default: ports[4] = 0;
       }
     }
 
     /* Capabilities */
-    if (vm->ports[5] != 0) {
-      vm->ports[0] = 1;
-      switch(vm->ports[5]) {
-        case -1:  vm->ports[5] = IMAGE_SIZE;
+    if (ports[5] != 0) {
+      ports[0] = 1;
+      switch(ports[5]) {
+        case -1:  ports[5] = IMAGE_SIZE;
                   break;
-        case -2:  vm->ports[5] = 0;
+        case -2:  ports[5] = 0;
                   break;
-        case -3:  vm->ports[5] = 0;
+        case -3:  ports[5] = 0;
                   break;
-        case -4:  vm->ports[5] = 0;
+        case -4:  ports[5] = 0;
                   break;
-        case -5:  vm->ports[5] = SP;
+        case -5:  ports[5] = sp;
                   break;
-        case -6:  vm->ports[5] = RSP;
+        case -6:  ports[5] = rsp;
                   break;
-        case -7:  vm->ports[5] = 0;
+        case -7:  ports[5] = 0;
                   break;
-        case -8:  vm->ports[5] = time(NULL);
+        case -8:  ports[5] = time(NULL);
                   break;
-        case -9:  vm->ports[5] = 0;
-                  IP = IMAGE_SIZE;
+        case -9:  ports[5] = 0;
+                  ip = IMAGE_SIZE;
                   break;
-        case -10: vm->ports[5] = 0;
-                  dev_getenv(vm);
+        case -10: ports[5] = 0;
+                  dev_getenv();
                   break;
-        case -11: vm->ports[5] = 80;
+        case -11: ports[5] = 80;
                   break;
-        case -12: vm->ports[5] = 25;
+        case -12: ports[5] = 25;
                   break;
-        default:  vm->ports[5] = 0;
+        default:  ports[5] = 0;
       }
     }
 
     /* mbed io devices */
-    if (vm->ports[13] != 0 || vm->ports[14] != 0) {
-      vm->ports[0] = 1;
-      handle_mbed(vm);
+    if (ports[13] != 0 || ports[14] != 0) {
+      ports[0] = 1;
+      handle_mbed();
     }
 
   }
 }
 
 /* The VM ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-void init_vm(VM *vm) {
+void init_vm() {
    CELL a;
-   IP = 0;  SP = 0;  RSP = 0;
+   ip = 0;  sp = 0;  rsp = 0;
    for (a = 0; a < STACK_DEPTH; a++)
-      vm->data[a] = 0;
+      data[a] = 0;
    for (a = 0; a < ADDRESSES; a++)
-      vm->address[a] = 0;
+      address[a] = 0;
    for (a = 0; a < IMAGE_SIZE; a++)
-      vm->image[a] = 0;
+      image[a] = 0;
    for (a = 0; a < PORTS; a++)
-      vm->ports[a] = 0;
+      ports[a] = 0;
 }
 
-void vm_process(VM *vm) {
+void process() {
   CELL a, b, opcode;
-  opcode = vm->image[IP];
+  opcode = image[ip];
 
   switch(opcode) {
     case VM_NOP:
          break;
     case VM_LIT:
-         SP++;
-         IP++;
-         TOS = vm->image[IP];
+         sp++;
+         ip++;
+         TOS = image[ip];
          break;
     case VM_DUP:
-         SP++;
-         vm->data[SP] = NOS;
+         sp++;
+         data[sp] = NOS;
          break;
     case VM_DROP:
          DROP
@@ -542,81 +510,81 @@ void vm_process(VM *vm) {
          NOS = a;
          break;
     case VM_PUSH:
-         RSP++;
+         rsp++;
          TORS = TOS;
          DROP
          break;
     case VM_POP:
-         SP++;
+         sp++;
          TOS = TORS;
-         RSP--;
+         rsp--;
          break;
     case VM_LOOP:
          TOS--;
          if (TOS != 0 && TOS > -1)
          {
-           IP++;
-           IP = vm->image[IP] - 1;
+           ip++;
+           ip = image[ip] - 1;
          }
          else
          {
-           IP++;
+           ip++;
            DROP;
          }
          break;
     case VM_JUMP:
-         IP++;
-         IP = vm->image[IP] - 1;
-         if (IP < 0)
-           IP = IMAGE_SIZE;
+         ip++;
+         ip = image[ip] - 1;
+         if (ip < 0)
+           ip = IMAGE_SIZE;
          else {
-           if (vm->image[IP+1] == 0)
-             IP++;
-           if (vm->image[IP+1] == 0)
-             IP++;
+           if (image[ip+1] == 0)
+             ip++;
+           if (image[ip+1] == 0)
+             ip++;
          }
          break;
     case VM_RETURN:
-         IP = TORS;
-         RSP--;
-         if (IP < 0)
-           IP = IMAGE_SIZE;
+         ip = TORS;
+         rsp--;
+         if (ip < 0)
+           ip = IMAGE_SIZE;
          else {
-           if (vm->image[IP+1] == 0)
-             IP++;
-           if (vm->image[IP+1] == 0)
-             IP++;
+           if (image[ip+1] == 0)
+             ip++;
+           if (image[ip+1] == 0)
+             ip++;
          }
          break;
     case VM_GT_JUMP:
-         IP++;
+         ip++;
          if(NOS > TOS)
-           IP = vm->image[IP] - 1;
+           ip = image[ip] - 1;
          DROP DROP
          break;
     case VM_LT_JUMP:
-         IP++;
+         ip++;
          if(NOS < TOS)
-           IP = vm->image[IP] - 1;
+           ip = image[ip] - 1;
          DROP DROP
          break;
     case VM_NE_JUMP:
-         IP++;
+         ip++;
          if(TOS != NOS)
-           IP = vm->image[IP] - 1;
+           ip = image[ip] - 1;
          DROP DROP
          break;
     case VM_EQ_JUMP:
-         IP++;
+         ip++;
          if(TOS == NOS)
-           IP = vm->image[IP] - 1;
+           ip = image[ip] - 1;
          DROP DROP
          break;
     case VM_FETCH:
-         TOS = vm->image[TOS];
+         TOS = image[TOS];
          break;
     case VM_STORE:
-         vm->image[TOS] = NOS;
+         image[TOS] = NOS;
          DROP DROP
          break;
     case VM_ADD:
@@ -670,8 +638,8 @@ void vm_process(VM *vm) {
     case VM_ZERO_EXIT:
          if (TOS == 0) {
            DROP
-           IP = TORS;
-           RSP--;
+           ip = TORS;
+           rsp--;
          }
          break;
     case VM_INC:
@@ -682,58 +650,49 @@ void vm_process(VM *vm) {
          break;
     case VM_IN:
          a = TOS;
-         TOS = vm->ports[a];
-         vm->ports[a] = 0;
+         TOS = ports[a];
+         ports[a] = 0;
          break;
     case VM_OUT:
-         vm->ports[0] = 0;
-         vm->ports[TOS] = NOS;
+         ports[0] = 0;
+         ports[TOS] = NOS;
          DROP DROP
          break;
     case VM_WAIT:
-         handle_devices(vm);
+         handle_devices();
          break;
     default:
-         RSP++;
-         TORS = IP;
-         IP = vm->image[IP] - 1;
+         rsp++;
+         TORS = ip;
+         ip = image[ip] - 1;
 
-         if (IP < 0)
-           IP = IMAGE_SIZE;
+         if (ip < 0)
+           ip = IMAGE_SIZE;
          else {
-           if (vm->image[IP+1] == 0)
-             IP++;
-           if (vm->image[IP+1] == 0)
-             IP++;
+           if (image[ip+1] == 0)
+             ip++;
+           if (image[ip+1] == 0)
+             ip++;
          }
          break;
   }
-  vm->ports[3] = 1;
+  ports[3] = 1;
 }
 
 /* Main ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 int main(int argc, char **argv)
 {
-  VM static vmm;
-  VM *vm = &vmm;
-  strcpy(vm->filename, "/local/retroImg");
-
   while (1) {
-    init_vm(vm);
+    init_vm();
     dev_init_input();
 
-    dev_init_output();
-
-    if (vm_load_image(vm, vm->filename) == -1) {
-      dev_cleanup();
-      printf("Sorry, unable to find %s\n", vm->filename);
+    if (load_image() == -1) {
+      printf("Sorry, unable to find retroImg\n");
       exit(1);
     }
 
-    for (IP = 0; IP < IMAGE_SIZE; IP++)
-      vm_process(vm);
-
-    dev_cleanup();
+    for (ip = 0; ip < IMAGE_SIZE; ip++)
+      process();
   }
 }
 

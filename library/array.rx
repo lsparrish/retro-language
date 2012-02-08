@@ -22,7 +22,7 @@ chain: array'
     !quote [ @ @quote do ] ^types'ARRAY each@ ;
 
   : sum  ( a-n )
-    0 swap [ + ] apply ;
+    0 swap &+ apply ;
 
   : length  ( a-n )  @ ;
 
@@ -64,7 +64,7 @@ chain: array'
     2over [ @ ] bi@ [ swap ! ] dip swap ! ;
 
   : contrast  ( aa-f )
-    [ @ ] bi@ > ;
+    &@ bi@ > ;
 ---reveal---
   : sort:bubble  ( a- )
     @+ !c !a
@@ -132,6 +132,9 @@ Examples
 
   ( Average the values in an array )
   ^array'new{ 1 2 3 4 5 } [ ^array'sum ] [ ^array'length ] bi /
+
+  ( Create an array of strings )
+  [ "abc"  "def"  "ghi" ] ^array'fromQuote
 
 
 ---------

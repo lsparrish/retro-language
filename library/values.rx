@@ -7,7 +7,7 @@
 chain: values'
 {{
   variable state
-  : (value) @state [ ! ] [ @ ] if state off ;
+  : (value) @state &! &@ if state off ;
 ---reveal---
   : .value .data ` (value) ;
   : to     state on ;

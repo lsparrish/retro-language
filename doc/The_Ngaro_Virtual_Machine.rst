@@ -9,8 +9,9 @@ Abstract
 Ngaro is a minimalistic virtual machine emulating a dual stack computer with
 a simple instruction set and a few basic I/O devices.
 
-At present, there are full implementations in C, Go, Python, and Ruby, and
-partial implementations in C#, Forth, Common Lisp, Lua, JavaScript, and Java.
+At present, there are full implementations in Assembly (x86), C, F#, Go, Common
+Lisp, PHP, Python, and Ruby, and minimal implementations in C#, Forth, Lua, JavaScript,
+Java, Perl, and Scheme.
 
 
 -------------
@@ -28,9 +29,6 @@ instruction set for accessing values larger or smaller than a single cell.
 Registers
 ---------
 Ngaro exposes no registers directly.
-
-Internally, it may have registers for the *instruction pointer*, *data stack
-pointer*, and *address stack pointer*.
 
 
 ------
@@ -55,6 +53,9 @@ Image Files
 On startup, Ngaro will load an *image file*. This is a flat, linear array of
 signed integer values. On disk, images are stored in little endian format, but
 the VM may convert them to big endian internally.
+
+If an implementation uses big endian internally, this must be reported via the
+queries I/O port.
 
 The first value loaded is mapped to address zero, and subsequent values are
 loaded to sequential addresses in the Ngaro memory space.
@@ -86,6 +87,10 @@ may provide non-standard devices on port numbers above or below this range.
 | 4    | File I/O              |
 +------+-----------------------+
 | 5    | Querying the VM       |
++------+-----------------------+
+| 6    | Canvas                |
++------+-----------------------+
+| 7    | Mouse                 |
 +------+-----------------------+
 
 
@@ -247,23 +252,17 @@ Set port 5 to one of the following values; wait; then read the result back.
 | -14   | 0 for little endian, 1 for big endian |
 +-------+---------------------------------------+
 
-At a minimum, an implementation must provide
-support for -1, -5, -6, -8, and -9.
+At a minimum, an implementation must provide support for -1, -5, -6, -8, and -9.
 
-For -10, the application must provide a buffer
-address on the stack, and a pointer to a string.
-The VM should search the system environment for
-the string and copy its value to the application
-memory, starting at the provided buffer address.
-If an environment variable is not found, the
-VM should store a value of zero in the provided
+For -10, the application must provide a buffer address on the stack, and a
+pointer to a string. The VM should search the system environment for the
+string and copy its value to the application memory, starting at the providedbuffer address.
+If an environment variable is not found, the VM should store a value of zero in the provided
 buffer address.
 
-For -13, if the returned value is zero, the image
-can assume a 32-bit environment.
+For -13, if the returned value is zero, the image can assume a 32-bit environment.
 
-For -14, if the VM is using big endian internally,
-this should return a value of 1.
+For -14, if the VM is using big endian internally, this should return a value of 1.
 
 
 Port 6: Canvas

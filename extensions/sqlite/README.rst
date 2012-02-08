@@ -1,6 +1,7 @@
-RxSQL
-=====
-RxSQL provides a bridge between an SQLite3 database and Retro.
+sqlite bindings for Retro
+=========================
+This tool and vocabulary provide a bridge between an SQLite3
+database and Retro.
 
 
 Server
@@ -18,11 +19,17 @@ The server is written in Python.
   * Columns are tab separated
 * Repeat until a *quit* file is created
 
+Start the server by doing:
+
+::
+
+  python sqlite.py
+
 
 Client
 ------
 The client library is written in Retro. It provides a number of functions
-under an **sqlite'** vocabulary.
+under a **sql'** vocabulary.
 
 +--------------+---------+-------------------------------------------------+
 | Function     | Stack   | Description                                     |
@@ -53,15 +60,15 @@ Put the *sqlite.rx* in the directory with your image, and do:
 
 ::
 
-  include sqlite.rx
+  include sql.rx
 
 Option 2
 ~~~~~~~~
-Put the *sqlite.rx* in your *library* directory, and do:
+Put the *sql.rx* in your *library* directory, and do:
 
 ::
 
-  needs sqlite'
+  needs sql'
 
 
 Example
@@ -69,9 +76,10 @@ Example
 
 ::
 
-  with sqlite'
+  with sql'
 
   "select * from prices where item like 'SIEQ%'" submitQuery
   loadResults
     [ cr getRow itemize [ 1- :column "%s|" puts ] iter ] times
   finished
+

@@ -12,42 +12,55 @@
   <a href='https://launchpad.net/retro-language'>launchpad</a>
 </p>
 
-<p class='older'>2012.01.20&nbsp;</p>
+<p class='older'>2012.02.07</p>
 
 <h2>Retro is...</h2>
 <p>A concatenative, stack based programming language with roots in Forth. It was designed to be
-   minimalistic, yet useful, and runs on a portable virtual machine.</p>
+   minimalistic, yet useful. Retro is image based, and runs on a portable virtual machine.</p>
 
 <table border="0" width="100%">
 <tr>
-  <td><h2>Retro 11.2</h2>
+  <td valign="top" wirdth="48%%"><h2>Retro 11.2</h2>
     <p>The <a href="http://s3.retroforth.org/download/11.x/retro-11.2.tar.gz">latest stable release</a>
        was made on January 15, 2012.</p>
     <p>This includes virtual machines in C, C#, Common Lisp, Forth, F#, Go,
-       HTML5, Java, Perl, PHP, Python, Ruby, Scheme, and x86 assembly language.</p>
+       HTML5, Java, Perl, PHP, Python, Ruby, Scheme, and x86 assembly language. It also includes
+       the standard image, libraries, and documentation in ReStructured Text (ReST) format.</p>
+    <p>The <a href="/docs.html">documentation</a> is also provided in HTML formats.</p>
   </td>
-  <td width="3%">&nbsp;</td>
-  <td><h2>Development</h2>
+  <td width="4%">&nbsp;</td>
+  <td valign="top" width="48%"><h2>Development</h2>
     <p>All development is now being managed through <a href="https://launchpad.net/retro-language">Launchpad</a>.</p>
     <p>We have a Bazaar repository and bug tracker there. Mailing lists are still provided through Google groups,
-       and our IRC channel remains active.</p>
+       and our <a href="http://webchat.freenode.net/?channels=retro">IRC channel</a> remains active. We provide
+       <a href="http://rx-core.org/dev/rancid">logs</a> of the IRC discussions for the past several years.</p>
+    <p>You can obtain a copy of the repository by doing <tt>bzr branch lp:retro-language</tt>.<p>
+    <p>Users of git can clone a copy of the repository by doing:
+      <tt>git clone https://github.com/crcx/retro-language.git</tt></p>
+    <p>A <a href="snapshot.tar.gz">snapshot</a> of the current code is provided for those who are interested.
+       This is generated from the Bazaar repository and is updated hourly.</p>
+    <p>A <a href="retro_windows.zip">binary package</a> is provided for Windows users. This includes
+       precompiled binaries of the C and F# implementations of the VM, the image, library, documentation,
+       and examples.</p>
   </td>
 </tr>
 <tr>
-  <td><h2>Embedded</h2>
+  <td valign="top" width="48%"><h2>Embedded</h2>
     <p>Retro supports some embedded development boards. Specifically, the <a href="http://mbed.org">mbed</a>
        and the <a href="http://arduino.cc">Arduino</a> Mega.</p>
-    <a href="https://twitter.com/#!/blengon/status/158359305572200450/photo/1">
-      <img src="https://p.twimg.com/AjKa8wvCMAAzLSu.jpg:large" width="128" height="77"></a>
-
+    <p><a href="https://twitter.com/#!/blengon/status/158359305572200450/photo/1">
+       <img src="https://p.twimg.com/AjKa8wvCMAAzLSu.jpg:large" width="128" height="77"></a></p>
+    <p><a href="embedded.html">Read more</a> about Retro on embedded devices.</p>
   </td>
-  <td width="3%">&nbsp;</td>
-  <td><h2>Mobile and Web</h2>
+  <td width="4%">&nbsp;</td>
+  <td valign="top" width="48%"><h2>Mobile and Web</h2>
     <p>The HTML5 implementation of the Retro VM allows Retro to run on most modern browsers,
        and, thanks to <a href="http://phonegap.com/">PhoneGap</a>, on Android as well.</p>
     <p>You can <a href="/demo">try it in your browser</a>, or download the Android
        version from the <a href="https://market.android.com/details?id=com.forthworks.retro">Android
-       Market</a>.</p>
+       Market</a>. If you use the Chrome browser, we have a
+       <a href="https://chrome.google.com/webstore/detail/okkcncncgmgemiokddjeeljmjkangljn?hl=en-US">Chrome
+       App</a> as well.</p>
   </td>
 </tr>
 </table>

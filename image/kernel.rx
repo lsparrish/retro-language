@@ -9,19 +9,21 @@
 ( Kernel Begins ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 IMAGE-SIZE  constant CORE
 CORE 0000 + constant TIB
-TIB   512 + constant HEAP
+TIB   256 + constant HEAP
 
 ( Initial Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-mark variable last  ( Pointer to the most recent dictionary header            )
-HEAP variable: heap ( Starting address of the data/code heap                  )
-variable compiler   ( Is the compiler on or off?                              )
-variable which      ( Pointer to dictionary header of the most recently       )
-                    ( looked up word                                          )
-pad
+mark variable last    ( Pointer to the most recent dictionary header          )
+HEAP variable: heap   ( Starting address of the data/code heap                )
+variable compiler     ( Is the compiler on or off?                            )
+variable which        ( Pointer to dictionary header of the most recently     )
+                      ( looked up word                                        )
+TIB  variable: <tib>  ( Start of default text input buffer                    )
+
 label: copytag   "Retro" $,
 label: version   "11.3" $,
-label: build     "2012.01.18" $,
+label: build     "2012.02.08" $,
 label: okmsg     "ok  " $,
+pad
 
 ( Primitives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 t: dup  (  n-nn )  dup,  ;      t: 1+   (  n-n  )  1+,   ;
@@ -51,18 +53,12 @@ t: here     (  -a )  heap # @, ;
 t: ,        ( n-  )  here !+ heap # !, ;
 t: ;;       (  -  )  9 # , ;
 t: t-;      (  -  )  ;; ;; compiler # off ;
-t: ($,)     ( a-a )  repeat @+ 0; , again ;
-t: $        ( a-  )  ($,) drop, 0 # , ;
+i: ($,)     ( a-a )  repeat @+ 0; , again ;
+i: $        ( a-  )  ($,) drop, 0 # , ;
 t: push     ( n-  )  5 # , ;
 t: pop      (  -n )  6 # , ;
 
 ( Conditionals and Flow Control ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-t: (if)     ( -a            )  , here 0 # , ;
-t: t-=if    ( R: xy-  C: -a )  12 # jump: (if)
-t: t->if    ( R: xy-  C: -a )  11 # jump: (if)
-t: t-<if    ( R: xy-  C: -a )  10 # jump: (if)
-t: t-!if    ( R: xy-  C: -a )  13 # jump: (if)
-t: t-then   ( R: -    C: a- )  here swap, !, ;
 t: t-0;     ( n-n   ||   n- )  25 # , ;
 t: t-repeat ( R: -    C: -a )  here ;
 t: t-again  ( R: -    C: a- )  8 # , , ;
@@ -85,34 +81,34 @@ t: .primitive  (  a- )
 t: redraw (  -  ) update # @, 0; drop, 0 # 3 # out, ;
 t: putc   ( c-  ) 0; 1 # 2 # out, wait redraw ;
 t: cr     (  -  ) 10 # putc ;
-t: (puts) ( a-a ) repeat @+ 0; putc again ;
+i: (puts) ( a-a ) repeat @+ 0; putc again ;
 t: <puts> ( a-  ) (puts) drop, ;
 t: puts   ( a-  ) <puts> ;
 
 ( Console Input ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-variable break                           ( Holds the delimiter for 'accept'   )
+   variable  break                       ( Holds the delimiter for 'accept'   )
 -1 variable: remapping                   ( Allow extended whitespace?         )
 -1 variable: eatLeading?                 ( Eat leading delimiters?            )
 -1 variable: tabAsWhitespace
 
-t: tib ( -a ) TIB # ;
+t: tib ( -a ) <tib> # @, ;
 
 t: remapKeys ( c-c ) ;
-t: ws        ( c-c )
+i: ws        ( c-c )
    dup,  127 # =if drop,  8 # then
    dup,   13 # =if drop, 10 # then
    remapping # @, 0; drop,
    dup,   10 # =if drop, 32 # then
    tabAsWhitespace # @, 0 # !if dup, 9 # =if drop, 32 # then then ;
 
-t: <getc> (  -c ) 1 # 1 # out, wait 1 # in, ;
+i: <getc> (  -c ) 1 # 1 # out, wait 1 # in, ;
 t: getc   (  -c ) repeat <getc> remapKeys dup 0 # !if ws ; then drop, again ;
-t: putc?  ( n-n ) dup, 8 # =if drop, break # @, ; then dup, putc ;
-t: eat    ( a-a )
+i: putc?  ( n-n ) dup, 8 # =if drop, break # @, ; then dup, putc ;
+i: eat    ( a-a )
    eatLeading? # @, 0; drop
    repeat getc putc? dup, break # @, !if swap, !+ ; then drop, again ;
-t: guard? ( n-n ) dup, 1+, tib <if drop, tib ; then 8 # putc ;
-t: (accept) ( a-a )
+i: guard? ( n-n ) dup, 1+, tib <if drop, tib ; then 8 # putc ;
+i: (accept) ( a-a )
    repeat
      getc
      dup, 8 # =if drop, 1-, guard? jump: (accept) then
@@ -144,7 +140,7 @@ t: [        (    -naa ) compiler # @, 8 # , here 0 # , here compiler # on ;
 t: ]        ( naa-q   ) push, ;; here swap, !, compiler # !, pop, .data ;
 
 ( Combinators ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-t: empty    (    -    ) ;
+i: empty    (    -    ) ;
 t: if       ( fqq-    )
    push, swap, pop, swap, 0 # !if drop, do ; then swap, drop, do ;
 t: ifTrue   (  fq-    ) ' empty # if ;
@@ -153,12 +149,14 @@ t: dip      (  nq-n   ) swap, push, do pop, ;
 t: sip      (  nq-n   ) over ' do # dip ;
 
 ( Conditionals ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-t: =    ( xy-f  ) =if -1 # ; then 0 # ;
-t: <>   ( xy-f  ) !if -1 # ; then 0 # ;
-t: >=   ( xy-f  ) >if -1 # ; then 0 # ;
-t: <=   ( xy-f  ) <if -1 # ; then 0 # ;
-t: <    ( xy-f  ) >if  0 # ; then -1 # ;
-t: >    ( xy-f  ) <if  0 # ; then -1 # ;
+i: false (  -n  )  0 # ;
+i: true  (  -n  ) -1 # ;
+t: =    ( xy-f  ) =if jump: true  then jump: false
+t: <>   ( xy-f  ) !if jump: true  then jump: false
+t: >=   ( xy-f  ) >if jump: true  then jump: false
+t: <=   ( xy-f  ) <if jump: true  then jump: false
+t: <    ( xy-f  ) >if jump: false then jump: true
+t: >    ( xy-f  ) <if jump: false then jump: true
 
 ( Strings ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 t: compare  ( $$-f )
@@ -168,11 +166,11 @@ t: compare  ( $$-f )
      !if drop, drop, dup, xor, ; then
    0 # 12 m, m,
    drop, drop, -1 # ;
-t: count       ( a-a ) repeat @+ 0; drop, again ;
+i: count       ( a-a ) repeat @+ 0; drop, again ;
 t: getLength   ( a-n ) dup, count 1-, swap, -, ;
 t: withLength  ( a-an ) dup, getLength ;
 t: keepString  ( a-a ) withLength 3 # +, here +, 8 # , , here swap, $ ;
-t: STRING-LENGTH  ( -n )  512 # ;
+t: STRING-LENGTH  ( -n )  256 # ;
 t: STRING-BUFFERS ( -n )   12 # ;
 
 ( Numbers [Parsing & Display] ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
@@ -181,20 +179,20 @@ t: STRING-BUFFERS ( -n )   12 # ;
 label: numbers "0123456789ABCDEF" $,
 
 t: nums     ( -a ) numbers # ;
-t: (digits) nums +, @, over =if num # on then ;
-t: digits   1- repeat dup, push, (digits) pop, 0; 1- again ;
-t: valid?   base # @, dup, 16 # <if digits ; then drop, ;
-t: digit?   num # off valid? drop, num # @, ;
-t: toDigit  ( c-n ) '0 # -, base # @, 16 # =if dup, 16 # >if 7 # -, then then ;
-t: isNegative? ( a-a )
+i: (digits) nums +, @, over =if num # on then ;
+i: digits   1- repeat dup, push, (digits) pop, 0; 1- again ;
+i: valid?   base # @, dup, 16 # <if digits ; then drop, ;
+i: digit?   num # off valid? drop, num # @, ;
+i: toDigit  ( c-n ) '0 # -, base # @, 16 # =if dup, 16 # >if 7 # -, then then ;
+i: isNegative? ( a-a )
    dup, @, '- # =if -1 # negate? # !, 1+, ; then 1 # negate? # !, ;
-t: (convert)
+i: (convert)
    repeat
      dup, @, 0; toDigit #value # @, base # @, *, +, #value # !, 1+,
    again ;
 t: toNumber ( $-n )
    isNegative? 0 # #value # !, (convert) drop, #value # @, negate? # @, *, ;
-t: (isnumber)
+i: (isnumber)
    repeat dup, @, 0; digit? flag # @, and, flag # !, 1+, again ;
 t: isNumber? ( $-f ) isNegative? flag # on (isnumber) drop, flag # @, ;
 
@@ -204,8 +202,8 @@ t: isNumber? ( $-f ) isNegative? flag # on (isnumber) drop, flag # @, ;
 t: boot         (  -  )
    copytag # puts 32 # putc version # puts
    32 # putc 40 # putc build # puts 41 # putc cr ;
-t: query        ( n-n ) 5 # out, wait 5 # in, ;
-t: run-on-boot  (  -  )
+i: query        ( n-n ) 5 # out, wait 5 # in, ;
+i: run-on-boot  (  -  )
    -1  # query memory # !,  ( Memory Size     )
    -2  # query fb #     !,  ( Canvas Present? )
    -3  # query fw #     !,  ( Canvas Width    )
@@ -216,19 +214,19 @@ t: run-on-boot  (  -  )
 
 ( Dictionary Search ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 2 elements name found
-t: prepare  ( a-a  ) found # off name # !, last # @, ;
-t: done     (  -af ) which # @, found # @, ;
-t: match?   ( $-$f ) dup, d->name name # @, compare ;
-t: <search> ( $-   )
+i: prepare  ( a-a  ) found # off name # !, last # @, ;
+i: done     (  -af ) which # @, found # @, ;
+i: match?   ( $-$f ) dup, d->name name # @, compare ;
+i: <search> ( $-   )
    repeat match? 0 # !if which # !, found # on ; then @ 0; again ;
 t: find     ( $-af ) prepare <search> done ;
 t: t-'      ( "-a  ) 32 # accept tib find 0 # !if d->xt @, ; then drop, 0 # ;
 
 ( Word Prefixes and "Not Found" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 label: ___   "___" $,
-t: get      ( $-$  ) dup, @, ___ # 2 # +, !, 1+, ;
-t: xt:class ( d-aa ) dup, d->xt @, swap, d->class @, ;
-t: try      (  -   )
+i: get      ( $-$  ) dup, @, ___ # 2 # +, !, 1+, ;
+i: xt:class ( d-aa ) dup, d->xt @, swap, d->class @, ;
+i: try      (  -   )
    tib get find 0 #
    !if d->xt @, ___ # find
       0 # !if xt:class withClass 0 # ; then drop,
@@ -238,10 +236,10 @@ t: notFound   ( -  ) <notFound> 0; drop cr tib puts 32 # putc '? # putc cr ;
 
 ( Listener ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 t: ok      (   - ) compiler # @, not 0; drop, cr okmsg # puts ;
-t: word    (  d- ) xt:class jump: withClass
-t: build#  (   - ) tib toNumber ' .data # withClass ;
-t: number  (   - ) tib isNumber? 0 # !if build# ; then notFound ;
-t: process ( af- ) 0 # !if word ; then drop number ;
+i: word    (  d- ) xt:class jump: withClass
+i: build#  (   - ) tib toNumber ' .data # withClass ;
+i: number  (   - ) tib isNumber? 0 # !if build# ; then notFound ;
+i: process ( af- ) 0 # !if word ; then drop number ;
 t: listen  (   - ) repeat ok 32 # accept tib find process again ;
 
 ( Initial Dictionary ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
@@ -287,9 +285,7 @@ t: listen  (   - ) repeat ok 32 # accept tib find process again ;
 ' <=             word: <=             ' >=           word: >=
 
 ' t-;            macro: ;             ' ;;           macro: ;;
-' t-=if          macro: =if           ' t->if        macro: >if
-' t-<if          macro: <if           ' t-!if        macro: !if
-' t-then         macro: then          ' t-repeat     macro: repeat
+' t-repeat       macro: repeat
 ' t-again        macro: again         ' t-0;         macro: 0;
 ' push           macro: push          ' pop          macro: pop
 ' [              macro: [             ' ]            macro: ]
@@ -308,7 +304,7 @@ patch
 
 ( Finish Metacompiled Part ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 main: run-on-boot jump: listen
-endKernel bootNew
+endKernel shrink bootNew
 
 
 ( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
@@ -331,8 +327,9 @@ create list  ( -a )  0 , 0 ,
 : {{ ( - )  last @ dup list ! list 1+ ! ;
 : ---reveal--- ( - ) last @ list 1+ ! ;
 : }} ( - )
-  list @ list 1+ @ =if list @ last ! ;; then
-  list @ [ last repeat @ dup @ list 1+ @ =if ;; then again ] do ! ;
+  list @ list 1+ @ =
+  [ list @ last ! ]
+  [ list @ [ last repeat @ dup @ list 1+ @ <> 0; drop again ] do ! ] if ;
 
 ( Vectored Execution ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : :devector ( a-  ) dup 0 swap ! 1+ 0 swap ! ;
@@ -345,10 +342,10 @@ create list  ( -a )  0 , 0 ,
 {{
   create a 0 , create b 0 , create c 0 , create xt 0 ,
   : skim       ( a-a )
-    last repeat @ over over d->xt @ =if nip ;; then 0; again ;
+    last repeat @ over over d->xt @ = [ nip 0 ] ifTrue 0; again ;
   : getHeaders ( $-  )
     xt ! 0 a ! 0 b ! 0 c !
-    last repeat @ 0; dup d->xt @ xt @ =if dup b ! @ a ! ;; then dup c ! again ;
+    last repeat @ 0; dup d->xt @ xt @ = [ dup b ! @ a ! 0 ] [ -1 ] if 0; drop dup c ! again ;
   : <hide>     ( a-  ) getHeaders b @ 0; drop a @ c @ ! ;
 ---reveal---
   : d'         ( "-a ) ' drop which @ ;
@@ -388,15 +385,16 @@ here
 
 ( Compiler Macros ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : `     ( "-  )
-  ' dup 0 !if .data @which @d->class , ;; then
-  drop tib isNumber? -1
-  =if tib toNumber .data &.data , ;; then
-  notFound ; compile-only
+  ' dup 0 <> -1 =
+  [ .data @which @d->class , ]
+  [  drop tib isNumber? -1 =
+    [ tib toNumber .data &.data , ] [ notFound ] if ] if ; compile-only
 : jump: ( "- ) ' 0; 8 , , ; compile-only
 
 ( Additional Combinators ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : []      (    -    ) ` [ ` ] ; immediate
 : while   (   q-    ) [ repeat dup dip swap 0; drop again ] do drop ;
+: until   (   q-    ) [ repeat dup dip swap not 0; drop again ] do drop ;
 : curry   (  nq-q   ) [ [ ` [ ] dip .data ] dip , ` ] ;
 : take    (  qq-q   ) swap [ [ ` [ ] dip , ] dip .data ` ] ;
 : bi      (  xqq-   ) &sip dip do ;
@@ -506,7 +504,7 @@ create dicts 64 allot
   2 elements active prior
   create "|" 124 ,  0 ,
   create "%%" 37 , 37 , 0 ,
-  : seal   (  - ) last repeat @ 0; @active over @ =if 0 swap ! ;; then again ;
+  : seal   (  - ) last [ @ 0; @active over @ = ] until 0 swap ! ;
   : revert (  - ) @prior 0; !last 0 !prior ;
   : safety (  - ) "%%" header immediate &revert @last !d->xt ;
 ---reveal---
@@ -572,7 +570,7 @@ create dicts 64 allot
 
   ( Main Wrapper ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
   : try      (  -   )
-    flag on tib (split prefix) [ handle ] &drop if @flag ;
+    flag on tib (split prefix) &handle &drop if @flag ;
   &try is <notFound>
 }}
 
@@ -609,7 +607,7 @@ create dicts 64 allot
 ( Formatted String Display ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 -1 variable: formatted
 {{
-  : withBase ( n$q-$ ) [ swap ] dip base [ do ] preserve ;
+  : withBase ( n$q-$ ) &swap dip base &do preserve ;
   : char ( $-$ )
     @+ [ 'n = ] [ cr      ] whend
        [ '' = ] [ '" putc ] whend
@@ -637,14 +635,14 @@ create dicts 64 allot
 ( Debugging ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : depth   (    -n ) -5 5 out wait 5 in ;
 : reset   ( ...-  ) depth repeat 0; 1- nip again ;
-: .s      (    -  )
-  depth [ "\n<%d> " puts ] sip 0;
-  heap  [ [ here 1+ ;; [[ 128 allot  ]] ] do !heap
-          dup [ swap , ] times
-              [ here 1- @ dup putn space -1 allot ] times ] preserve ;
+{{
+  : (.s)  0; 1- swap push (.s) pop dup putn space ;
+---reveal---
+  : .s    depth [ "\n<%d> " puts ] sip (.s) ;
+}}
 
 {{
-  : list    ( a-  ) [ d->name puts space ] 3 ( LIST ) each@ ;
+  : list    ( a-  ) [ d->name puts space ] 3 ( ^types'LIST ) each@ ;
   : others  (  -  ) @dicts repeat 0; cr dup dicts + list 1- again ;
 ---reveal---
   : words   (  -  ) cr formatted dup [ off others cr last list ] preserve ;
@@ -707,7 +705,7 @@ chain: strings'
   variables| len needle haystack flag right left src |
   : buffer (  -a ) here STRING-LENGTH 4 * + STRING-BUFFERS STRING-LENGTH * + ;
   : trim   ( $-$ )
-    dup withLength + 1- dup @ 32 =if 0 swap ! dup 1- -- trim ;; then drop ;
+    dup withLength + 1- dup @ 32 = [ 0 swap ! dup 1- -- trim ] &drop if ;
   : place  ( $$n- ) [ copy 0 ] sip here + ! ;
   : prep   (  $$- ) swap !haystack [ getLength !len ] [ !needle ] bi 0 !flag ;
   : move   (    - ) @haystack here @len place haystack ++ ;
@@ -719,8 +717,8 @@ chain: strings'
   : findChar ( $c-a )
     !needle
     repeat @+
-      dup 0   =if 2drop 0 ;; then
-      @needle =if 1-      ;; then
+      dup 0   = [ 2drop 0 0 ] [ -1 ] if 0; drop
+      @needle = [ 1-      0 ] [ -1 ] if 0; drop
     again ;
   : chop      ( $-$ ) tempString withLength over + 1- 0 swap ! ;
   : getSubset ( $nn-$ )
@@ -747,7 +745,7 @@ chain: strings'
 }}
   : reverse ( $-$ )
     dup tempString set
-    [ getLength ] [ withLength + 1- ] bi swap
+    &getLength [ withLength + 1- ] bi swap
     [ dup @ add 1- ] times drop
     start tempString ;
   : split ( $n-$$ )
@@ -819,12 +817,6 @@ chain: types'
   3 constant LIST   ( -n )
 ;chain
 
-( cleanup ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-hide =if
-hide !if
-hide >if
-hide <if
-hide then
-
+( cleanup and save ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 global .s save bye
 

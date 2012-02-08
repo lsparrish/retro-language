@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 int32_t input[1000000];
 int16_t output16[1000000];
@@ -14,7 +15,6 @@ int16_t output16BE[1000000];
 int32_t output32BE[1000000];
 int64_t output64BE[1000000];
 
-#ifdef RXBE
 uint32_t bitswap32(uint32_t x)
 {
   return ((x << 24) & 0xff000000) |
@@ -22,7 +22,6 @@ uint32_t bitswap32(uint32_t x)
          ((x <<  8) & 0x0000ff00) |
          ((x << 24) & 0x000000ff);
 }
-#endif
 
 int load_image(char *image)
 {
@@ -84,7 +83,7 @@ void convert()
   fprintf(stderr, "Converting...\n");
   for (i = 0; i < cells; i++)
   {
-    be = bswap32(input[i]);
+    be = bitswap32(input[i]);
     output16[i] = (int16_t)input[i];
     output64[i] = (int64_t)input[i];
     output16BE[i] = (int16_t)be;

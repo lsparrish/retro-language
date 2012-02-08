@@ -1,4 +1,4 @@
-.TH retro 1 "January 2012" "" "Retro Language"
+.TH retro 1 "February 2012" "" "Retro Language"
 
 .SH NAME
 .P
@@ -49,6 +49,21 @@ to the input stack
 .RS
 Display statistics on opcodes processed upon exit
 .RE
+
+.SH FINDING THE IMAGE
+.P
+If you do not specify an image using
+.B
+--with
+Retro will try to load a file named
+.I
+retroImage
+from the current working directory. If this is not found, Retro
+checks the
+.B
+RETROIMAGE
+environment variable for the image to use. If this is not found,
+an error will be reported.
 
 .SH REPORTING BUGS
 .P

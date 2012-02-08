@@ -12,6 +12,9 @@
 #include <string.h>
 #include <termios.h>
 #include <sys/ioctl.h>
+/* ATH */
+#include <sys/stat.h>
+#include <errno.h>
 
 /* Configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -650,6 +653,10 @@ int main(int argc, char **argv) {
   VM *vm;
   int i, wantsStats;
 
+  /* ATH */
+  char *env;
+  struct stat sts;
+
   wantsStats = 0;
   vm = calloc(sizeof(VM), sizeof(char));
   strcpy(vm->filename, LOCAL_FNAME);
@@ -666,8 +673,37 @@ int main(int argc, char **argv) {
       vm->shrink = 1;
     if (strcmp(argv[i], "--stats") == 0)
       wantsStats = 1;
+    if (strcmp(argv[i], "--help") == 0)
+    {
+      printf("--with filename    Add filename to the input stack\n");
+      printf("--image filename   Use filename as the image to load\n");
+      printf("--shrink           When saving, don't save unused cells\n");
+      printf("--stats            Display opcode usage and stack summaries upon exit\n");
+      printf("--help             Display this text\n");
+      exit(1);
+    }
   }
 
+  /* ATH - 26 January 2012
+   *
+   * Check for the existence of the file name held in vm->filename.
+   * If it does not exist read the env variable RETROIMAGE and check for the existence of that file.
+   * If that does not exists exit with an error.
+   *
+   */
+
+  if ( ( stat( vm->filename, &sts) == -1 ) && errno == ENOENT ) {
+      // File doesn't exist, get the environment variable.
+      //
+      env = (char *)getenv("RETROIMAGE");
+      if( !env ) {
+        fprintf(stderr,"No image file and environment variable RETROIMAGE not set.\n");
+        exit(1);
+      } else {
+          strncpy(vm->filename, env,sizeof(vm->filename));
+          fprintf(stderr,"Loading image from %s\n", env);
+      }
+  }
   if (rxLoadImage(vm, vm->filename) == 0) {
     printf("Sorry, unable to find %s\n", vm->filename);
     free(vm);
