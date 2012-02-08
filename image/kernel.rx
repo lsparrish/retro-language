@@ -642,11 +642,11 @@ create dicts 64 allot
 ( Debugging ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : depth   (    -n ) -5 5 out wait 5 in ;
 : reset   ( ...-  ) depth repeat 0; 1- nip again ;
-: .s      (    -  )
-  depth [ "\n<%d> " puts ] sip 0;
-  heap  [ [ here 1+ ;; [[ 128 allot  ]] ] do !heap
-          dup [ swap , ] times
-              [ here 1- @ dup putn space -1 allot ] times ] preserve ;
+{{
+  : (.s)  0; 1- swap push (.s) pop dup putn space ;
+---reveal---
+  : .s    depth [ "\n<%d> " puts ] sip (.s) ;
+}}
 
 {{
   : list    ( a-  ) [ d->name puts space ] 3 ( LIST ) each@ ;
