@@ -118,13 +118,11 @@ static display_t display_font6_8[][6] PROGMEM =
 
 static void display_init()
 {
-    SPI_DDR |= (1<<SPI_CS)|(1<<SPI_MOSI)|(1<<SPI_SCK);
-    DISPLAY_DDR |= (1<<DISPLAY_DC)|(1<<DISPLAY_RST);
-
+    DISPLAY_DDR |= (1<<DISPLAY_SS)|(1<<DISPLAY_DC)|(1<<DISPLAY_RST);
     DISPLAY_PORT &= ~(1<<DISPLAY_RST);
     _delay_ms(100);
     DISPLAY_PORT |= (1<<DISPLAY_RST);
-    SPCR = 0x51;   // enable SPI master, fosc/16 = 1MH
+    DISPLAY_PORT |= (1<<DISPLAY_SS);
 
     display_write_byte(0x21, 0);
     display_write_byte(0xc6, 0);
@@ -137,12 +135,11 @@ static void display_init()
 
 static void display_write_byte(display_t dat, display_t dat_type)
 {
-    SPI_PORT &= ~(1<<SPI_CS);
+    DISPLAY_PORT &= ~(1<<DISPLAY_SS);
     if (dat_type == 0) DISPLAY_PORT &= ~(1<<DISPLAY_DC);
     else DISPLAY_PORT |= (1<<DISPLAY_DC);
-    SPDR = dat;
-    while ((SPSR & 0x80) == 0);
-    SPI_DDR |= (1<<SPI_CS);
+    spi_transfer_byte(dat);
+    DISPLAY_PORT |= (1<<DISPLAY_SS);
 }
 
 
@@ -202,3 +199,5 @@ static void display_clear(void)
 }
 
 #endif
+
+// vim:sts=4:sw=4:expandtab:

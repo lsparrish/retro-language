@@ -1,17 +1,31 @@
 # This variable sets the board, for whit it should compile
 BOARD=mega2560
 DISPLAY=nokia3110
+STORAGE=sdcard
+IMAGE_MODE=rwstorage
 
-CFLAGS=-O3 -std=gnu99 -Wall
+CFLAGS=-O2 -std=gnu99 -Wall -Wextra
 NATCFLAGS=-DBOARD_native
 AVRCFLAGS=$(CFLAGS) -DAVRCPU -DF_CPU=16000000UL -mmcu=atmega2560
-AVRCFLAGS+=-DBOARD_$(BOARD) -DDISPLAY_$(DISPLAY)
+DEPENDS=retro.c console_$(BOARD).h
+#DEPENDS+=image.hex.h eeprom_atmel.h 
+
+AVRCFLAGS+=-DIMAGE_MODE_$(IMAGE_MODE)
+NATCFLAGS+=-DIMAGE_MODE_$(IMAGE_MODE)
+AVRCFLAGS+=-DBOARD_$(BOARD)
+#AVRCFLAGS+=-DDISPLAY_$(DISPLAY)
+#DEPENDS+=display_$(DISPLAY).h
+AVRCFLAGS+=-DSTORAGE_$(STORAGE)
+NATCFLAGS+=-DSTORAGE_$(STORAGE)
+DEPENDS+=storage_$(STORAGE).h
+
 AVRCC=avr-gcc
 AVROBJCOPY=avr-objcopy
 IMAGE_BLOCK_SIZE=256
 LIBRARY_PATH=../../../../library
 #RETRO_MODULES+=$(LIBRARY_PATH)/dissect.rx
 #RETRO_MODULES+=$(LIBRARY_PATH)/eval.rx
+RETRO_MODULES+=$(LIBRARY_PATH)/diet.rx
 RETRO_MODULES+=$(LIBRARY_PATH)/struct.rx
 RETRO_MODULES+=$(LIBRARY_PATH)/array.rx
 RETRO_MODULES+=$(LIBRARY_PATH)/hash.rx
@@ -72,11 +86,11 @@ clean:
 retro.orig: ../../../complete/retro.c
 	$(CC) $(CFLAGS) -o $@ $<
 
-retro.nat: retro.c image.hex.h
+retro.nat: $(DEPENDS)
 	$(CC) $(CFLAGS) $(NATCFLAGS) -o $@ $<
 
 retro.hex: retro.out
-retro.out: image.hex.h eeprom_atmel.h console_$(BOARD).h display_$(DISPLAY).h
+retro.out: $(DEPENDS)
 
 convert: ../../../../tools/convert.c
 	$(CC) -O -DRX16 -o $@ $<
