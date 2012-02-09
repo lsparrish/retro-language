@@ -21,7 +21,7 @@ TIB  variable: <tib>  ( Start of default text input buffer                    )
 
 label: copytag   "Retro" $,
 label: version   "11.3" $,
-label: build     "2012.02.08" $,
+label: build     "2012.02.09" $,
 label: okmsg     "ok  " $,
 pad
 
@@ -136,8 +136,10 @@ t: :        ( "-  )  create ' .word # last # @, d->class !, ]] 0 # , 0 # , ;
 t: t-(      ( "-  )  ') # accept ;
 
 ( Quotes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-t: [        (    -naa ) compiler # @, 8 # , here 0 # , here compiler # on ;
-t: ]        ( naa-q   ) push, ;; here swap, !, compiler # !, pop, .data ;
+t: quote ( -a  )  pop, 1+, dup, @, 1-, push, 1+, ;
+t: [     ( -af )  ' quote # , here 0 # , compiler # @, compiler # on ;
+t: ]     ( fa- )  ;; compiler # !, here over !,
+                  compiler # @, 0 # =if 1+, ; then drop, ;
 
 ( Combinators ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 i: empty    (    -    ) ;
@@ -258,7 +260,7 @@ t: listen  (   - ) repeat ok 32 # accept tib find process again ;
 ' :              word: :              ' header       word: header
 ' cr             word: cr             ' putc         word: putc
 ' remapKeys      word: remapKeys      ' <puts>       word: <puts>
-' over           word: over
+' over           word: over           ' quote        word: quote
 ' not            word: not            ' on           word: on
 ' off            word: off            ' /            word: /
 ' mod            word: mod            ' negate       word: negate
