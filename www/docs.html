@@ -2,65 +2,67 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
 <html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en'>
 <head>
-  <title>the Retro Language: documentation</title>
-  <link rel='stylesheet' href='retro.css' type='text/css'/>
+  <title>the Retro Language</title>
+  <style>
+  div { float: left; padding: 10px; width: 35%; }
+  .head { font-size: large; color: navy; font-weight: bold; }
+  .Constant { color: #ff40ff; font-weight: bold; }
+  .Statement { color: #ffff00; font-weight: bold; }
+  .Identifier { color: #00ffff; font-weight: bold; }
+  .Special { color: #ff6060; font-weight: bold; }
+  pre { font-family: monospace; color: #ffffff; background-color: #000000; }
+  .Comment { color: #00ffff; font-weight: bold; }
+  .PreProc { color: #8080ff; font-weight: bold; }
+  </style>
 </head>
 <body>
-  <p class='header'><em>retro language: documentation</em></p>
-<p class='nav'>
-  <a href='http://rx-core.org/dev/corpse'>blog</a> |
-  <a href='https://launchpad.net/retro-language'>launchpad</a>
-</p>
 
-<p class='older'>2012.01.30</p>
+<div id="about" style="float: clear; width: 80%">
+  <p class="head">Retro Language</p>
+  <p>Retro is a concatenative, stack based language with roots in Forth. Designed to be small,
+     easily learned, and easily modified to meet specific needs, it has been developed and
+     refined through use by a small community over the last decade.</p>
+</div>
 
-<h2>Retro is...</h2>
-<p>A concatenative, stack based programming language with roots in Forth. It was designed to be
-   minimalistic, yet useful, is image based, and runs on a portable virtual machine.</p>
+<div id="primary">
+  <p class="head">Essentials</p>
+    <p><a href="docs/An_Introduction_to_Retro.html">An Introduction to Retro</a></p>
+    <p><a href="docs/Coding_Style.html">Coding Style</a></p>
+    <p><a href="docs/Core_Functions.html">Core Functions and Data Structures</a></p>
+    <p><a href="docs/Implementations.html">Implementation Status</a></p>
+    <p><a href="docs/The_Ngaro_Virtual_Machine.html">The Ngaro Virtual Machine</a></p>
+    <p><a href="docs/Contributing.html">Contributing</a></p>
+</div>
+<div id="primary">
+  <p class="head">Libraries</p>
+    <p><a href="/docs/library/array.html">array'</a></p>
+    <p><a href="/docs/library/assertion.html">assertion'</a></p>
+    <p><a href="/docs/library/bad.html">bad'</a></p>
+    <p><a href="/docs/library/bstrings.html">bstrings'</a></p>
+    <p><a href="/docs/library/calendar.html">calendar'</a></p>
+    <p><a href="/docs/library/canvas.html">canvas'</a></p>
+    <p><a href="/docs/library/casket.html">casket'</a></p>
+    <p><a href="/docs/library/char.html">char'</a></p>
+    <p><a href="/docs/library/combinators.html">combinators'</a></p>
+    <p><a href="/docs/library/console.html">console'</a></p>
+    <p><a href="/docs/library/crypto.html">crypto'</a></p>
+    <p><a href="/docs/library/decompose.html">decompose'</a></p>
+    <p><a href="/docs/library/decorator.html">decorator'</a></p>
+    <p><a href="/docs/library/dissect.html">dissect'</a></p>
+    <p><a href="/docs/library/enum.html">enum'</a></p>
+    <p><a href="/docs/library/eval.html">eval'</a></p>
+    <p><a href="/docs/library/forth.html">forth'</a></p>
+    <p><a href="/docs/library/hash.html">hash'</a></p>
+    <p><a href="/docs/library/infix.html">infix'</a></p>
+    <p><a href="/docs/library/linkedList.html">linkedList'</a></p>
+    <p><a href="/docs/library/locals.html">locals'</a></p>
+    <p><a href="/docs/library/math.html">math'</a></p>
+    <p><a href="/docs/library/stack.html">stack'</a></p>
+    <p><a href="/docs/library/struct.html">struct'</a></p>
+    <p><a href="/docs/library/values.html">values'</a></p>
+    <p><a href="/docs/library/variations.html">variations'</a></p>
+</div>
 
-<table border="0" width="100%">
-<tr>
-  <td valign="top" wirdth="48%%"><h2>Documentation</h2>
-    <p>An Introduction to Retro  (<a href="docs/An_Introduction_to_Retro.html">HTML</a>)</p>
-    <p>Coding Style              (<a href="docs/Coding_Style.html">HTML</a>)</p>
-    <p>Core Functions            (<a href="docs/Core_Functions.html">HTML</a>)</p>
-    <p>Implementation Status     (<a href="docs/Implementations.html">HTML</a>)</p>
-    <p>The Ngaro Virtual Machine (<a href="docs/The_Ngaro_Virtual_Machine.html">HTML</a>)</p>
-    <p>Contributing              (<a href="docs/Contributing.html">HTML</a>)</p>
-  </td>
-  <td width="4%">&nbsp;</td>
-  <td valign="top" width="48%"><h2>Libraries</h2>
-    <p>array'       (<a href="/docs/library/array.html">HTML</a>)</p>
-    <p>assertion'   (<a href="/docs/library/assertion.html">HTML</a>)</p>
-    <p>bad'         (<a href="/docs/library/bad.html">HTML</a>)</p>
-    <p>bstrings'    (<a href="/docs/library/bstrings.html">HTML</a>)</p>
-    <p>calendar'    (<a href="/docs/library/calendar.html">HTML</a>)</p>
-    <p>canvas'      (<a href="/docs/library/canvas.html">HTML</a>)</p>
-    <p>casket'      (<a href="/docs/library/casket.html">HTML</a>)</p>
-    <p>char'        (<a href="/docs/library/char.html">HTML</a>)</p>
-    <p>combinators' (<a href="/docs/library/combinators.html">HTML</a>)</p>
-    <p>console'     (<a href="/docs/library/console.html">HTML</a>)</p>
-    <p>crypto'      (<a href="/docs/library/crypto.html">HTML</a>)</p>
-    <p>decompose'   (<a href="/docs/library/decompose.html">HTML</a>)</p>
-    <p>decorator'   (<a href="/docs/library/decorator.html">HTML</a>)</p>
-    <p>dissect'     (<a href="/docs/library/dissect.html">HTML</a>)</p>
-    <p>enum'        (<a href="/docs/library/enum.html">HTML</a>)</p>
-    <p>eval'        (<a href="/docs/library/eval.html">HTML</a>)</p>
-    <p>forth'       (<a href="/docs/library/forth.html">HTML</a>)</p>
-    <p>hash'        (<a href="/docs/library/hash.html">HTML</a>)</p>
-    <p>infix'       (<a href="/docs/library/infix.html">HTML</a>)</p>
-    <p>linkedList'  (<a href="/docs/library/linkedList.html">HTML</a>)</p>
-    <p>locals'      (<a href="/docs/library/locals.html">HTML</a>)</p>
-    <p>math'        (<a href="/docs/library/math.html">HTML</a>)</p>
-    <p>stack'       (<a href="/docs/library/stack.html">HTML</a>)</p>
-    <p>struct'      (<a href="/docs/library/struct.html">HTML</a>)</p>
-    <p>values'      (<a href="/docs/library/values.html">HTML</a>)</p>
-    <p>variations'  (<a href="/docs/library/variations.html">HTML</a>)</p>
-  </td>
-</tr>
-</table>
-
-<p class='footer'>&nbsp;</p>
 </body>
 </html>
 
