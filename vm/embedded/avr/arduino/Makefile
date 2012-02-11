@@ -5,7 +5,7 @@ DISPLAY=nokia3110
 STORAGE=sdcard
 IMAGE_MODE=roflash
 
-CFLAGS=-Os -std=gnu99 -Wall -Wextra
+CFLAGS=-ggdb3 -std=gnu99 -Wall -Wextra
 #CFLAGS+=-DCACHE_uthash
 NATCFLAGS=-DBOARD_native
 AVRCFLAGS=$(CFLAGS) -DAVRCPU -DF_CPU=16000000UL -mmcu=at$(BOARD)

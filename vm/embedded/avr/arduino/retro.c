@@ -4,7 +4,7 @@
 /* Configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #define CELL            int16_t
 #define IMAGE_SIZE        16000
-#define IMAGE_CACHE_SIZE     3
+#define IMAGE_CACHE_SIZE    130
 #define ADDRESSES            32
 #define STACK_DEPTH          32
 #define PORTS                15
@@ -15,6 +15,7 @@
 #ifdef BOARD_native
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #endif
 
 /* Hash table ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -88,7 +89,7 @@ typedef struct CELL_CACHE_ELEMENT {
 #else
     unsigned int changed:1;
     unsigned int key:15;
-    unsigned int next:8;
+    unsigned int next:16;
     CELL value;
 #endif
 } cell_cache_element_t;
@@ -98,12 +99,12 @@ static cell_cache_element_t *cell_cache;
 #else
 static cell_cache_element_t cell_cache[IMAGE_CACHE_SIZE];
 static uint8_t cell_cache_first;
+#define CELL_CACHE_END 65535
 #endif
 
 /* Image operations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 static inline CELL img_get(CELL k);
 static inline void img_put(CELL k, CELL v);
-static void img_sync(void);
 
 /* Board and image setup ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
@@ -270,6 +271,8 @@ static void img_storage_sync(void) {
 #endif
 #endif
 
+#ifdef CACHE_uthash
+
 static inline
 cell_cache_element_t* //__attribute__((always_inline))
 _cache_add(CELL key, uint8_t changed, CELL value)
@@ -282,69 +285,31 @@ _cache_add(CELL key, uint8_t changed, CELL value)
     elem->key = key;
     elem->changed = changed;
     elem->value = value;
-#ifdef CACHE_uthash
     HASH_ADD(hh, cell_cache, key, sizeof(key), elem);
-#else
-    elem->next = NULL;
-    if (cell_cache == NULL) cell_cache = elem;
-    else { elem->next = cell_cache; cell_cache = elem; }
-    ++cell_cache_size;
-#endif
     return elem;
 }
 
 static inline CELL img_get(CELL k) {
     cell_cache_element_t *elem = NULL;
-#ifdef CACHE_uthash
     HASH_FIND(hh, cell_cache, &k, sizeof(k), elem);
-#else
-    cell_cache_element_t *prev = NULL;
-    for (elem = cell_cache; elem != NULL && elem->key != k;) {
-        prev = elem;
-        elem = elem->next;
-    }
-#endif
     if (elem == NULL)
         elem = _cache_add(k, 0, img_storage_get(k));
     else {
-#ifdef CACHE_uthash
         HASH_DELETE(hh, cell_cache, elem);
         HASH_ADD(hh, cell_cache, key, sizeof(CELL), elem);
-#else
-        if (prev != NULL) {
-            prev->next = elem->next;
-            elem->next = cell_cache;
-            cell_cache = elem;
-        }
-#endif
     }
     return elem->value;
 }
 
 static inline void img_put(CELL k, CELL v) {
     cell_cache_element_t *elem = NULL;
-#ifdef CACHE_uthash
     HASH_FIND(hh, cell_cache, &k, sizeof(k), elem);
-#else
-    cell_cache_element_t *prev = NULL;
-    for (elem = cell_cache; elem != NULL && elem->key != k;) {
-        prev = elem;
-        elem = elem->next;
-    }
-#endif
     if (elem != NULL) {
         if (elem->value != v) {
             elem->value = v;
             elem->changed = 1;
-#ifndef CACHE_uthash
-            if (prev != NULL)
-                prev->next = elem->next;
-            elem->next = cell_cache;
-            cell_cache = elem;
-#endif
         }
     } else {
-#ifdef CACHE_uthash
         if (HASH_COUNT(cell_cache) > IMAGE_CACHE_SIZE) {
             cell_cache_element_t *temp = NULL;
             elem = NULL;
@@ -359,32 +324,12 @@ static inline void img_put(CELL k, CELL v) {
                     break;
             }
         }
-#else
-        if (cell_cache_size > IMAGE_CACHE_SIZE) {
-            cell_cache_element_t *rm = NULL, *rmprev = NULL;
-            for (prev = NULL, elem = cell_cache; elem != NULL;) {
-                if (elem->changed == 0) {
-                    rm = elem;
-                    rmprev = prev;
-                }
-                prev = elem;
-                elem = elem->next;
-            }
-            if (rm != NULL) {
-                if (rmprev == NULL) cell_cache = rm->next;
-                else rmprev = rm->next;
-                --cell_cache_size;
-                free(rm);
-            }
-        }
-#endif
         _cache_add(k, 1, v);
     }
 }
 
 static inline void img_sync() {
     cell_cache_element_t *elem;
-#ifdef CACHE_uthash
     cell_cache_element_t *temp;
     HASH_ITER(hh, cell_cache, elem, temp) {
         if (elem->changed) {
@@ -392,13 +337,101 @@ static inline void img_sync() {
                 elem->changed = 0;
         }
     }
-#else
-    for (elem = cell_cache; elem != NULL; elem = elem->next)
-        if (elem->changed && img_storage_put(elem->key, elem->value))
-                elem->changed = 0;
-#endif
     img_storage_sync();
 }
+
+#else
+
+static inline CELL img_get(CELL k) {
+    uint16_t cur = cell_cache_first;
+    uint16_t last = CELL_CACHE_END;
+    uint16_t lastfree = CELL_CACHE_END;
+    uint16_t lastfreeprev = CELL_CACHE_END;
+
+    for (; cur != CELL_CACHE_END; cur = cell_cache[cur].next) {
+        if (cell_cache[cur].key == k) {
+            if (last != CELL_CACHE_END) {
+                cell_cache[last].next = cell_cache[cur].next;
+                cell_cache[cur].next = cell_cache_first;
+                cell_cache_first = cur;
+            }
+            return cell_cache[cur].value;
+        }
+        if (cell_cache[cur].changed == 0) {
+            lastfreeprev = last;
+            lastfree = cur;
+        }
+        last = cur;
+    }
+    if (lastfree == CELL_CACHE_END) {
+        console_puts("\nERROR: Out of memory ");
+#ifndef BOARD_native
+        while(1) _delay_ms(1000);
+#else
+        fflush(stdout);
+        while(1) sleep(1);
+#endif
+    }
+
+    cell_cache[lastfree].key = k;
+    cell_cache[lastfree].value = img_storage_get(k);
+    cell_cache[lastfree].changed = 0;
+    if (lastfreeprev != CELL_CACHE_END) {
+        cell_cache[lastfreeprev].next = cell_cache[lastfree].next;
+        cell_cache[lastfree].next = cell_cache_first;
+        cell_cache_first = lastfree;
+    }
+
+    return cell_cache[lastfree].value;
+}
+
+static inline void img_put(CELL k, CELL v) {
+    uint16_t cur = cell_cache_first;
+    uint16_t last = CELL_CACHE_END;
+    uint16_t lastfree = CELL_CACHE_END;
+    uint16_t lastfreeprev = CELL_CACHE_END;
+
+    for (; cur != CELL_CACHE_END; cur = cell_cache[cur].next) {
+        if (cell_cache[cur].key == k) {
+            if (last != CELL_CACHE_END) {
+                cell_cache[last].next = cell_cache[cur].next;
+                cell_cache[cur].next = cell_cache_first;
+                cell_cache_first = cur;
+            }
+            if (cell_cache[cur].value != v) {
+                cell_cache[cur].value = v;
+                cell_cache[cur].changed = 1;
+            }
+            return;
+        }
+        if (cell_cache[cur].changed == 0) {
+            lastfreeprev = last;
+            lastfree = cur;
+        }
+        last = cur;
+    }
+    if (lastfree == CELL_CACHE_END) {
+        console_puts("\nERROR: Out of memory ");
+#ifndef BOARD_native
+        while(1) _delay_ms(1000);
+#else
+        fflush(stdout);
+        while(1) sleep(1);
+#endif
+    }
+    cell_cache[lastfree].key = k;
+    cell_cache[lastfree].value = v;
+    cell_cache[lastfree].changed = 1;
+    if (lastfreeprev != CELL_CACHE_END) {
+        cell_cache[lastfreeprev].next = cell_cache[lastfree].next;
+        cell_cache[lastfree].next = cell_cache_first;
+        cell_cache_first = lastfree;
+    }
+}
+
+#define img_sync()
+
+#endif
 
 static inline void img_string(CELL starting, char *buffer, CELL buffer_len)
 {
@@ -426,11 +459,6 @@ int main(void)
 
 #ifdef DISPLAY_ACTIVATED
     char string_buffer[STRING_BUFFER_SIZE+1];
-#endif
-
-    cell_cache = NULL;
-#ifndef CACHE_uthash
-    cell_cache_size = 0;
 #endif
 
     console_prepare();
@@ -463,6 +491,20 @@ int main(void)
     image_sector_flags.sector_num = 1;
     img_storage_load(0);
 #endif
+
+#ifdef CACHE_uthash
+    cell_cache = NULL;
+#else
+    for (j = 0; j < IMAGE_CACHE_SIZE; ++j) {
+        cell_cache[j].key = j;
+        cell_cache[j].value = img_storage_get(j);
+        cell_cache[j].changed = 0;
+        cell_cache[j].next = j + 1;
+    }
+    cell_cache[j-1].next = CELL_CACHE_END;
+    cell_cache_first = 0;
+#endif
+
 
     for (j = 0; j < STACK_DEPTH; ++j) data[j] = 0;
     for (j = 0; j < ADDRESSES; ++j) address[j] = 0;
