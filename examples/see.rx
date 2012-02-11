@@ -1,0 +1,28 @@
+needs dissect'
+
+variable qdepth
+
+: resolveName  ( a-a )
+  dup @ xt->d dup [ d->name ] [ drop dup putn " do" ] if puts space 1+ ;
+
+: dumpString  ( a-a )
+  repeat @+ 0; putc again ;
+
+: decompile  ( a-a )
+  dup @
+  [ 0 = ] [ 1+ ] whend
+  [ 1 = ] [ 1+ dup @ putn space 1+ ] whend
+  [ 8 = ] [ 1+ dup @ 1- @ 0 = [  1+ '" putc dumpString '" putc space 2 + ] [ dup @ "jump %d " puts 1+ ] if ] whend
+  [ 9 = ] [ 1+ @qdepth [ "] " qdepth -- ] [ "; " ] if puts ] whend
+  [ &quote  = ] [ qdepth ++ 2 + "[ " puts ] whend
+  [ 0 31 within not ] [ resolveName ] whend
+  [ &quote <> ] [ ^dissect'decompile ^strings'trimRight "%s " puts ] whend
+  drop ;
+
+: see
+  0 !qdepth
+  ' cr [ decompile dup 1- ^dissect'endOfWord? not ] while drop ;
+
+: hello [ 1 2 + [ "hello" puts ] do ] do ;
+see hello
+
