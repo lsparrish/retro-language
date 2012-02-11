@@ -6,6 +6,7 @@
 #define EEPROM_ACTIVATED
 
 static CELL load_from_eeprom() {
+    /*
     CELL ret, key, value;
     char *fname = getenv("EEPROM_FILE");
     FILE *f = fopen(fname == NULL ? "eeprom.data" : fname, "r");
@@ -19,20 +20,16 @@ static CELL load_from_eeprom() {
         img_put(key, value);
         console_putc('.');
     }
-    //for (int i = 0; i < IMAGE_CHANGE_SIZE; ++i) {
-    //    if (fread((void*)&value, sizeof(CELL), 1, f) != 1) goto read_error;
-    //    img_put(i + IMAGE_CELLS, value);
-    //    console_putc('.');
-    //}
     fclose(f);
     return ret;
 read_error:
     console_puts("\nERROR: failed to read from EEPROM. ");
-    if (f != NULL) fclose(f);
+    if (f != NULL) fclose(f);*/
     return 0;
 }
 
 static CELL save_to_eeprom() {
+    /*
     CELL ret = 0, x, y, k, v;
     char *fname = getenv("EEPROM_FILE");
     FILE *f = fopen(fname == NULL ? "eeprom.data" : fname, "r+");
@@ -52,13 +49,6 @@ static CELL save_to_eeprom() {
             console_putc('.');
         }
     }
-    //for (uint16_t i = 0; i < IMAGE_CHANGE_SIZE; ++i) {
-    //    v = image_changes[i];
-    //    if (fwrite(&v, sizeof(CELL), 1, f) != 1) goto write_error;
-    //    if (fseek(f, 0 - sizeof(CELL), SEEK_CUR) != 0) goto write_error;
-    //    if (fread(&y, sizeof(CELL), 1, f) != 1) goto write_error;
-    //    if (v != y) goto write_error;
-    //}
     if (fseek(f, 0, SEEK_SET) != 0) goto write_error;
     if (fwrite((void*)&ret, sizeof(CELL), 1, f) != 1) goto write_error;
     if (fseek(f, 0, SEEK_SET) != 0) goto write_error;
@@ -68,7 +58,7 @@ static CELL save_to_eeprom() {
     return ret;
 write_error:
     console_puts("\nERROR: failed to write to EEPROM. ");
-    if (f != NULL) fclose(f);
+    if (f != NULL) fclose(f); */
     return 0;
 }
 

@@ -3,25 +3,29 @@
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* Configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #define CELL            int16_t
-#define IMAGE_SIZE        31000
-#define IMAGE_CACHE_SIZE    100
-#define ADDRESSES            64
-#define STACK_DEPTH          64
+#define IMAGE_SIZE        16000
+#define IMAGE_CACHE_SIZE     3
+#define ADDRESSES            32
+#define STACK_DEPTH          32
 #define PORTS                15
 #define STRING_BUFFER_SIZE   32
 
 /* General includes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-#include <stdio.h>
 #include <stdlib.h>
+#ifdef BOARD_native
+#include <stdio.h>
 #include <string.h>
+#endif
 
 /* Hash table ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+#ifdef CACHE_uthash
 #define HASH_FUNCTION HASH_BER
 #include "uthash.h"
+#endif
 
 /* Board specific includes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-#ifdef BOARD_mega2560
-#define BAUD 38400
+#if defined(BOARD_mega2560) || defined(BOARD_mega328p)
+#define BAUD 9600
 
 #include <avr/io.h>
 #include <avr/pgmspace.h>
@@ -34,7 +38,6 @@
 #define SPI_MOSI     PB2
 #define SPI_SCK      PB1
 #define SPI_SS       PB0
-#define SPI_SPEED    0
 
 #define DISPLAY_PORT PORTL
 #define DISPLAY_DDR  DDRL
@@ -42,9 +45,9 @@
 #define DISPLAY_DC   PL1
 #define DISPLAY_RST  PL0
 
-#define SDCARD_PORT  PORTL
-#define SDCARD_DDR   DDRL
-#define SDCARD_SS    PL7
+#define SDCARD_PORT  SPI_PORT
+#define SDCARD_DDR   SPI_DDR
+#define SDCARD_SS    SPI_SS
 
 #else
 #ifdef BOARD_native
@@ -76,14 +79,26 @@ static CELL __attribute__((always_inline)) spi_transfer_cell(CELL data);
 #endif
 
 /* Change store ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-typedef struct {
+typedef struct CELL_CACHE_ELEMENT {
+#ifdef CACHE_uthash
     uint8_t changed;
     CELL key;
     CELL value;
     UT_hash_handle hh;
+#else
+    unsigned int changed:1;
+    unsigned int key:15;
+    unsigned int next:8;
+    CELL value;
+#endif
 } cell_cache_element_t;
 
+#ifdef CACHE_uthash
 static cell_cache_element_t *cell_cache;
+#else
+static cell_cache_element_t cell_cache[IMAGE_CACHE_SIZE];
+static uint8_t cell_cache_first;
+#endif
 
 /* Image operations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 static inline CELL img_get(CELL k);
@@ -92,9 +107,9 @@ static void img_sync(void);
 
 /* Board and image setup ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#ifdef BOARD_mega2560
+#if defined(BOARD_mega2560) || defined(BOARD_mega328p)
 
-#include "console_mega2560.h"
+#include "console_atmega.h"
 
 #ifdef IMAGE_MODE_roflash
 #include "image.hex.h"
@@ -146,11 +161,12 @@ static void console_puts(char *s) {
 
 static void spi_master_init(void) {
     SPI_DDR &= ~(1 << SPI_MISO);
-    SPI_DDR |=  (1 << SPI_MOSI);
     SPI_DDR |=  (1 << SPI_SCK);
     SPI_DDR |=  (1 << SPI_SS);
+    SPI_DDR |=  (1 << SPI_MOSI);
     SPI_PORT |= (1 << SPI_SS);
-    SPCR = (1 << SPE) | (1 << MSTR) | SPI_SPEED;
+    SPCR = (1 << SPE) | (1 << MSTR) | (0 << SPR1) | (0 << SPR0);
+    SPSR &= ~(1 << SPI2X);
 }
 
 static void spi_slave_init(void) {
@@ -159,7 +175,8 @@ static void spi_slave_init(void) {
     SPI_DDR &= ~(1 << SPI_SCK);
     SPI_DDR &= ~(1 << SPI_SS);
     SPI_PORT &= ~(1 << SPI_SS);
-    SPCR = (1 << SPE) | SPI_SPEED;
+    SPCR = (1 << SPE) | (1 << SPR1) | (1 << SPR0);
+    SPSR &= ~(1 << SPI2X);
 }
 
 static uint8_t spi_transfer_byte(uint8_t data) {
@@ -182,9 +199,9 @@ static CELL spi_transfer_cell(CELL data) {
 
 #ifdef IMAGE_MODE_roflash
 
-static inline CELL __attribute__((always_inline)) img_storage_get(CELL k) { return image_read(k); }
-static inline uint8_t __attribute__((always_inline)) img_storage_put(CELL k, CELL v) { return 0; }
-static void img_storage_sync(void) { }
+#define img_storage_get(k) image_read(k)
+#define img_storage_put(k, v) 0
+#define img_storage_sync()
 
 #else
 #ifdef IMAGE_MODE_rwstorage
@@ -253,44 +270,81 @@ static void img_storage_sync(void) {
 #endif
 #endif
 
-static inline cell_cache_element_t* __attribute__((always_inline)) _cache_add(CELL key, uint8_t changed, CELL value) {
+static inline
+cell_cache_element_t* //__attribute__((always_inline))
+_cache_add(CELL key, uint8_t changed, CELL value)
+{
     cell_cache_element_t *elem = malloc(sizeof(cell_cache_element_t));
+    if (elem == NULL) {
+        console_puts("\nERROR: not enough memory ");
+        return NULL;
+    }
     elem->key = key;
     elem->changed = changed;
     elem->value = value;
+#ifdef CACHE_uthash
     HASH_ADD(hh, cell_cache, key, sizeof(key), elem);
+#else
+    elem->next = NULL;
+    if (cell_cache == NULL) cell_cache = elem;
+    else { elem->next = cell_cache; cell_cache = elem; }
+    ++cell_cache_size;
+#endif
     return elem;
 }
 
 static inline CELL img_get(CELL k) {
     cell_cache_element_t *elem = NULL;
+#ifdef CACHE_uthash
     HASH_FIND(hh, cell_cache, &k, sizeof(k), elem);
-    if (elem == NULL) {
-        CELL v = img_storage_get(k);
-        elem = _cache_add(k, 0, v);
-    } else {
-        HASH_DELETE(hh, cell_cache, elem);
-        HASH_ADD(hh, cell_cache, key, sizeof(CELL), elem);
-    }
-#ifdef BOARD_native
-    if (check_data[k] != elem->value) {
-        console_puts("\nERROR: data read check failed ");
-        abort();
+#else
+    cell_cache_element_t *prev = NULL;
+    for (elem = cell_cache; elem != NULL && elem->key != k;) {
+        prev = elem;
+        elem = elem->next;
     }
 #endif
+    if (elem == NULL)
+        elem = _cache_add(k, 0, img_storage_get(k));
+    else {
+#ifdef CACHE_uthash
+        HASH_DELETE(hh, cell_cache, elem);
+        HASH_ADD(hh, cell_cache, key, sizeof(CELL), elem);
+#else
+        if (prev != NULL) {
+            prev->next = elem->next;
+            elem->next = cell_cache;
+            cell_cache = elem;
+        }
+#endif
+    }
     return elem->value;
 }
 
 static inline void img_put(CELL k, CELL v) {
     cell_cache_element_t *elem = NULL;
+#ifdef CACHE_uthash
     HASH_FIND(hh, cell_cache, &k, sizeof(k), elem);
+#else
+    cell_cache_element_t *prev = NULL;
+    for (elem = cell_cache; elem != NULL && elem->key != k;) {
+        prev = elem;
+        elem = elem->next;
+    }
+#endif
     if (elem != NULL) {
         if (elem->value != v) {
             elem->value = v;
             elem->changed = 1;
+#ifndef CACHE_uthash
+            if (prev != NULL)
+                prev->next = elem->next;
+            elem->next = cell_cache;
+            cell_cache = elem;
+#endif
         }
     } else {
-        _cache_add(k, 1, v);
+#ifdef CACHE_uthash
         if (HASH_COUNT(cell_cache) > IMAGE_CACHE_SIZE) {
             cell_cache_element_t *temp = NULL;
             elem = NULL;
@@ -305,20 +359,44 @@ static inline void img_put(CELL k, CELL v) {
                     break;
             }
         }
-    }
-#ifdef BOARD_native
-    check_data[k] = v;
+#else
+        if (cell_cache_size > IMAGE_CACHE_SIZE) {
+            cell_cache_element_t *rm = NULL, *rmprev = NULL;
+            for (prev = NULL, elem = cell_cache; elem != NULL;) {
+                if (elem->changed == 0) {
+                    rm = elem;
+                    rmprev = prev;
+                }
+                prev = elem;
+                elem = elem->next;
+            }
+            if (rm != NULL) {
+                if (rmprev == NULL) cell_cache = rm->next;
+                else rmprev = rm->next;
+                --cell_cache_size;
+                free(rm);
+            }
+        }
 #endif
+        _cache_add(k, 1, v);
+    }
 }
 
 static inline void img_sync() {
-    cell_cache_element_t *elem, *temp;
+    cell_cache_element_t *elem;
+#ifdef CACHE_uthash
+    cell_cache_element_t *temp;
     HASH_ITER(hh, cell_cache, elem, temp) {
         if (elem->changed) {
-            img_storage_put(elem->key, elem->value);
-            elem->changed = 0;
+            if (img_storage_put(elem->key, elem->value))
+                elem->changed = 0;
         }
     }
+#else
+    for (elem = cell_cache; elem != NULL; elem = elem->next)
+        if (elem->changed && img_storage_put(elem->key, elem->value))
+                elem->changed = 0;
+#endif
     img_storage_sync();
 }
 
@@ -350,6 +428,11 @@ int main(void)
     char string_buffer[STRING_BUFFER_SIZE+1];
 #endif
 
+    cell_cache = NULL;
+#ifndef CACHE_uthash
+    cell_cache_size = 0;
+#endif
+
     console_prepare();
     console_puts("\nInitialize Ngaro VM.\n\n");
 
@@ -370,11 +453,6 @@ int main(void)
     }
 #endif
 
-#ifdef IMAGE_MODE_roflash
-    for (j = 0; j < IMAGE_CACHE_SIZE; ++j)
-        image_cache[j].key = -1;
-#endif
-
 #ifdef IMAGE_MODE_rwstorage
     image_sector_data = (CELL*)malloc(STORAGE_SECTOR_SIZE);
     if (image_sector_data == NULL) {
@@ -389,7 +467,6 @@ int main(void)
     for (j = 0; j < STACK_DEPTH; ++j) data[j] = 0;
     for (j = 0; j < ADDRESSES; ++j) address[j] = 0;
     for (j = 0; j < PORTS; ++j) ports[j] = 0;
-
 
     for (S_IP = 0; S_IP >= 0 && S_IP < IMAGE_SIZE; ++S_IP) {
         switch(img_get(S_IP)) {
@@ -563,7 +640,9 @@ int main(void)
         ports[3] = 1;
     }
 
+#ifdef IMAGE_MODE_rwstorage
 finish:
+#endif
     img_sync();
     console_puts("\n\nNgaro VM is down.\n");
     console_finish();

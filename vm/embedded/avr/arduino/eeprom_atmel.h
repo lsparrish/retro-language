@@ -8,6 +8,7 @@
 #include <avr/eeprom.h>
 
 static CELL load_from_eeprom() {
+    /*
     CELL ret, key, value;
     uint16_t *a;
     ret = eeprom_read_word(0);
@@ -20,18 +21,15 @@ static CELL load_from_eeprom() {
         img_put(key, value);
         console_putc('.');
     }
-    //for (int i = 0, k = ret * 4 + 1; i < IMAGE_CHANGE_SIZE; ++i, k += 2) {
-    //    a = (uint16_t*)k; value = eeprom_read_word(a);
-    //    img_put(i + IMAGE_CELLS, value);
-    //    console_putc('.');
-    //}
     return ret;
 read_error:
     console_puts("\nERROR: failed to read from EEPROM. ");
+    */
     return 0;
 }
 
 static CELL save_to_eeprom() {
+    /*
     CELL ret = 0, x, y, k, v;
     uint16_t *a;
     eeprom_write_word(0, ret);
@@ -47,17 +45,13 @@ static CELL save_to_eeprom() {
             console_putc('.');
         }
     }
-    //for (uint16_t i = 0, l = ret * 4 + 1; i < IMAGE_CHANGE_SIZE; ++i) {
-    //    v = image_changes[i];
-    //    a = (uint16_t*)l; eeprom_write_word(a, v); y = eeprom_read_word(a);
-    //    if (v != y) goto write_error;
-    //}
     eeprom_write_word(0, ret);
     x = eeprom_read_word(0);
     if (x != ret) goto write_error;
     return ret;
 write_error:
     console_puts("\nERROR: failed to write to EEPROM. ");
+    */
     return 0;
 }
 

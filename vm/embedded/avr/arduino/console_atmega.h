@@ -1,5 +1,5 @@
-#ifndef CONSOLE_MEGA2560_H
-#define CONSOLE_MEGA2560_H
+#ifndef CONSOLE_ATMEGA_H
+#define CONSOLE_ATMEGA_H
 #ifdef CONSOLE_ACTIVATED
 #error "Only one console can be activated."
 #endif
