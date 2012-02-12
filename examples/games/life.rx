@@ -29,14 +29,14 @@ create next
     SW SS SE @surrounding ;
   : alive  ( rc-n )
     count
-    [ 0 1 within ] [ drop 0 ] when
-    [ 4 8 within ] [ drop 0 ] when
-    [ 2 3 within ] [ drop 1 ] when ;
+    [ 0 1 within ] [ 0 ] whend
+    [ 4 8 within ] [ 0 ] whend
+    [ 2 3 within ] [ 1 ] whend ;
   : dead   ( rc-n )
     count
-    [ 3 =        ] [ drop 1 ] when
-    [ 0 2 within ] [ drop 0 ] when
-    [ 4 8 within ] [ drop 0 ] when ;
+    [ 3 =        ] [ 1 ] whend
+    [ 0 2 within ] [ 0 ] whend
+    [ 4 8 within ] [ 0 ] whend ;
   : newState  ( rc-n )
     2over get 1 = [ alive ] [ dead ] if ;
   : set   ( nrc- )  next + [ 20 * ] dip + ! ;
