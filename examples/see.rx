@@ -24,13 +24,12 @@ variable qdepth
 
 : see
   0 !qdepth
-  ' cr [ decompile @qdepth [ -1 ] [ dup 1- ^dissect'endOfWord? not ] if ] while drop ;
+  ' cr [ decompile @qdepth [ decompile -1 ] [ dup 1- ^dissect'endOfWord? not ] if ] while drop ;
 
 doc{
 Known Limitations
 -----------------
 *  no support for recognizing repeat/again pairs
-*  ] ] is treated as an end of function condition
 *  string identification could be more robust
 *  literals could be resolved to names, or ASCII characters
 }doc
