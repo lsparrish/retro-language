@@ -8,7 +8,7 @@
 #define STORAGE_SECTOR_SIZE 512
 #define STORAGE_SECTOR_SHIFT 9
 
-#ifndef BOARD_native
+#if BOARD != native
 
 #define SD_NORM 0
 #define SD_BUSY 1

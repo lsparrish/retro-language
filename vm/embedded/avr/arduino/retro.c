@@ -1,62 +1,44 @@
 /* Ngaro VM for Arduino boards ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    Copyright (c) 2011 - 2012, Oleksandr Kozachuk
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-/* Configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-#define CELL            int16_t
-#define IMAGE_SIZE        16000
-#define IMAGE_CACHE_SIZE    130
-#define ADDRESSES            32
-#define STACK_DEPTH          32
-#define PORTS                15
-#define STRING_BUFFER_SIZE   32
+/* Predefines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+/* Board types */
+#define native 1
+#define mega2560 2
+#define mega328p 3
+
+/* Image storage types */
+#define roflash 1
+#define rwstorage 2
+
+/* Display types */
+#define nokia3110 1
+
+/* Storage types */
+#define sdcard 1
 
 /* General includes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #include <stdlib.h>
-#ifdef BOARD_native
+#if BOARD == native
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #endif
 
-/* Hash table ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-#ifdef CACHE_uthash
-#define HASH_FUNCTION HASH_BER
-#include "uthash.h"
-#endif
-
 /* Board specific includes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-#if defined(BOARD_mega2560) || defined(BOARD_mega328p)
-#define BAUD 9600
+#if BOARD == mega2560 || BOARD == mega328p
 
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include <util/delay.h>
 #include <util/setbaud.h>
 
-#define SPI_PORT     PORTB
-#define SPI_DDR      DDRB
-#define SPI_MISO     PB3
-#define SPI_MOSI     PB2
-#define SPI_SCK      PB1
-#define SPI_SS       PB0
-
-#define DISPLAY_PORT PORTL
-#define DISPLAY_DDR  DDRL
-#define DISPLAY_SS   PL2
-#define DISPLAY_DC   PL1
-#define DISPLAY_RST  PL0
-
-#define SDCARD_PORT  SPI_PORT
-#define SDCARD_DDR   SPI_DDR
-#define SDCARD_SS    SPI_SS
-
 #else
-#ifdef BOARD_native
-
+#if BOARD == native
 #include <termios.h>
-
 #else
-#error "Unknown platform or -DBOARD_<type> not defined."
+#error "Unknown platform or -DBOARD=<type> not defined."
 #endif
 #endif
 
@@ -70,7 +52,7 @@ enum vm_opcode {VM_NOP, VM_LIT, VM_DUP, VM_DROP, VM_SWAP, VM_PUSH, VM_POP,
 
 static void console_puts(char *s);
 
-#ifndef BOARD_native
+#if BOARD != native
 
 static void spi_master_init(void);
 static void spi_slave_init(void);
@@ -80,49 +62,36 @@ static CELL __attribute__((always_inline)) spi_transfer_cell(CELL data);
 #endif
 
 /* Change store ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-typedef struct CELL_CACHE_ELEMENT {
-#ifdef CACHE_uthash
-    uint8_t changed;
-    CELL key;
-    CELL value;
-    UT_hash_handle hh;
-#else
-    unsigned int changed:1;
-    unsigned int key:15;
-    unsigned int next:16;
-    CELL value;
-#endif
-} cell_cache_element_t;
+#define CELL_CACHE_END IMAGE_CACHE_SIZE
+#define CELL_CHANGED (((CELL)1) << (sizeof(CELL) * 8 - 2))
+typedef CELL_CACHE_TYPE cell_cache_pointer_t;
 
-#ifdef CACHE_uthash
-static cell_cache_element_t *cell_cache;
-#else
-static cell_cache_element_t cell_cache[IMAGE_CACHE_SIZE];
-static uint8_t cell_cache_first;
-#define CELL_CACHE_END 65535
-#endif
+static CELL *cell_cache_keys;
+static cell_cache_pointer_t *cell_cache_nexts;
+static CELL *cell_cache_values;
+static cell_cache_pointer_t cell_cache_first;
 
 /* Image operations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-static inline CELL img_get(CELL k);
-static inline void img_put(CELL k, CELL v);
+static CELL img_get(CELL k);
+static void img_put(CELL k, CELL v);
 
 /* Board and image setup ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#if defined(BOARD_mega2560) || defined(BOARD_mega328p)
+#if BOARD == mega2560 || BOARD == mega328p
 
 #include "console_atmega.h"
 
-#ifdef IMAGE_MODE_roflash
-#include "image.hex.h"
+#if IMAGE_MODE == roflash
+#include "image.h"
 #include "eeprom_atmel.h"
 #endif
 
-#ifdef DISPLAY_nokia3110
+#if DISPLAY == nokia3110
 #include "display_nokia3110.h"
 #endif
 
 #else
-#ifdef BOARD_native
+#if BOARD == native
 
 #include "console_native.h"
 
@@ -132,16 +101,17 @@ static inline void img_put(CELL k, CELL v);
 #define pgm_read_word(x) (*(x))
 #define _SFR_IO8(x) SFR_IO8[x]
 static int SFR_IO8[64];
+#define _delay_ms(x) sleep(x/1000)
 
-#ifdef IMAGE_MODE_roflash
-#include "image.hex.h"
+#if IMAGE_MODE == roflash
+#include "image.h"
 #include "eeprom_native.h"
 #endif
 
 #endif
 #endif
 
-#ifdef STORAGE_sdcard
+#if STORAGE == sdcard
 #include "storage_sdcard.h"
 #endif
 
@@ -158,7 +128,7 @@ static void console_puts(char *s) {
 }
 
 /* SPI ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-#ifndef BOARD_native
+#if BOARD != native
 
 static void spi_master_init(void) {
     SPI_DDR &= ~(1 << SPI_MISO);
@@ -198,14 +168,14 @@ static CELL spi_transfer_cell(CELL data) {
 
 /* Image read and write ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#ifdef IMAGE_MODE_roflash
+#if IMAGE_MODE == roflash
 
 #define img_storage_get(k) image_read(k)
 #define img_storage_put(k, v) 0
 #define img_storage_sync()
 
 #else
-#ifdef IMAGE_MODE_rwstorage
+#if IMAGE_MODE == rwstorage
 
 #ifndef STORAGE_ACTIVATED
 #error "Image mode 'rwstorage' is needs an enabled storage."
@@ -219,28 +189,20 @@ static struct {
     uint32_t sector_num:31;
 } image_sector_flags;
 
-static inline void img_storage_load(uint32_t sec) {
+static void img_storage_load(uint32_t sec) {
     if (sec != image_sector_flags.sector_num) {
         if (image_sector_flags.changed != 0) {
             if (0 != storage_write_sector(
                         (uint8_t*) image_sector_data,
                         image_sector_flags.sector_num)) {
                 console_puts("\nERROR: failed to write sector ");
-#ifndef BOARD_native
                 _delay_ms(1000);
-#else
-                sleep(10);
-#endif
             } else image_sector_flags.changed = 0;
         }
         if (image_sector_flags.changed == 0) {
             if (0 != storage_read_sector((uint8_t*) image_sector_data, sec)) {
                 console_puts("\nERROR: failed to read sector ");
-#ifndef BOARD_native
                 _delay_ms(1000);
-#else
-                sleep(10);
-#endif
             } else image_sector_flags.sector_num = sec;
         }
     }
@@ -271,167 +233,70 @@ static void img_storage_sync(void) {
 #endif
 #endif
 
-#ifdef CACHE_uthash
-
-static inline
-cell_cache_element_t* //__attribute__((always_inline))
-_cache_add(CELL key, uint8_t changed, CELL value)
-{
-    cell_cache_element_t *elem = malloc(sizeof(cell_cache_element_t));
-    if (elem == NULL) {
-        console_puts("\nERROR: not enough memory ");
-        return NULL;
-    }
-    elem->key = key;
-    elem->changed = changed;
-    elem->value = value;
-    HASH_ADD(hh, cell_cache, key, sizeof(key), elem);
-    return elem;
-}
-
-static inline CELL img_get(CELL k) {
-    cell_cache_element_t *elem = NULL;
-    HASH_FIND(hh, cell_cache, &k, sizeof(k), elem);
-    if (elem == NULL)
-        elem = _cache_add(k, 0, img_storage_get(k));
-    else {
-        HASH_DELETE(hh, cell_cache, elem);
-        HASH_ADD(hh, cell_cache, key, sizeof(CELL), elem);
-    }
-    return elem->value;
-}
-
-static inline void img_put(CELL k, CELL v) {
-    cell_cache_element_t *elem = NULL;
-    HASH_FIND(hh, cell_cache, &k, sizeof(k), elem);
-    if (elem != NULL) {
-        if (elem->value != v) {
-            elem->value = v;
-            elem->changed = 1;
-        }
-    } else {
-        if (HASH_COUNT(cell_cache) > IMAGE_CACHE_SIZE) {
-            cell_cache_element_t *temp = NULL;
-            elem = NULL;
-            HASH_ITER(hh, cell_cache, elem, temp) {
-                if (elem->changed) {
-                    if (HASH_COUNT(cell_cache) < (IMAGE_CACHE_SIZE+5)) continue;
-                    if (!img_storage_put(elem->key, elem->value)) continue;
-                }
-                HASH_DEL(cell_cache, elem);
-                free(elem);
-                if (HASH_COUNT(cell_cache) < IMAGE_CACHE_SIZE)
-                    break;
-            }
-        }
-        _cache_add(k, 1, v);
+static void _img_lru(cell_cache_pointer_t cur, cell_cache_pointer_t prev) {
+    if (prev != CELL_CACHE_END) {
+        cell_cache_nexts[prev] = cell_cache_nexts[cur];
+        cell_cache_nexts[cur] = cell_cache_first;
+        cell_cache_first = cur;
     }
 }
 
-static inline void img_sync() {
-    cell_cache_element_t *elem;
-    cell_cache_element_t *temp;
-    HASH_ITER(hh, cell_cache, elem, temp) {
-        if (elem->changed) {
-            if (img_storage_put(elem->key, elem->value))
-                elem->changed = 0;
-        }
-    }
-    img_storage_sync();
-}
-
-#else
-
-static inline CELL img_get(CELL k) {
-    uint16_t cur = cell_cache_first;
-    uint16_t last = CELL_CACHE_END;
-    uint16_t lastfree = CELL_CACHE_END;
-    uint16_t lastfreeprev = CELL_CACHE_END;
-
-    for (; cur != CELL_CACHE_END; cur = cell_cache[cur].next) {
-        if (cell_cache[cur].key == k) {
-            if (last != CELL_CACHE_END) {
-                cell_cache[last].next = cell_cache[cur].next;
-                cell_cache[cur].next = cell_cache_first;
-                cell_cache_first = cur;
-            }
-            return cell_cache[cur].value;
-        }
-        if (cell_cache[cur].changed == 0) {
-            lastfreeprev = last;
-            lastfree = cur;
-        }
-        last = cur;
-    }
-    if (lastfree == CELL_CACHE_END) {
-        console_puts("\nERROR: Out of memory ");
-#ifndef BOARD_native
-        while(1) _delay_ms(1000);
-#else
-        fflush(stdout);
-        while(1) sleep(1);
-#endif
-    }
-
-    cell_cache[lastfree].key = k;
-    cell_cache[lastfree].value = img_storage_get(k);
-    cell_cache[lastfree].changed = 0;
-    if (lastfreeprev != CELL_CACHE_END) {
-        cell_cache[lastfreeprev].next = cell_cache[lastfree].next;
-        cell_cache[lastfree].next = cell_cache_first;
-        cell_cache_first = lastfree;
-    }
-
-    return cell_cache[lastfree].value;
-}
-
-static inline void img_put(CELL k, CELL v) {
-    uint16_t cur = cell_cache_first;
-    uint16_t last = CELL_CACHE_END;
-    uint16_t lastfree = CELL_CACHE_END;
-    uint16_t lastfreeprev = CELL_CACHE_END;
-
-    for (; cur != CELL_CACHE_END; cur = cell_cache[cur].next) {
-        if (cell_cache[cur].key == k) {
-            if (last != CELL_CACHE_END) {
-                cell_cache[last].next = cell_cache[cur].next;
-                cell_cache[cur].next = cell_cache_first;
-                cell_cache_first = cur;
-            }
-            if (cell_cache[cur].value != v) {
-                cell_cache[cur].value = v;
-                cell_cache[cur].changed = 1;
-            }
+static void _img_find(CELL k, cell_cache_pointer_t *pointers) {
+    for (; pointers[0] != CELL_CACHE_END; pointers[0] = cell_cache_nexts[pointers[0]]) {
+        if ((cell_cache_keys[pointers[0]] & (~CELL_CHANGED)) == k) {
+            _img_lru(pointers[0], pointers[1]);
             return;
         }
-        if (cell_cache[cur].changed == 0) {
-            lastfreeprev = last;
-            lastfree = cur;
+        if ((cell_cache_keys[pointers[0]] & CELL_CHANGED) == 0) {
+            pointers[3] = pointers[1];
+            pointers[2] = pointers[0];
         }
-        last = cur;
+        pointers[1] = pointers[0];
     }
-    if (lastfree == CELL_CACHE_END) {
+    if (pointers[2] == CELL_CACHE_END) {
         console_puts("\nERROR: Out of memory ");
-#ifndef BOARD_native
         while(1) _delay_ms(1000);
-#else
-        fflush(stdout);
-        while(1) sleep(1);
-#endif
     }
-    cell_cache[lastfree].key = k;
-    cell_cache[lastfree].value = v;
-    cell_cache[lastfree].changed = 1;
-    if (lastfreeprev != CELL_CACHE_END) {
-        cell_cache[lastfreeprev].next = cell_cache[lastfree].next;
-        cell_cache[lastfree].next = cell_cache_first;
-        cell_cache_first = lastfree;
+}
+
+static CELL img_get(CELL k) {
+    cell_cache_pointer_t pointers[4] = {
+        cell_cache_first,
+        CELL_CACHE_END, CELL_CACHE_END, CELL_CACHE_END
+    };
+
+    _img_find(k, pointers);
+    if (pointers[0] != CELL_CACHE_END)
+        return cell_cache_values[pointers[0]];
+
+    _img_lru(pointers[2], pointers[3]);
+    cell_cache_keys[cell_cache_first] = k;
+    return (cell_cache_values[cell_cache_first] = img_storage_get(k));
+}
+
+static void img_put(CELL k, CELL v) {
+    cell_cache_pointer_t pointers[4] = {
+        cell_cache_first,
+        CELL_CACHE_END, CELL_CACHE_END, CELL_CACHE_END
+    };
+
+    _img_find(k, pointers);
+    if (pointers[0] != CELL_CACHE_END) {
+        if (cell_cache_values[cell_cache_first] != v) {
+            cell_cache_values[cell_cache_first] = v;
+            cell_cache_keys[cell_cache_first] |= CELL_CHANGED;
+        }
+        return;
     }
+    if (img_storage_get(k) == v)
+        return;
+
+    _img_lru(pointers[2], pointers[3]);
+    cell_cache_keys[cell_cache_first] = (k | CELL_CHANGED);
+    cell_cache_values[cell_cache_first] = v;
 }
 
 #define img_sync()
-
-#endif
 
 static inline void img_string(CELL starting, char *buffer, CELL buffer_len)
 {
@@ -445,17 +310,12 @@ int main(void)
 {
     size_t j; size_t t;
     register CELL S_SP = 0, S_RSP = 0, S_IP = 0;
-    CELL data[STACK_DEPTH];
-    CELL address[ADDRESSES];
-    CELL ports[PORTS];
+    CELL *data;
+    CELL *address;
+    CELL *ports;
     CELL a, b;
-#ifdef FILESYSTEM_ACTIVATED
-    struct fs_t *fs;
-#endif
 
-#ifndef BOARD_native
     _delay_ms(1000);
-#endif
 
 #ifdef DISPLAY_ACTIVATED
     char string_buffer[STRING_BUFFER_SIZE+1];
@@ -464,7 +324,7 @@ int main(void)
     console_prepare();
     console_puts("\nInitialize Ngaro VM.\n\n");
 
-#ifndef BOARD_native
+#if BOARD != native
     spi_master_init();
 #endif
 
@@ -481,7 +341,7 @@ int main(void)
     }
 #endif
 
-#ifdef IMAGE_MODE_rwstorage
+#if IMAGE_MODE == rwstorage
     image_sector_data = (CELL*)malloc(STORAGE_SECTOR_SIZE);
     if (image_sector_data == NULL) {
         console_puts("\nERROR: failed to allocate sector buffer ");
@@ -492,26 +352,35 @@ int main(void)
     img_storage_load(0);
 #endif
 
-#ifdef CACHE_uthash
-    cell_cache = NULL;
-#else
-    for (j = 0; j < IMAGE_CACHE_SIZE; ++j) {
-        cell_cache[j].key = j;
-        cell_cache[j].value = img_storage_get(j);
-        cell_cache[j].changed = 0;
-        cell_cache[j].next = j + 1;
+    cell_cache_keys = (CELL*) malloc(sizeof(CELL) * IMAGE_CACHE_SIZE);
+    cell_cache_nexts = (cell_cache_pointer_t*) malloc(sizeof(cell_cache_pointer_t) * IMAGE_CACHE_SIZE);
+    cell_cache_values = (CELL*) malloc(sizeof(CELL) * IMAGE_CACHE_SIZE);
+    if (cell_cache_keys == NULL || cell_cache_nexts == NULL || cell_cache_values == NULL) {
+        console_puts("\nERROR: failed to allocate cell cache ");
+        goto finish;
     }
-    cell_cache[j-1].next = CELL_CACHE_END;
+    for (j = 0; j < IMAGE_CACHE_SIZE; ++j) {
+        cell_cache_keys[j] = j;
+        cell_cache_values[j] = img_storage_get(j);
+        cell_cache_nexts[j] = j + 1;
+    }
+    cell_cache_nexts[j-1] = CELL_CACHE_END;
     cell_cache_first = 0;
-#endif
 
-
+    data = (CELL*) malloc(sizeof(CELL) * STACK_DEPTH);
+    address = (CELL*) malloc(sizeof(CELL) * ADDRESSES);
+    ports = (CELL*) malloc(sizeof(CELL) * PORTS);
+    if (data == NULL || address == NULL || ports == NULL) {
+        console_puts("\nERROR: failed to allocate stacks or ports ");
+        goto finish;
+    }
     for (j = 0; j < STACK_DEPTH; ++j) data[j] = 0;
     for (j = 0; j < ADDRESSES; ++j) address[j] = 0;
     for (j = 0; j < PORTS; ++j) ports[j] = 0;
 
     for (S_IP = 0; S_IP >= 0 && S_IP < IMAGE_SIZE; ++S_IP) {
-        switch(img_get(S_IP)) {
+        register CELL op = img_get(S_IP);
+        switch(op) {
             case     VM_NOP: break;
             case     VM_LIT: S_SP++; S_IP++; S_TOS = img_get(S_IP); break;
             case     VM_DUP: S_SP++; S_TOS = S_NOS; break;
@@ -579,7 +448,7 @@ int main(void)
                     if (ports[4] != 0) {
                         ports[0] = 1;
                         switch (ports[4]) {
-#ifdef IMAGE_MODE_roflash
+#if IMAGE_MODE == roflash
                             case 1: ports[4] = save_to_eeprom(); break;
                             case 2: ports[4] = load_from_eeprom(); break;
 #endif
@@ -622,7 +491,7 @@ int main(void)
                                 else _SFR_IO8(a) &= ~(1 << b);
                                 ports[13] = 0;
                                 S_DROP; break;
-#ifndef BOARD_native
+#if BOARD != native
                             case -5: a = S_TOS; S_DROP;
                                      _delay_ms(a);
                                      ports[13] = 0;
@@ -682,13 +551,11 @@ int main(void)
         ports[3] = 1;
     }
 
-#ifdef IMAGE_MODE_rwstorage
 finish:
-#endif
     img_sync();
     console_puts("\n\nNgaro VM is down.\n");
     console_finish();
-#ifndef BOARD_native
+#if BOARD != native
     while(1) _delay_ms(100);
 #endif
     return 0;

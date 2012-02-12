@@ -1,3 +1,4 @@
-^diet'shrink
+[ 80 ] &STRING-LENGTH :is
+[  4 ] &STRING-BUFFERS :is
 1 4 out 0 0 out wait ( start save directly, because of our own save )
 bye
