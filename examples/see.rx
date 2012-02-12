@@ -24,7 +24,7 @@ variable qdepth
 
 : see
   0 !qdepth
-  ' cr [ decompile dup 1- ^dissect'endOfWord? not ] while drop ;
+  ' cr [ decompile @qdepth [ -1 ] [ dup 1- ^dissect'endOfWord? not ] if ] while drop ;
 
 doc{
 Known Limitations
@@ -37,4 +37,6 @@ Known Limitations
 
 : hello [ 1 2 + [ "hello" puts ] do ] do ;
 see hello
+: harm [ 1 [ 2 ] ] ;
+see harm
 
