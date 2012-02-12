@@ -50,7 +50,22 @@ enum vm_opcode {VM_NOP, VM_LIT, VM_DUP, VM_DROP, VM_SWAP, VM_PUSH, VM_POP,
                 VM_SHR, VM_ZERO_EXIT, VM_INC, VM_DEC, VM_IN, VM_OUT,
                 VM_WAIT };
 
+enum vm_errors {
+    ERR_OUT_OF_MEMORY            = 0x01,
+    ERR_ALLOCATE_SECTOR_BUFFER   = 0x02,
+    ERR_ALLOCATE_CELL_CACHE      = 0x03,
+    ERR_ALLOCATE_STACKS          = 0x04,
+    ERR_READ_EEPROM              = 0x05,
+    ERR_WRITE_EEPROM             = 0x06,
+    ERR_INIT_STORAGE             = 0x07,
+    ERR_WRITE_SECTOR             = 0x08,
+    ERR_READ_SECTOR              = 0x09,
+};
+
+
+static void console_putc(char c);
 static void console_puts(char *s);
+static void console_pute(CELL e);
 
 #if BOARD != native
 
@@ -127,6 +142,17 @@ static void console_puts(char *s) {
         console_putc(*x);
 }
 
+static void console_pute(CELL e) {
+    console_puts("\nERR");
+    uint8_t a = (e >> 4);
+    uint8_t b = e & 0xF;
+    if (a > 9) console_putc('A' - 10 + a);
+    else console_putc('0' + a);
+    if (b > 9) console_putc('A' - 10 + b);
+    else console_putc('0' + b);
+    console_putc(' ');
+}
+
 /* SPI ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #if BOARD != native
 
@@ -195,13 +221,13 @@ static void img_storage_load(uint32_t sec) {
             if (0 != storage_write_sector(
                         (uint8_t*) image_sector_data,
                         image_sector_flags.sector_num)) {
-                console_puts("\nERROR: failed to write sector ");
+                console_pute(ERR_WRITE_SECTOR);
                 _delay_ms(1000);
             } else image_sector_flags.changed = 0;
         }
         if (image_sector_flags.changed == 0) {
             if (0 != storage_read_sector((uint8_t*) image_sector_data, sec)) {
-                console_puts("\nERROR: failed to read sector ");
+                console_pute(ERR_READ_SECTOR);
                 _delay_ms(1000);
             } else image_sector_flags.sector_num = sec;
         }
@@ -225,7 +251,7 @@ static void img_storage_sync(void) {
         if (0 != storage_write_sector(
                     (uint8_t*) image_sector_data,
                     image_sector_flags.sector_num))
-            console_puts("\nERROR: failed to write sector ");
+            console_pute(ERR_WRITE_SECTOR);
 }
 
 #else
@@ -258,7 +284,7 @@ static inline cell_cache_pointer_t _img_find(CELL k) {
         pointer1 = pointer0;
     }
     if (pointer2 == CELL_CACHE_END) {
-        console_puts("\nERROR: Out of memory ");
+        console_pute(ERR_OUT_OF_MEMORY);
         while(1) _delay_ms(1000);
     }
     _img_lru(pointer2, pointer3);
@@ -298,7 +324,6 @@ static inline void img_string(CELL starting, char *buffer, CELL buffer_len)
 /* Main ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 int main(void)
 {
-    size_t j; size_t t;
     register CELL S_SP = 0, S_RSP = 0, S_IP = 0;
     CELL *data;
     CELL *address;
@@ -312,7 +337,6 @@ int main(void)
 #endif
 
     console_prepare();
-    console_puts("\nInitialize Ngaro VM.\n\n");
 
 #if BOARD != native
     spi_master_init();
@@ -326,7 +350,7 @@ int main(void)
 
 #ifdef STORAGE_ACTIVATED
     if (0 != storage_init()) {
-        console_puts("\nERROR: failed to initialize storage ");
+        console_pute(ERR_INIT_STORAGE);
         goto finish;
     }
 #endif
@@ -334,7 +358,7 @@ int main(void)
 #if IMAGE_MODE == rwstorage
     image_sector_data = (CELL*)malloc(STORAGE_SECTOR_SIZE);
     if (image_sector_data == NULL) {
-        console_puts("\nERROR: failed to allocate sector buffer ");
+        console_pute(ERR_ALLOCATE_SECTOR_BUFFER);
         goto finish;
     }
     image_sector_flags.changed = 0;
@@ -346,27 +370,27 @@ int main(void)
     cell_cache_nexts = (cell_cache_pointer_t*) malloc(sizeof(cell_cache_pointer_t) * IMAGE_CACHE_SIZE);
     cell_cache_values = (CELL*) malloc(sizeof(CELL) * IMAGE_CACHE_SIZE);
     if (cell_cache_keys == NULL || cell_cache_nexts == NULL || cell_cache_values == NULL) {
-        console_puts("\nERROR: failed to allocate cell cache ");
+        console_pute(ERR_ALLOCATE_CELL_CACHE);
         goto finish;
     }
-    for (j = 0; j < IMAGE_CACHE_SIZE; ++j) {
-        cell_cache_keys[j] = j;
-        cell_cache_values[j] = img_storage_get(j);
-        cell_cache_nexts[j] = j + 1;
+    for (a = 0; a < IMAGE_CACHE_SIZE; ++a) {
+        cell_cache_keys[a] = a;
+        cell_cache_values[a] = img_storage_get(a);
+        cell_cache_nexts[a] = a + 1;
     }
-    cell_cache_nexts[j-1] = CELL_CACHE_END;
+    cell_cache_nexts[a-1] = CELL_CACHE_END;
     cell_cache_first = 0;
 
     data = (CELL*) malloc(sizeof(CELL) * STACK_DEPTH);
     address = (CELL*) malloc(sizeof(CELL) * ADDRESSES);
     ports = (CELL*) malloc(sizeof(CELL) * PORTS);
     if (data == NULL || address == NULL || ports == NULL) {
-        console_puts("\nERROR: failed to allocate stacks or ports ");
+        console_pute(ERR_ALLOCATE_STACKS);
         goto finish;
     }
-    for (j = 0; j < STACK_DEPTH; ++j) data[j] = 0;
-    for (j = 0; j < ADDRESSES; ++j) address[j] = 0;
-    for (j = 0; j < PORTS; ++j) ports[j] = 0;
+    for (a = 0; a < STACK_DEPTH; ++a) data[a] = 0;
+    for (a = 0; a < ADDRESSES; ++a) address[a] = 0;
+    for (a = 0; a < PORTS; ++a) ports[a] = 0;
 
     for (S_IP = 0; S_IP >= 0 && S_IP < IMAGE_SIZE; ++S_IP) {
         register CELL op = img_get(S_IP);
@@ -420,7 +444,7 @@ int main(void)
             case     VM_INC: S_TOS += 1; break;
             case     VM_DEC: S_TOS -= 1; break;
             case      VM_IN: a = S_TOS; S_TOS = ports[a]; ports[a] = 0; break;
-            case     VM_OUT: t = (size_t) S_TOS; ports[0] = 0; ports[t] = S_NOS; S_DROP; S_DROP; break;
+            case     VM_OUT: a = S_TOS; ports[0] = 0; ports[a] = S_NOS; S_DROP; S_DROP; break;
             case    VM_WAIT:
                 if (ports[0] != 1) {
                     /* Input */
@@ -442,9 +466,13 @@ int main(void)
                             case 1: ports[4] = save_to_eeprom(); break;
                             case 2: ports[4] = load_from_eeprom(); break;
                             case 3: ports[4] = IMAGE_CACHE_SIZE; break;
-                            case 4: for (a = 0, b = 0; a < IMAGE_CACHE_SIZE; ++a)
+                            case 4: for (a = 0, b = 0; a < IMAGE_CACHE_SIZE; ++a) {
                                         if (cell_cache_keys[a] & CELL_CHANGED)
                                             ++b;
+#if BOARD == native
+                                        printf("\n# %03d: %05d (%d) ", cell_cache_keys[a] & (~CELL_CHANGED), cell_cache_values[b], (cell_cache_keys[a] & CELL_CHANGED) != 0);
+#endif
+                                    }
                                     ports[4] = b;
                                     break;
 #endif
@@ -549,7 +577,7 @@ int main(void)
 
 finish:
     img_sync();
-    console_puts("\n\nNgaro VM is down.\n");
+    console_puts("\n\nVM down.\n");
     console_finish();
 #if BOARD != native
     while(1) _delay_ms(100);

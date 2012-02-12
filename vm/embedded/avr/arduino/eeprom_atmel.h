@@ -20,7 +20,7 @@ static CELL load_from_eeprom() {
     }
     return ret;
 read_error:
-    console_puts("\nERROR: failed to read from EEPROM. ");
+    console_pute(ERR_READ_EEPROM);
     return 0;
 }
 
@@ -43,7 +43,7 @@ static CELL save_to_eeprom() {
     if (x != ret) goto write_error;
     return ret;
 write_error:
-    console_puts("\nERROR: failed to write to EEPROM. ");
+    console_pute(ERR_WRITE_EEPROM);
     return 0;
 }
 

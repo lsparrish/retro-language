@@ -1,3 +1,6 @@
+[ 80 ] &STRING-LENGTH :is
+[  4 ] &STRING-BUFFERS :is
+
 chain: arduino'
 
 : io-byte@  ( n-n ) -1 #13 out wait #13 in wait ;

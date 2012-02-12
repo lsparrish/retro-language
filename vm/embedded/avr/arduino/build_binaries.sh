@@ -14,6 +14,7 @@ cp $ROOT_DIRECTORY/retroImage retroImage || err "Failed to copy retroImage file"
 make -C $ROOT_DIRECTORY retro >error.log 2>&1 || err "Failed to builed original retro"
 cat $MODULES | $ROOT_DIRECTORY/retro --shrink --image retroImage >retro.log 2>&1 || err "Failed to build retro image"
 mv retro.log image.log
+tail image.log
 $CC $CFLAGS -o convert $ROOT_DIRECTORY/tools/convert.c >error.log 2>&1 || err "Failed to compile convert tool"
 ./convert >error.log 2>&1 || err "Failed to convert images"
 rm -f error.log
@@ -27,13 +28,18 @@ hexdump -v -e "\"{\" $IMAGE_BLOCK_SIZE/2 \"%d,\" \"},\n\"" retroImage16 \
   curr++;
 }
 END {
-  print \"#define IMAGE_CELLS \" ($IMAGE_BLOCK_SIZE * curr);
-  print \"static int16_t image_read(int16_t x) {\";
-  print \"  switch(x / ${IMAGE_BLOCK_SIZE}) {\";
-  for (i = 0; i < curr; i++) { \
-    print \"    case \" i \": return pgm_read_word(&(image_\" i \"[x % $IMAGE_BLOCK_SIZE]));\";
-  };
-  print \"  } return 0; }\";
+  cell_count = ($IMAGE_BLOCK_SIZE * curr);
+  print \"#define IMAGE_CELLS \" cell_count;
+  if (curr == 1) {
+    print \"#define image_read(x) ((CELL)pgm_read_word(&(image_0[x])))\";
+  } else {
+    print \"static int16_t image_read(int16_t x) {\";
+    print \"  switch(x / ${IMAGE_BLOCK_SIZE}) {\";
+    for (i = 0; i < curr; i++) { \
+      print \"    case \" i \": return pgm_read_word(&(image_\" i \"[x % $IMAGE_BLOCK_SIZE]));\";
+    };
+    print \"  } return 0; }\";
+  }
 }" > image.h \
 || err "Failed to build image header"
 ls -l image.h

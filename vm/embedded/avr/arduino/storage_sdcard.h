@@ -167,8 +167,10 @@ static uint8_t storage_read_sector(unsigned char *data, uint32_t addr) {
     char buf[10];
     unsigned int i;
 
+    /*
     sprintf(buf, "\nR%ld ", addr);
     console_puts(buf);
+    */
 
     /* convert sector number to byte address */
     addr <<= STORAGE_SECTOR_SHIFT;
@@ -193,6 +195,7 @@ static uint8_t storage_read_sector(unsigned char *data, uint32_t addr) {
     SDCARD_PORT |= (1<<SDCARD_SS);
     spi_transfer_byte(0xFF);
 
+    /*
     for (i = 0; i < STORAGE_SECTOR_SIZE; ++i) {
         unsigned char a, b;
         a = (data[i] >> 4);
@@ -203,6 +206,7 @@ static uint8_t storage_read_sector(unsigned char *data, uint32_t addr) {
         else console_putc('0' + b);
     }
     console_putc(' ');
+    */
     return 0;
 }
 
@@ -269,6 +273,7 @@ static uint8_t storage_read_sector(uint8_t *buffer, uint32_t sector) {
         buffer[i] = 0;
     fread(buffer, STORAGE_SECTOR_SIZE, 1, fd);
 
+    /*
     sprintf(buf, "\nR%d ", sector);
     console_puts(buf);
     for (unsigned int i = 0; i < STORAGE_SECTOR_SIZE; ++i) {
@@ -279,7 +284,7 @@ static uint8_t storage_read_sector(uint8_t *buffer, uint32_t sector) {
         else console_putc('0' + a);
         if (b > 9) console_putc('A' - 10 + b);
         else console_putc('0' + b);
-    }
+    }*/
     return 0;
 }
 

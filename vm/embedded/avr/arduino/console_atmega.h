@@ -10,6 +10,7 @@ static void console_prepare() {
     UCSR0B |= (1 << RXEN0);
     UCSR0B |= (1 << TXEN0);
     UCSR0C  = (1 << USBS0) | (1 << UCSZ00) | (1 << UCSZ01);
+    console_putc('\n');
 }
 
 static void console_finish() {
