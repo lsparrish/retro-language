@@ -233,7 +233,7 @@ static void img_storage_sync(void) {
 #endif
 #endif
 
-static void _img_lru(cell_cache_pointer_t cur, cell_cache_pointer_t prev) {
+static inline void _img_lru(cell_cache_pointer_t cur, cell_cache_pointer_t prev) {
     if (prev != CELL_CACHE_END) {
         cell_cache_nexts[prev] = cell_cache_nexts[cur];
         cell_cache_nexts[cur] = cell_cache_first;
@@ -241,47 +241,39 @@ static void _img_lru(cell_cache_pointer_t cur, cell_cache_pointer_t prev) {
     }
 }
 
-static void _img_find(CELL k, cell_cache_pointer_t *pointers) {
-    for (; pointers[0] != CELL_CACHE_END; pointers[0] = cell_cache_nexts[pointers[0]]) {
-        if ((cell_cache_keys[pointers[0]] & (~CELL_CHANGED)) == k) {
-            _img_lru(pointers[0], pointers[1]);
-            return;
+static inline cell_cache_pointer_t _img_find(CELL k) {
+    register cell_cache_pointer_t pointer0 = cell_cache_first;
+    register cell_cache_pointer_t pointer1 = CELL_CACHE_END;
+    register cell_cache_pointer_t pointer2 = CELL_CACHE_END;
+    register cell_cache_pointer_t pointer3 = CELL_CACHE_END;
+    for (; pointer0 != CELL_CACHE_END; pointer0 = cell_cache_nexts[pointer0]) {
+        if ((cell_cache_keys[pointer0] & (~CELL_CHANGED)) == k) {
+            _img_lru(pointer0, pointer1);
+            return pointer0;
         }
-        if ((cell_cache_keys[pointers[0]] & CELL_CHANGED) == 0) {
-            pointers[3] = pointers[1];
-            pointers[2] = pointers[0];
+        if ((cell_cache_keys[pointer0] & CELL_CHANGED) == 0) {
+            pointer3 = pointer1;
+            pointer2 = pointer0;
         }
-        pointers[1] = pointers[0];
+        pointer1 = pointer0;
     }
-    if (pointers[2] == CELL_CACHE_END) {
+    if (pointer2 == CELL_CACHE_END) {
         console_puts("\nERROR: Out of memory ");
         while(1) _delay_ms(1000);
     }
+    _img_lru(pointer2, pointer3);
+    return pointer0;
 }
 
-static CELL img_get(CELL k) {
-    cell_cache_pointer_t pointers[4] = {
-        cell_cache_first,
-        CELL_CACHE_END, CELL_CACHE_END, CELL_CACHE_END
-    };
-
-    _img_find(k, pointers);
-    if (pointers[0] != CELL_CACHE_END)
-        return cell_cache_values[pointers[0]];
-
-    _img_lru(pointers[2], pointers[3]);
+static inline CELL img_get(CELL k) {
+    if (_img_find(k) != CELL_CACHE_END)
+        return cell_cache_values[cell_cache_first];
     cell_cache_keys[cell_cache_first] = k;
     return (cell_cache_values[cell_cache_first] = img_storage_get(k));
 }
 
-static void img_put(CELL k, CELL v) {
-    cell_cache_pointer_t pointers[4] = {
-        cell_cache_first,
-        CELL_CACHE_END, CELL_CACHE_END, CELL_CACHE_END
-    };
-
-    _img_find(k, pointers);
-    if (pointers[0] != CELL_CACHE_END) {
+static inline void img_put(CELL k, CELL v) {
+    if (_img_find(k) != CELL_CACHE_END) {
         if (cell_cache_values[cell_cache_first] != v) {
             cell_cache_values[cell_cache_first] = v;
             cell_cache_keys[cell_cache_first] |= CELL_CHANGED;
@@ -290,8 +282,6 @@ static void img_put(CELL k, CELL v) {
     }
     if (img_storage_get(k) == v)
         return;
-
-    _img_lru(pointers[2], pointers[3]);
     cell_cache_keys[cell_cache_first] = (k | CELL_CHANGED);
     cell_cache_values[cell_cache_first] = v;
 }
