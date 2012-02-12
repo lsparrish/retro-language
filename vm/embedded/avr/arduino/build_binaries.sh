@@ -10,7 +10,7 @@ err () {
 [ X"$BOARD" = X"" ] && err "build_binaries.sh should be included in configuration."
 
 echo "Build image file"
-make -C $ROOT_DIRECTORY retro >error.log 2>&1 || err "Failed to builed original retro"
+make -C $ROOT_DIRECTORY retro image >error.log 2>&1 || err "Failed to builed original retro"
 cat $MODULES \
 | $ROOT_DIRECTORY/retro --shrink --image $ROOT_DIRECTORY/retroImage >error.log 2>&1 \
 || err "Failed to build retro image"
@@ -41,15 +41,13 @@ ls -l image.h
 
 echo "Build native executable (for testing)"
 echo $CC $CFLAGS $NATCFLAGS -o retro.nat retro.c
-$CC $CFLAGS $NATCFLAGS -o retro.nat retro.c >error.log 2>&1 \
-|| err "Failed to build native executable"
+$CC $CFLAGS $NATCFLAGS -o retro.nat retro.c || err "Failed to build native executable"
 rm -f error.log
 ls -l retro.nat
 
 echo "Build AVR executable (for uploading)"
 echo $AVRCC $CFLAGS $AVRCFLAGS -o retro.avr retro.c
-$AVRCC $CFLAGS $AVRCFLAGS -o retro.avr retro.c >error.log 2>&1 \
-|| err "Failed to build AVR executable"
+$AVRCC $CFLAGS $AVRCFLAGS -o retro.avr retro.c || err "Failed to build AVR executable"
 $AVROBJCOPY -S -O ihex -R .eeprom retro.avr retro.hex >error.log 2>&1 \
 || err "Failed to create upload file"
 rm -f error.log

@@ -441,6 +441,12 @@ int main(void)
 #if IMAGE_MODE == roflash
                             case 1: ports[4] = save_to_eeprom(); break;
                             case 2: ports[4] = load_from_eeprom(); break;
+                            case 3: ports[4] = IMAGE_CACHE_SIZE; break;
+                            case 4: for (a = 0, b = 0; a < IMAGE_CACHE_SIZE; ++a)
+                                        if (cell_cache_keys[a] & CELL_CHANGED)
+                                            ++b;
+                                    ports[4] = b;
+                                    break;
 #endif
                             default: ports[4] = 0;
                         }

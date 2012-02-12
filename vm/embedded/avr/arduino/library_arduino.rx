@@ -12,5 +12,10 @@ chain: arduino'
 : load ( -n )
   #2 #4 out #0 #0 out wait #4 in wait toString
   "\nLoaded cells: " puts puts ". " puts ;
+: meminfo ( - )
+  #3 #4 out #0 #0 out wait #4 in wait toString
+  #4 #4 out #0 #0 out wait #4 in wait toString
+  "\nCells used: " puts puts " of " puts
+  puts ;
 
 ;chain
