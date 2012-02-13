@@ -6,7 +6,37 @@
 needs dissect'
 
 chain: autopsy'
-  : decompile  ( a-a )  [ ^dissect'decompile ] sip "%d %s\n" puts ;
+
+( --[ source decompiler ]---------------------------------------------------- )
+{{
+  variable qdepth
+
+  : resolveName  ( a-a )
+    dup @ xt->d dup [ d->name ] [ drop dup putn " do" ] if puts space 1+ ;
+
+  : dumpString  ( a-a )
+    '" putc [ repeat @+ 0; putc again ] do '" putc space ;
+
+  : string?  ( a-af )
+    dup @ 1- @ 0 = ;
+
+  : decompile  ( a-a )
+    dup @
+    [ 0 = ] [ 1+ ] whend
+    [ 1 = ] [ 1+ dup @ putn space 1+ ] whend
+    [ 8 = ] [ 1+ string? [ 1+ dumpString 2 + ] [ dup @ "jump: %d " puts 1+ ] if ] whend
+    [ 9 = ] [ 1+ @qdepth [ "] " qdepth -- ] [ "; " ] if puts ] whend
+    [ &quote  = ] [ qdepth ++ 2 + "[ " puts ] whend
+    [ 0 31 within not ] [ resolveName ] whend
+    [ &quote <> ] [ ^dissect'decompile ^strings'trimRight "%s " puts ] whend
+    drop ;
+---reveal---
+  : viewSource  ( a- )
+    0 !qdepth
+    [ decompile @qdepth [ decompile -1 ] [ dup 1- ^dissect'endOfWord? not ] if ] while drop ;
+}}
+
+: decompile  ( a-a )  [ ^dissect'decompile ] sip "%d %s\n" puts ;
 
 ( --[ Box Drawing Code ]----------------------------------------------------- )
 
@@ -69,7 +99,6 @@ chain: autopsy'
 
   : findRet ( a-na )  1 swap repeat dup ^dissect'endOfWord? if; &1+ bi@ again ;
 ---reveal---
-
   : .cells ( an- )
     dup @box/line >
     [ @box/line - [ @box/line (.cells) drop + ] dip .cells ]
@@ -80,7 +109,7 @@ chain: autopsy'
 }}
 
 ( --[ "see" and "explore" ]-------------------------------------------------- )
-variable vertical
+
 {{
   : help  ( - )
     clear
@@ -103,7 +132,7 @@ variable vertical
     "\nPress any key to return to autospy.\n"    puts
     getc drop ;
 
-  2 elements x more?
+  variables| x mode more? |
 
   : goToAddress ( "- )
     clear "Address to jump to: " puts getNumber !x ;
@@ -126,10 +155,17 @@ variable vertical
     getToken dup find [ nip @d->xt ] [ drop toNumber ] if ;
 ---reveal---
   : :see    ( a- )
-    cr @vertical
-    [ [ decompile dup 1- ^dissect'endOfWord? not ] while drop ] &.thread if ;
+    cr @mode
+    [ 0 = ] [ .thread ] whend
+    [ 1 = ] [ viewSource ] whend
+    [ 2 = ] [ [ decompile dup 1- ^dissect'endOfWord? not ] while drop ] whend ;
   : see     ( "- ) getAddress :see ;
+
   : explore ( "- ) getAddress !x more? on browse ;
+
+  : vertical    ( - )  2 !mode ;
+  : horizontal  ( - )  0 !mode ;
+  : source      ( - )  1 !mode ;
 }}
 
 ( Single Step Debugger ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
@@ -387,7 +423,7 @@ Decompiler
 This allows you to examine the compiled code for a function in a readable
 manner.
 
-The decompiler has two display modes. The default, written by Marc Simpson,
+The decompiler has three display modes. The default, written by Marc Simpson,
 displays each memory cell as a box, in a clean, very readable manner. This
 is the *horizontal* mode, and is the default.
 
@@ -419,12 +455,20 @@ as:
   407 call  391
   408 ;
 
-To toggle the modes, use the **vertical** variable.
+The third is the *source* mode. This mode tries to render a close approximation
+of the original source for a function. With this, **cr** displays as:
 
 ::
 
-  vertical on   ( use vertical mode   )
-  vertical off  ( use horizontal mode )
+  10 putc ;
+
+To toggle the modes, just name them:
+
+::
+
+  vertical    ( use vertical mode   )
+  horizontal  ( use horizontal mode )
+  source      ( use source mode     )
 
 
 Memory Explorer
