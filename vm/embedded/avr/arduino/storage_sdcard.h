@@ -8,7 +8,7 @@
 #define STORAGE_SECTOR_SIZE 512
 #define STORAGE_SECTOR_SHIFT 9
 
-#ifndef BOARD_native
+#if BOARD != native
 
 #define SD_NORM 0
 #define SD_BUSY 1
@@ -158,15 +158,19 @@ static uint8_t storage_init(void) {
         sdcard_call_r1(SD_CMD_SET_BLOCKLEN, STORAGE_SECTOR_SIZE, SD_NORM, SD_DESS);
         if (sdcard_response.byte == 0) break;
     }
+
+    //spi_fast_mode();
     return 0;
 }
 
 static uint8_t storage_read_sector(unsigned char *data, uint32_t addr) {
-    //char buf[10];
+    char buf[10];
     unsigned int i;
 
-    //sprintf(buf, "\nR%ld ", addr);
-    //console_puts(buf);
+    /*
+    sprintf(buf, "\nR%ld ", addr);
+    console_puts(buf);
+    */
 
     /* convert sector number to byte address */
     addr <<= STORAGE_SECTOR_SHIFT;
@@ -201,7 +205,8 @@ static uint8_t storage_read_sector(unsigned char *data, uint32_t addr) {
         if (b > 9) console_putc('A' - 10 + b);
         else console_putc('0' + b);
     }
-    console_putc(' '); */
+    console_putc(' ');
+    */
     return 0;
 }
 
@@ -268,6 +273,7 @@ static uint8_t storage_read_sector(uint8_t *buffer, uint32_t sector) {
         buffer[i] = 0;
     fread(buffer, STORAGE_SECTOR_SIZE, 1, fd);
 
+    /*
     sprintf(buf, "\nR%d ", sector);
     console_puts(buf);
     for (unsigned int i = 0; i < STORAGE_SECTOR_SIZE; ++i) {
@@ -278,7 +284,7 @@ static uint8_t storage_read_sector(uint8_t *buffer, uint32_t sector) {
         else console_putc('0' + a);
         if (b > 9) console_putc('A' - 10 + b);
         else console_putc('0' + b);
-    }
+    }*/
     return 0;
 }
 

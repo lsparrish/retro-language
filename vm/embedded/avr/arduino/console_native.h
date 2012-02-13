@@ -24,6 +24,7 @@ static void console_finish() {
 
 static void console_putc(char c) {
     putchar(c);
+    fflush(stdout);
 }
 
 static char console_getc(void) {

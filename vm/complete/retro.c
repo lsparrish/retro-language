@@ -123,7 +123,7 @@ void rxGetString(VM *vm, int starting)
 }
 
 /* Console I/O Support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-void rxWriteConsole(VM *vm, CELL c) {
+void rxWriteConsole(CELL c) {
   (c > 0) ? putchar((char)c) : printf("\033[2J\033[1;1H");
   /* Erase the previous character if c = backspace */
   if (c == 8) {
@@ -323,7 +323,7 @@ void rxDeviceHandler(VM *vm) {
 
     /* Output (character generator) */
     if (vm->ports[2] == 1) {
-      rxWriteConsole(vm, TOS); DROP
+      rxWriteConsole(TOS); DROP
       vm->ports[2] = 0;
       vm->ports[0] = 1;
     }

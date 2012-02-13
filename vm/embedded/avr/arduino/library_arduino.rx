@@ -1,3 +1,6 @@
+[ 80 ] &STRING-LENGTH :is
+[  4 ] &STRING-BUFFERS :is
+
 chain: arduino'
 
 : io-byte@  ( n-n ) -1 #13 out wait #13 in wait ;
@@ -12,5 +15,10 @@ chain: arduino'
 : load ( -n )
   #2 #4 out #0 #0 out wait #4 in wait toString
   "\nLoaded cells: " puts puts ". " puts ;
+: meminfo ( - )
+  "\nCells used: " puts
+  #4 #4 out #0 #0 out wait #4 in wait toString puts
+  " of " puts
+  #3 #4 out #0 #0 out wait #4 in wait toString puts ;
 
 ;chain
