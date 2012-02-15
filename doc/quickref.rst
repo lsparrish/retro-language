@@ -50,6 +50,7 @@ Characters
 
   getc
 
+
 Strings
 =======
 
@@ -122,12 +123,36 @@ Less Than
   3 4 <
 
 
+Greater Than or Equal To
+========================
+
+::
+
+  3 4 >=
+
+
+Less Than or Equal To
+=====================
+
+::
+
+  3 4 <=
+
+
 String Equality
 ===============
 
 ::
 
   "hello"   "world"  compare
+
+
+String Inequality
+=================
+
+::
+
+  "hello"   "world"  compare not
 
 
 If / Then
@@ -192,6 +217,8 @@ Unconditional
 ::
 
   repeat ( code ) again
+
+Conditional loops are generally preferable.
 
 
 Counted
@@ -300,6 +327,8 @@ Creation
   chain: name'
     ... contents ...
   ;chain
+
+Vocabulary names should end in a single apostrophe.
 
 
 Add To Search Order
