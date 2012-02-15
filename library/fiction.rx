@@ -90,7 +90,7 @@ chain: fiction'
 
 : item ( "- )
   object ITEM @last @d->xt .type !
-  @last @d->xt items ^linkedList'b.add ;
+  @last @d->xt items ^linkedList'add ;
 
 : contains ( a"- )
   ' .location ! ;
