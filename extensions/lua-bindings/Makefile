@@ -55,7 +55,7 @@ LUA52     = $(PWD)/lua52
 LUAOS     = linux
 
 libretro.c:
-	ln -s ../../vm/experimental/libretro.c
+	ln -s ../../vm/complete/libretro.c
 
 luadownload: $(LUATGZ)
 $(LUATGZ):
