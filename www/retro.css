@@ -1,12 +1,10 @@
-body    { background: #fefefe; color: black; }
-p, li   { font-family: serif; }
-pre     { background: #efefef; overflow: auto; }
-a:link  { color: #0B0080; }
-a:visited { color: #0645AD; }
-a:hover { color: #3366BB; }
-h1, h2, h3, h4 { color: #0B0080; font-family: sans-serif; font-variant: small-caps; }
-.header { font-size: large; text-transform: lowercase; text-align: left; }
-.nav    { position: absolute; top: 0; right: 0; }
-.footer { border-top: 1px solid black; text-align: right; }
-.older  { background: #eeeeee; border-top: 3px solid black; text-align: right; }
+div { float: left; padding: 10px; width: 35%; }
+.head { font-size: large; color: navy; font-weight: bold; }
+.Constant { color: #ff40ff; font-weight: bold; }
+.Statement { color: #ffff00; font-weight: bold; }
+.Identifier { color: #00ffff; font-weight: bold; }
+.Special { color: #ff6060; font-weight: bold; }
+pre { font-family: monospace; color: #ffffff; background-color: #000000; }
+.Comment { color: #00ffff; font-weight: bold; }
+.PreProc { color: #8080ff; font-weight: bold; }
 
