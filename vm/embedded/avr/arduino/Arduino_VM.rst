@@ -146,9 +146,13 @@ variable as "-D<VAR>=<VALUE>", e.g. "-DBAUD=19200":
 +---------------------+----------------------------------------------------+
 
 To compile the VM simply call the configuration script, the VM file for upload
-to the board is retro.hex, if the image type is not "roflash", then you will
-get image.data file as the image, which you need to put to the apropriate
-place.
+to the board is retro.hex, if the image type is not "roflash", then you will get
+image.data file as the image, which you need to put to the apropriate place.
+With following or similar command you can upload the VM to the board:
+
+::
+
+    avrdude -F -c stk500v2 -p m2560 -b 19200 -P /dev/ttyU0 -U flash:w:retro.hex
 
 ---------
 Footnotes
