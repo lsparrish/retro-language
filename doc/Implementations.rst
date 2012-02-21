@@ -67,9 +67,13 @@ If you have problems with the input (e.g., under PuTTY), try:
 
 C
 =
-The C implementation can be built to support use of 16-bit,
-32-bit, or 64-bit images. The default is to build for standard
-32-bit images.
+The C implementation is the oldest and most flexible of the VM
+implementations. It is feature complete, can track opcode
+and stack usage, and serves as the reference implementation.
+
+Thiis implementation can be built for 16-bit, 32-bit, or 64-bit
+cell sizes in little or big endian. The default settings are for
+a standard little endian, 32-bit image.
 
 To build for 16-bit, define **RX16**, and for 64-bit, define
 **RX64**. To actually get a 16-bit or 64-bit image, do:
@@ -119,13 +123,15 @@ Retro can be used on some development boards. There may be limitations to
 the overall functionality, or special extensions to use features of the
 target platforms. See the individual implementations for notes.
 
-+-----+--------------+
-| CPU | Board        |
-+=====+==============+
-| ARM | mbed LPX1768 |
-+-----+--------------+
-| AVR | arduino mega |
-+-----+--------------+
++-------+--------------+
+| CPU   | Board        |
++=======+==============+
+| ARM   | mbed LPX1768 |
++-------+--------------+
+| AVR   | arduino mega |
++-------+--------------+
+| PIC32 | various      |
++-------+--------------+
 
 
 ----------------------------
