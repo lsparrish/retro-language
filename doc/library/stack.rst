@@ -1,7 +1,4 @@
-:Title: stack'
-:Author: Charles Childers
-:Version: 1.0
-
+======
 stack'
 ======
 This library provides a vocabulary for creating and using custom LIFO stacks.
@@ -70,3 +67,4 @@ Functions
 Data Structures
 ===============
 None.
+

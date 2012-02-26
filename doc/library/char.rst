@@ -1,7 +1,4 @@
-:Title: char'
-:Author: Charles Childers
-:Version: 1.0
-
+=====
 char'
 =====
 This library provides a vocabulary for simple operations on ASCII characters.
@@ -57,3 +54,4 @@ Functions
 Data Structures
 ===============
 None.
+

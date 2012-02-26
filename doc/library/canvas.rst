@@ -1,7 +1,4 @@
-:Title: canvas'
-:Author: Charles Childers
-:Version: 1.0
-
+=======
 canvas'
 =======
 This library provides support for the canvas device provided by the
@@ -91,3 +88,4 @@ Functions
 Data Structures
 ===============
 None.
+

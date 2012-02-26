@@ -1,7 +1,4 @@
-:Title: values'
-:Author: Charles Childers
-:Version: 1.0
-
+=======
 values'
 =======
 A value is a variable that returns the stored value when used. This
@@ -54,3 +51,4 @@ Functions
 Data Structures
 ===============
 None.
+
