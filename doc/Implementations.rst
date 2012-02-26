@@ -75,8 +75,20 @@ Thiis implementation can be built for 16-bit, 32-bit, or 64-bit
 cell sizes in little or big endian. The default settings are for
 a standard little endian, 32-bit image.
 
-To build for 16-bit, define **RX16**, and for 64-bit, define
-**RX64**. To actually get a 16-bit or 64-bit image, do:
+Add one of the following flags via CFLAGS to get a non-standard
+configuration:
+
++--------+--------------------+
+| Flag   | Usage              |
++========+====================+
+| -DRX16 | 16-bit cells       |
++--------+--------------------+
+| -DRX64 | 32-bit cells       |
++--------+--------------------+
+| -DRXBE | Big endian cells   |
++--------+--------------------+
+
+To generate a non-standard image, use:
 
 ::
 
