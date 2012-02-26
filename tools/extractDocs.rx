@@ -14,6 +14,7 @@ variables| in out |
   dup ^files':R ^files'open !in changeSuffix ^files':W ^files'open !out
   seekDocBlock
   extractDocBlock
+  "" @out ^files'writeLine
   @in @out [ ^files'close drop ] bi@ ;
 
 : getDocsFrom ( "- )
