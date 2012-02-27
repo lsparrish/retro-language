@@ -5,8 +5,9 @@ This library provides support for the canvas device provided by the
 JavaScript implementation of Ngaro.
 
 
+-------
 Loading
-=======
+-------
 Since the JavaScript implementation has no file I/O, build an image with
 this loaded manually.
 
@@ -16,16 +17,18 @@ this loaded manually.
   include vm/web/dumpImage.rx
 
 
+--------
 Examples
-========
+--------
 
 ::
 
   100 100 50 ^canvas'red ^canvas'solid ^canvas'circle
 
 
+---------
 Functions
-=========
+---------
 
 +---------------+-----------+-------------------------------------------------+
 | Name          | Stack     | Usage                                           |
@@ -83,9 +86,4 @@ Functions
 +---------------+-----------+-------------------------------------------------+
 | dimensions    |     -hw   |  Return height and width of canvas              |
 +---------------+-----------+-------------------------------------------------+
-
-
-Data Structures
-===============
-None.
 

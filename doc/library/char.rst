@@ -4,8 +4,9 @@ char'
 This library provides a vocabulary for simple operations on ASCII characters.
 
 
+-------
 Loading
-=======
+-------
 The following should suffice:
 
 ::
@@ -13,8 +14,9 @@ The following should suffice:
   needs char'
 
 
+--------
 Examples
-========
+--------
 
 ::
 
@@ -22,9 +24,9 @@ Examples
   'a dup ^char'isUpper? [ ^char'toLower ] ifTrue
 
 
+---------
 Functions
-=========
-
+---------
 +---------------+---------+------------------------------------------------+
 | Name          | Stack   | Usage                                          |
 +===============+=========+================================================+
@@ -49,9 +51,4 @@ Functions
 | toLower       | c-c     | Convert an upperacase character to lowercase.  |
 |               |         | This will only work on an uppercase character. |
 +---------------+---------+------------------------------------------------+
-
-
-Data Structures
-===============
-None.
 

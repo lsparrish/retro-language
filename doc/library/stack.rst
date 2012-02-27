@@ -4,8 +4,9 @@ stack'
 This library provides a vocabulary for creating and using custom LIFO stacks.
 
 
+-------
 Loading
-=======
+-------
 The following should suffice:
 
 ::
@@ -13,8 +14,9 @@ The following should suffice:
   needs stack'
 
 
+--------
 Examples
-========
+--------
 
 ::
 
@@ -42,8 +44,9 @@ Examples
   pop putn
 
 
+---------
 Functions
-=========
+---------
 
 +----------+-----------+---------------------------------+
 | Name     | Stack     | Usage                           |
@@ -62,9 +65,4 @@ Functions
 +----------+-----------+---------------------------------+
 | depth    | -n        | Return number of items on stack |
 +----------+-----------+---------------------------------+
-
-
-Data Structures
-===============
-None.
 

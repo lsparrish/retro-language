@@ -1,5 +1,5 @@
 ==========
-Assertions
+assertion'
 ==========
 
 
@@ -30,16 +30,6 @@ stack before calling postCond when the thread exits.
 NOTE: For simplicity of implementation, failure within a word of
 class .assertion will not result in immediate termination;
 instead, the false value of assertionFlag is left to propagate.
-
-
--------
-Loading
--------
-The following should suffice:
-
-::
-
-  needs assertion'
 
 
 --------
@@ -129,5 +119,4 @@ Functions
 +---------------+-------+-----------------------------------------------------+
 | assertion     | ``-`` | Change the class of a function to **.asssertion**   |
 +---------------+-------+-----------------------------------------------------+
-
 

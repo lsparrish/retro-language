@@ -5,8 +5,9 @@ A value is a variable that returns the stored value when used. This
 library provides an implementation for Retro.
 
 
+-------
 Loading
-=======
+-------
 The following should suffice:
 
 ::
@@ -14,8 +15,9 @@ The following should suffice:
   needs values'
 
 
+--------
 Examples
-========
+--------
 
 ::
 
@@ -31,8 +33,9 @@ Examples
   foo foo + .s
 
 
+---------
 Functions
-=========
+---------
 
 +----------+-----------+-------------------------+
 | Name     | Stack     | Usage                   |
@@ -46,9 +49,4 @@ Functions
 +----------+-----------+-------------------------+
 | value    | "-        | Create a new value      |
 +----------+-----------+-------------------------+
-
-
-Data Structures
-===============
-None.
 
