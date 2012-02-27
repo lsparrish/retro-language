@@ -11,21 +11,39 @@
 #include <time.h>
 #include <unistd.h>
 #include <string.h>
-#include <termios.h>
+#if 0
+#   include <termios.h>
+#else
+#   define termios sgttyb
+#endif
 #include <sys/ioctl.h>
 
-#define CELL            int16_t
-#define IMAGE_SIZE        20000
-#define ADDRESSES           512
+/* Configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+                +---------+---------+---------+
+                | 16 bit  | 32 bit  | 64 bit  |
+   +------------+---------+---------+---------+
+   | IMAGE_SIZE | 32000   | 1000000 | 1000000 |
+   +------------+---------+---------+---------+
+   | CELL       | int16_t | int32_t | int64_t |
+   +------------+---------+---------+---------+
+
+   If memory is tight, cut the MAX_FILE_NAME and MAX_REQUEST_LENGTH.
+
+   You can also cut the ADDRESSES stack size down, but if you have
+   heavy nesting or recursion this may cause problems. If you do modify
+   it and experience odd problems, try raising it a bit higher.
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+#define CELL            int32_t
+#define IMAGE_SIZE        10000
+#define ADDRESSES          1024
 #define STACK_DEPTH         128
 #define PORTS                12
 #define MAX_FILE_NAME      1024
 #define MAX_REQUEST_LENGTH 1024
 #define MAX_OPEN_FILES        8
 #define LOCAL                 "/lib/retroImage"
-#define CELLSIZE             16
-#define VM_ENDIAN             0
-
+#define CELLSIZE             32
 
 enum vm_opcode {VM_NOP, VM_LIT, VM_DUP, VM_DROP, VM_SWAP, VM_PUSH, VM_POP,
                 VM_LOOP, VM_JUMP, VM_RETURN, VM_GT_JUMP, VM_LT_JUMP,
@@ -103,6 +121,7 @@ void rxPrepareInput(VM *vm) {
 }
 
 void rxPrepareOutput(VM *vm) {
+#if 0
   tcgetattr(0, &vm->old_termios);
   vm->new_termios = vm->old_termios;
   vm->new_termios.c_iflag &= ~(BRKINT+ISTRIP+IXON+IXOFF);
@@ -111,10 +130,21 @@ void rxPrepareOutput(VM *vm) {
   vm->new_termios.c_cc[VMIN] = 1;
   vm->new_termios.c_cc[VTIME] = 0;
   tcsetattr(0, TCSANOW, &vm->new_termios);
+#else
+  ioctl(0, TIOCGETP, &vm->old_termios);
+  vm->new_termios = vm->old_termios;
+  vm->new_termios.sg_flags &= ~(ECHO | CRMOD | XTABS | RAW);
+  vm->new_termios.sg_flags |= CBREAK;
+  ioctl(0, TIOCSETP, &vm->new_termios);
+#endif
 }
 
 void rxRestoreIO(VM *vm) {
+#if 0
   tcsetattr(0, TCSANOW, &vm->old_termios);
+#else
+  ioctl(0, TIOCSETP, &vm->old_termios);
+#endif
 }
 
 /* File I/O Support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -603,7 +633,7 @@ int main(int argc, char **argv) {
 
   wantsStats = 0;
   vm = calloc(sizeof(VM), sizeof(char));
-  strcpy(vm->filename, LOCAL);
+  strcpy(vm->filename, LOCAL_FNAME);
 
   rxPrepareInput(vm);
 
@@ -617,15 +647,6 @@ int main(int argc, char **argv) {
       vm->shrink = 1;
     if (strcmp(argv[i], "--stats") == 0)
       wantsStats = 1;
-    if (strcmp(argv[i], "--help") == 0)
-    {
-      printf("--with filename    Add filename to the input stack\n");
-      printf("--image filename   Use filename as the image to load\n");
-      printf("--shrink           When saving, don't save unused cells\n");
-      printf("--stats            Display opcode usage and stack summaries upon exit\n");
-      printf("--help             Display this text\n");
-      exit(1);
-    }
   }
 
   if (rxLoadImage(vm, vm->filename) == 0) {

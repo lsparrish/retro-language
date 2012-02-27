@@ -1,4 +1,4 @@
-TOPSRC		= $(shell cd ../..; pwd)
+TOPSRC		= $(shell cd ../../..; pwd)
 include $(TOPSRC)/target.mk
 
 CFLAGS		+= -Werror -Wall
@@ -8,20 +8,22 @@ OBJS		= retro.o
 BIN             = retroforth
 LIBS            += -ltermcap
 
-all:            install-lib
+all:            $(BIN)
 
-$(BIN).elf:     ${OBJS}
-		${CC} ${LDFLAGS} -o $(BIN).elf $(OBJS) ${LIBS}
-
-$(BIN).dis:     $(BIN).elf
-		${OBJDUMP} -S $(BIN).elf > $(BIN).dis
+$(BIN):         ${SRCS}
+		${CC} ${LDFLAGS} -o $(BIN).elf $(SRCS) ${LIBS}
 		${SIZE} $(BIN).elf
-
-../$(BIN):      $(BIN).dis
-		${ELF2AOUT} $(BIN).elf $@
-
-install-lib:    ../$(BIN)
-		cp retroImage $(TOPSRC)/lib
+		${OBJDUMP} -S $(BIN).elf > $(BIN).dis
+		${ELF2AOUT} $(BIN).elf $@ && rm $(BIN).elf
 
 clean:
-		rm -f *.o *.elf ../$(BIN) *.elf *.dis *~ retro.c $(TOPSRC)/lib/retroImage
+		rm -f *.o *.elf $(BIN) *.elf *.dis *~
+
+install:        all
+		install $(BIN) $(DESTDIR)/bin/
+		cp retroImage $(DESTDIR)/lib/
+
+image:          $(BIN)
+		cat image/meta.rx image/kernel.rx > core.rx
+		./$(BIN) --shrink --image retroImage --with core.rx
+		rm core.rx
