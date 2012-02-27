@@ -1,12 +1,13 @@
 ======
-Arrays
+array'
 ======
 
 
 --------
 Overview
 --------
-This library provides a vocabulary for working with arrays.
+This library provides functions for creating and working with simple
+arrays.
 
 
 --------------
@@ -26,17 +27,6 @@ are represented like:
   +---+--------------------+
   | n | ... nth value ...  |
   +---+--------------------+
-
-
-
--------
-Loading
--------
-The following should suffice:
-
-::
-
-  needs array'
 
 
 --------
@@ -101,3 +91,4 @@ Functions
 +-------------+-----------+------------------------------------------------+
 | sort:bubble | a-        | Sort the items in an array using bubble sort   |
 +-------------+-----------+------------------------------------------------+
+

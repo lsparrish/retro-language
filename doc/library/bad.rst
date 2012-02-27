@@ -1,6 +1,6 @@
-===============
-Byte Addressing
-===============
+====
+bad'
+====
 
 
 --------
@@ -75,3 +75,4 @@ Functions
 | newPool  |  n-    | Allocate a new pool of *n* characters and set  |
 |          |        | **pool** to point to it                        |
 +----------+--------+------------------------------------------------+
+

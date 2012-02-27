@@ -23,9 +23,9 @@ chain: hash'
 ;chain
 
 doc{
-=================
-Hashing Functions
-=================
+=====
+hash'
+=====
 
 
 --------

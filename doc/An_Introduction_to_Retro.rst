@@ -9,50 +9,12 @@ Getting Started
 Choosing a VM
 =============
 Retro runs on a virtual machine. This has been implemented in many languages, and
-allows easy portability to most platforms.
+allows easy portability to most platforms. For most users, the *C*, *Python*, or
+*Ruby* implementations will be the best choices as the dependencies are easy to
+take care of on most systems.
 
-The table below lists the current implementations, and the features they support.
-For most users, we recommend using *C*, *Python*, or *Ruby*, as these are feature
-complete, and can be setup quickly and easily.
-
-+------------+--------------+---+---+---+---+---+---+---+----------------------+
-| Language   | File         | A | B | C | D | E | F | G | Building             |
-+============+==============+===+===+===+===+===+===+===+======================+
-| Assembly   | retro.s      | x | x | x | x | x | x | x | | as retro.s -o retro|
-|            |              |   |   |   |   |   |   |   | | ld retro.o -o retro|
-+------------+--------------+---+---+---+---+---+---+---+----------------------+
-| C          | retro.c      | x | x | x | x | x | x | x | gcc retro.c -o retro |
-+------------+--------------+---+---+---+---+---+---+---+----------------------+
-| C#         | retro.cs     | x | x |   | x | x | x | x | gmcs retro.cs        |
-+------------+--------------+---+---+---+---+---+---+---+----------------------+
-| F#         | retro.fsx    | x | x | x | x | x | x | x |                      |
-+------------+--------------+---+---+---+---+---+---+---+----------------------+
-| Forth      | retro.fs     | x | x | x |   | x | x | x |                      |
-+------------+--------------+---+---+---+---+---+---+---+----------------------+
-| Go         | go/          | x | x | x | x | x | x | x | cd gonga && make     |
-+------------+--------------+---+---+---+---+---+---+---+----------------------+
-| Lisp       | lisp/        | x | x | x | x | x | x | x |                      |
-+------------+--------------+---+---+---+---+---+---+---+----------------------+
-| Java       | retro.java   | x |   |   |   | x | x | x | javac retro.java     |
-+------------+--------------+---+---+---+---+---+---+---+----------------------+
-| Lua        | retro.lua    | x |   |   |   | x | x | x |                      |
-+------------+--------------+---+---+---+---+---+---+---+----------------------+
-| Perl       | retro.pl     | x |   |   |   | x | x | x |                      |
-+------------+--------------+---+---+---+---+---+---+---+----------------------+
-| PHP        | retro.php    | x | x | x |   | x | x | x |                      |
-+------------+--------------+---+---+---+---+---+---+---+----------------------+
-| Python     | retro.py     | x | x | x | x | x | x | x |                      |
-+------------+--------------+---+---+---+---+---+---+---+----------------------+
-| Ruby       | retro.rb     | x | x | x | x | x | x | x |                      |
-+------------+--------------+---+---+---+---+---+---+---+----------------------+
-
-A) save image
-B) "include", "needs"
-C) file i/o
-D) query host environment
-E) get current time
-F) passes core tests
-G) passes vocabulary tests
+Windows users can download a binary distribution which includes the F# (for .NET)
+and C implementations. These are confirmed to work on XP, Vista, and Windows 7.
 
 
 The Image File
@@ -64,12 +26,25 @@ and interact with Retro.
 
 The Library
 ===========
-If you are using the Assembly, C, F#, Forth, Go, Python, or Ruby VM
-implementations, you can also copy or symlink the *library* directory into the
-same directory as your VM and *retroImage*.
+Several implementations of the VM support the use of the standard library via
+**needs**. If you are using one of these, you can copy or symlink the *library*
+directory into the same directory as your VM and image file.
 
-This is optional, but copying it over is recommended as it simplifies loading
-libraries and handling dependencies.
+
+The Way I Work
+==============
+When starting a new project I create a directory, with a fresh copy of the image,
+a symlink to the library, and a symlink to the VM I've selected.
+
+Given a copy of the source in *~/retro-language* I do:
+
+::
+
+  mkdir project
+  cd project
+  cp ~/retro-language/retroImage .
+  ln -s ~/retro-language/library
+  ln -s ~/retro-language/retro
 
 
 Basic Interactions

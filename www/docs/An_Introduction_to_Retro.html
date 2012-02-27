@@ -235,195 +235,11 @@ table.corefunc th {
 <div class="section" id="choosing-a-vm">
 <h2>Choosing a VM</h2>
 <p>Retro runs on a virtual machine. This has been implemented in many languages, and
-allows easy portability to most platforms.</p>
-<p>The table below lists the current implementations, and the features they support.
-For most users, we recommend using <em>C</em>, <em>Python</em>, or <em>Ruby</em>, as these are feature
-complete, and can be setup quickly and easily.</p>
-<table border="1" class="docutils">
-<colgroup>
-<col width="17%" />
-<col width="20%" />
-<col width="4%" />
-<col width="4%" />
-<col width="4%" />
-<col width="4%" />
-<col width="4%" />
-<col width="4%" />
-<col width="4%" />
-<col width="32%" />
-</colgroup>
-<thead valign="bottom">
-<tr><th class="head">Language</th>
-<th class="head">File</th>
-<th class="head">A</th>
-<th class="head">B</th>
-<th class="head">C</th>
-<th class="head">D</th>
-<th class="head">E</th>
-<th class="head">F</th>
-<th class="head">G</th>
-<th class="head">Building</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr><td>Assembly</td>
-<td>retro.s</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td><div class="first last line-block">
-<div class="line">as retro.s -o retro</div>
-<div class="line">ld retro.o -o retro</div>
-</div>
-</td>
-</tr>
-<tr><td>C</td>
-<td>retro.c</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>gcc retro.c -o retro</td>
-</tr>
-<tr><td>C#</td>
-<td>retro.cs</td>
-<td>x</td>
-<td>x</td>
-<td>&nbsp;</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>gmcs retro.cs</td>
-</tr>
-<tr><td>F#</td>
-<td>retro.fsx</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>&nbsp;</td>
-</tr>
-<tr><td>Forth</td>
-<td>retro.fs</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>&nbsp;</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>&nbsp;</td>
-</tr>
-<tr><td>Go</td>
-<td>go/</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>cd gonga &amp;&amp; make</td>
-</tr>
-<tr><td>Lisp</td>
-<td>lisp/</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>&nbsp;</td>
-</tr>
-<tr><td>Java</td>
-<td>retro.java</td>
-<td>x</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>javac retro.java</td>
-</tr>
-<tr><td>Lua</td>
-<td>retro.lua</td>
-<td>x</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>&nbsp;</td>
-</tr>
-<tr><td>Perl</td>
-<td>retro.pl</td>
-<td>x</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>&nbsp;</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>&nbsp;</td>
-</tr>
-<tr><td>PHP</td>
-<td>retro.php</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>&nbsp;</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>&nbsp;</td>
-</tr>
-<tr><td>Python</td>
-<td>retro.py</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>&nbsp;</td>
-</tr>
-<tr><td>Ruby</td>
-<td>retro.rb</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>x</td>
-<td>&nbsp;</td>
-</tr>
-</tbody>
-</table>
-<ol class="upperalpha simple">
-<li>save image</li>
-<li>&quot;include&quot;, &quot;needs&quot;</li>
-<li>file i/o</li>
-<li>query host environment</li>
-<li>get current time</li>
-<li>passes core tests</li>
-<li>passes vocabulary tests</li>
-</ol>
+allows easy portability to most platforms. For most users, the <em>C</em>, <em>Python</em>, or
+<em>Ruby</em> implementations will be the best choices as the dependencies are easy to
+take care of on most systems.</p>
+<p>Windows users can download a binary distribution which includes the F# (for .NET)
+and C implementations. These are confirmed to work on XP, Vista, and Windows 7.</p>
 </div>
 <div class="section" id="the-image-file">
 <h2>The Image File</h2>
@@ -433,11 +249,22 @@ and interact with Retro.</p>
 </div>
 <div class="section" id="the-library">
 <h2>The Library</h2>
-<p>If you are using the Assembly, C, F#, Forth, Go, Python, or Ruby VM
-implementations, you can also copy or symlink the <em>library</em> directory into the
-same directory as your VM and <em>retroImage</em>.</p>
-<p>This is optional, but copying it over is recommended as it simplifies loading
-libraries and handling dependencies.</p>
+<p>Several implementations of the VM support the use of the standard library via
+<strong>needs</strong>. If you are using one of these, you can copy or symlink the <em>library</em>
+directory into the same directory as your VM and image file.</p>
+</div>
+<div class="section" id="the-way-i-work">
+<h2>The Way I Work</h2>
+<p>When starting a new project I create a directory, with a fresh copy of the image,
+a symlink to the library, and a symlink to the VM I've selected.</p>
+<p>Given a copy of the source in <em>~/retro-language</em> I do:</p>
+<pre class="literal-block">
+mkdir project
+cd project
+cp ~/retro-language/retroImage .
+ln -s ~/retro-language/library
+ln -s ~/retro-language/retro
+</pre>
 </div>
 <div class="section" id="basic-interactions">
 <h2>Basic Interactions</h2>

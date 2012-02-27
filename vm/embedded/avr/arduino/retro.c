@@ -1,49 +1,44 @@
 /* Ngaro VM for Arduino boards ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    Copyright (c) 2011 - 2012, Oleksandr Kozachuk
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-/* Configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-#define CELL            int16_t
-#define IMAGE_SIZE        31000
-#define IMAGE_CACHE_SIZE    181
-#define CHANGE_TABLE_SIZE   457
-#define ADDRESSES            64
-#define STACK_DEPTH          64
-#define PORTS                15
-#define STRING_BUFFER_SIZE   32
+/* Predefines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+/* Board types */
+#define native 1
+#define mega2560 2
+#define mega328p 3
+
+/* Image storage types */
+#define roflash 1
+#define rwstorage 2
+
+/* Display types */
+#define nokia3110 1
+
+/* Storage types */
+#define sdcard 1
 
 /* General includes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-#include <stdio.h>
 #include <stdlib.h>
+#if BOARD == native
+#include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+#endif
 
 /* Board specific includes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-#ifdef BOARD_mega2560
-#define BAUD 38400
+#if BOARD == mega2560 || BOARD == mega328p
 
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 #include <util/delay.h>
 #include <util/setbaud.h>
 
-#define SPI_PORT     PORTB
-#define SPI_DDR      DDRB
-#define SPI_CS       PB0
-#define SPI_SCK      PB1
-#define SPI_MOSI     PB2
-#define SPI_MISO     PB3
-
-#define DISPLAY_PORT PORTL
-#define DISPLAY_DDR  DDRL
-#define DISPLAY_DC   PL1
-#define DISPLAY_RST  PL0
-
 #else
-#ifdef BOARD_native
-
+#if BOARD == native
 #include <termios.h>
-
 #else
-#error "Unknown platform or -DBOARD_<type> not defined."
+#error "Unknown platform or -DBOARD=<type> not defined."
 #endif
 #endif
 
@@ -55,57 +50,84 @@ enum vm_opcode {VM_NOP, VM_LIT, VM_DUP, VM_DROP, VM_SWAP, VM_PUSH, VM_POP,
                 VM_SHR, VM_ZERO_EXIT, VM_INC, VM_DEC, VM_IN, VM_OUT,
                 VM_WAIT };
 
+enum vm_errors {
+    ERR_OUT_OF_MEMORY            = 0x01,
+    ERR_ALLOCATE_SECTOR_BUFFER   = 0x02,
+    ERR_ALLOCATE_CELL_CACHE      = 0x03,
+    ERR_ALLOCATE_STACKS          = 0x04,
+    ERR_READ_EEPROM              = 0x05,
+    ERR_WRITE_EEPROM             = 0x06,
+    ERR_INIT_STORAGE             = 0x07,
+    ERR_WRITE_SECTOR             = 0x08,
+    ERR_READ_SECTOR              = 0x09,
+};
+
+
+static void console_putc(char c);
 static void console_puts(char *s);
+static void console_pute(CELL e);
+
+#if BOARD != native
+
+static void spi_master_init(void);
+static void spi_slave_init(void);
+static uint8_t __attribute__((always_inline)) spi_transfer_byte(uint8_t data);
+static CELL __attribute__((always_inline)) spi_transfer_cell(CELL data);
+
+#endif
 
 /* Change store ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-typedef struct CHANGE_ELEMENT {
-    CELL key;
-    CELL value;
-} change_element_t;
+#define CELL_CACHE_END IMAGE_CACHE_SIZE
+#define CELL_CHANGED (((CELL)1) << (sizeof(CELL) * 8 - 2))
+typedef CELL_CACHE_TYPE cell_cache_pointer_t;
 
-typedef struct CHANGE_TABLE {
-    uint8_t full;
-    uint8_t size;
-    change_element_t *elements;
-} change_table_t;
+static CELL *cell_cache_keys;
+static cell_cache_pointer_t *cell_cache_nexts;
+static CELL *cell_cache_values;
+static cell_cache_pointer_t cell_cache_first;
 
-static change_table_t change_table[CHANGE_TABLE_SIZE];
-static struct { CELL key; CELL value; } image_cache[IMAGE_CACHE_SIZE];
-static CELL _cache_pos_temp;
-
-#define img_put(k, v) _img_put(k, v)
-static void _img_put(CELL k, CELL v);
-#define img_get(k) \
-    ( image_cache[_cache_pos_temp = (k % IMAGE_CACHE_SIZE)].key == k ? \
-      image_cache[_cache_pos_temp].value : _img_get(k) )
-static CELL _img_get(CELL k);
+/* Image operations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+static CELL img_get(CELL k);
+static void img_put(CELL k, CELL v);
 
 /* Board and image setup ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#ifdef BOARD_mega2560
+#if BOARD == mega2560 || BOARD == mega328p
 
-#include "console_mega2560.h"
-#include "image.hex.h"
+#include "console_atmega.h"
+
+#if IMAGE_MODE == roflash
+#include "image.h"
 #include "eeprom_atmel.h"
+#endif
 
-#ifdef DISPLAY_nokia3110
+#if DISPLAY == nokia3110
 #include "display_nokia3110.h"
 #endif
 
 #else
-#ifdef BOARD_native
+#if BOARD == native
 
 #include "console_native.h"
+
 #define PROGMEM
 #define prog_int32_t int32_t
 #define prog_int16_t int16_t
 #define pgm_read_word(x) (*(x))
 #define _SFR_IO8(x) SFR_IO8[x]
 static int SFR_IO8[64];
-#include "image.hex.h"
+#define _delay_ms(x) sleep(x/1000)
+
+#if IMAGE_MODE == roflash
+#include "image.h"
 #include "eeprom_native.h"
+#endif
 
 #endif
+#endif
+
+#if STORAGE == sdcard
+#include "storage_sdcard.h"
 #endif
 
 /* Macros ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -120,63 +142,205 @@ static void console_puts(char *s) {
         console_putc(*x);
 }
 
+static void console_pute(CELL e) {
+    console_puts("\nERR");
+    uint8_t a = (e >> 4);
+    uint8_t b = e & 0xF;
+    if (a > 9) console_putc('A' - 10 + a);
+    else console_putc('0' + a);
+    if (b > 9) console_putc('A' - 10 + b);
+    else console_putc('0' + b);
+    console_putc(' ');
+}
+
+/* SPI ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+#if BOARD != native
+
+static void spi_master_init(void) {
+    SPI_DDR &= ~(1 << SPI_MISO);
+    SPI_DDR |=  (1 << SPI_SCK);
+    SPI_DDR |=  (1 << SPI_SS);
+    SPI_DDR |=  (1 << SPI_MOSI);
+    SPI_PORT |= (1 << SPI_SS);
+    SPCR = (1 << SPE) | (1 << MSTR) | (0 << SPR1) | (0 << SPR0);
+    SPSR &= ~(1 << SPI2X);
+}
+
+static void spi_slave_init(void) {
+    SPI_DDR |=  (1 << SPI_MISO);
+    SPI_DDR &= ~(1 << SPI_MOSI);
+    SPI_DDR &= ~(1 << SPI_SCK);
+    SPI_DDR &= ~(1 << SPI_SS);
+    SPI_PORT &= ~(1 << SPI_SS);
+    SPCR = (1 << SPE) | (1 << SPR1) | (1 << SPR0);
+    SPSR &= ~(1 << SPI2X);
+}
+
+static uint8_t spi_transfer_byte(uint8_t data) {
+    SPDR = data;
+    while ((SPSR & (1 << SPIF)) == 0);
+    return SPDR;
+}
+
+static CELL spi_transfer_cell(CELL data) {
+    union { CELL l; uint8_t c[sizeof(CELL)]; } d;
+    d.l = data;
+    for (int8_t i = sizeof(CELL) - 1; i >= 0; --i)
+        d.c[i] = spi_transfer_byte(d.c[i]);
+    return d.l;
+}
+
+#endif
+
 /* Image read and write ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-static CELL _img_get(CELL k) {
-    uint16_t i = 0, p = k % IMAGE_CACHE_SIZE;
-    image_cache[p].key = k;
-    change_table_t *tbl = &(change_table[(k % CHANGE_TABLE_SIZE)]);
-    for (; i < tbl->full && tbl->elements[i].key != k; ++i);
-    if (i == tbl->full)
-        return (image_cache[p].value = image_read(k));
-    return (image_cache[p].value = tbl->elements[i].value);
-}
 
-static void _img_put(CELL k, CELL v) {
-    uint16_t i = 0, p = k % IMAGE_CACHE_SIZE;
-    change_table_t *tbl;
-    if (_img_get(k) == v) return;
-    tbl = &(change_table[(k % CHANGE_TABLE_SIZE)]);
-    for (; i < tbl->full && tbl->elements[i].key != k; ++i);
-    if (i == tbl->full) {
-        if (tbl->size == tbl->full) {
-            tbl->size += 5;
-            tbl->elements = (change_element_t*)realloc(tbl->elements,
-                    tbl->size * sizeof(change_element_t));
+#if IMAGE_MODE == roflash
+
+#define img_storage_get(k) image_read(k)
+#define img_storage_put(k, v) 0
+#define img_storage_sync()
+
+#else
+#if IMAGE_MODE == rwstorage
+
+#ifndef STORAGE_ACTIVATED
+#error "Image mode 'rwstorage' is needs an enabled storage."
+#endif
+
+#define IMAGE_SECTOR_SIZE (STORAGE_SECTOR_SIZE/sizeof(CELL))
+
+static CELL *image_sector_data;
+static struct {
+    uint8_t changed:1;
+    uint32_t sector_num:31;
+} image_sector_flags;
+
+static void img_storage_load(uint32_t sec) {
+    if (sec != image_sector_flags.sector_num) {
+        if (image_sector_flags.changed != 0) {
+            if (0 != storage_write_sector(
+                        (uint8_t*) image_sector_data,
+                        image_sector_flags.sector_num)) {
+                console_pute(ERR_WRITE_SECTOR);
+                _delay_ms(1000);
+            } else image_sector_flags.changed = 0;
         }
-        tbl->elements[i].key = k; tbl->full += 1;
+        if (image_sector_flags.changed == 0) {
+            if (0 != storage_read_sector((uint8_t*) image_sector_data, sec)) {
+                console_pute(ERR_READ_SECTOR);
+                _delay_ms(1000);
+            } else image_sector_flags.sector_num = sec;
+        }
     }
-    tbl->elements[i].value = v;
-    image_cache[p].key = k;
-    image_cache[p].value = v;
 }
 
-void img_string(CELL starting, char *buffer, CELL buffer_len)
+static inline CELL __attribute__((always_inline)) img_storage_get(CELL k) {
+    img_storage_load(k / IMAGE_SECTOR_SIZE);
+    return image_sector_data[k % IMAGE_SECTOR_SIZE];
+}
+
+static inline uint8_t __attribute__((always_inline)) img_storage_put(CELL k, CELL v) {
+    img_storage_load(k / IMAGE_SECTOR_SIZE);
+    image_sector_data[k % IMAGE_SECTOR_SIZE] = v;
+    image_sector_flags.changed = 1;
+    return 1;
+}
+
+static void img_storage_sync(void) {
+    if (image_sector_flags.changed != 0)
+        if (0 != storage_write_sector(
+                    (uint8_t*) image_sector_data,
+                    image_sector_flags.sector_num))
+            console_pute(ERR_WRITE_SECTOR);
+}
+
+#else
+#error "Unsupported image mode."
+#endif
+#endif
+
+static inline void _img_lru(cell_cache_pointer_t cur, cell_cache_pointer_t prev) {
+    if (prev != CELL_CACHE_END) {
+        cell_cache_nexts[prev] = cell_cache_nexts[cur];
+        cell_cache_nexts[cur] = cell_cache_first;
+        cell_cache_first = cur;
+    }
+}
+
+static inline cell_cache_pointer_t _img_find(CELL k) {
+    register cell_cache_pointer_t pointer0 = cell_cache_first;
+    register cell_cache_pointer_t pointer1 = CELL_CACHE_END;
+    register cell_cache_pointer_t pointer2 = CELL_CACHE_END;
+    register cell_cache_pointer_t pointer3 = CELL_CACHE_END;
+    for (; pointer0 != CELL_CACHE_END; pointer0 = cell_cache_nexts[pointer0]) {
+        if ((cell_cache_keys[pointer0] & (~CELL_CHANGED)) == k) {
+            _img_lru(pointer0, pointer1);
+            return pointer0;
+        }
+        if ((cell_cache_keys[pointer0] & CELL_CHANGED) == 0) {
+            pointer3 = pointer1;
+            pointer2 = pointer0;
+        }
+        pointer1 = pointer0;
+    }
+    if (pointer2 == CELL_CACHE_END) {
+        console_pute(ERR_OUT_OF_MEMORY);
+        while(1) _delay_ms(1000);
+    }
+    _img_lru(pointer2, pointer3);
+    return pointer0;
+}
+
+static inline CELL img_get(CELL k) {
+    if (_img_find(k) != CELL_CACHE_END)
+        return cell_cache_values[cell_cache_first];
+    cell_cache_keys[cell_cache_first] = k;
+    return (cell_cache_values[cell_cache_first] = img_storage_get(k));
+}
+
+static inline void img_put(CELL k, CELL v) {
+    if (_img_find(k) != CELL_CACHE_END) {
+        if (cell_cache_values[cell_cache_first] != v) {
+            cell_cache_values[cell_cache_first] = v;
+            cell_cache_keys[cell_cache_first] |= CELL_CHANGED;
+        }
+        return;
+    }
+    if (img_storage_get(k) == v)
+        return;
+    cell_cache_keys[cell_cache_first] = (k | CELL_CHANGED);
+    cell_cache_values[cell_cache_first] = v;
+}
+
+#define img_sync()
+
+static inline void img_string(CELL starting, char *buffer, CELL buffer_len)
 {
-  CELL i = 0, j = starting;
-  for(; i < buffer_len && 0 != (buffer[i] = img_get(j)); ++i, ++j);
-  buffer[i] = 0;
+    CELL i = 0, j = starting;
+    for(; i < buffer_len && 0 != (buffer[i] = img_get(j)); ++i, ++j);
+    buffer[i] = 0;
 }
 
 /* Main ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 int main(void)
 {
-    size_t j; size_t t;
     register CELL S_SP = 0, S_RSP = 0, S_IP = 0;
-    CELL data[STACK_DEPTH];
-    CELL address[ADDRESSES];
-    CELL ports[PORTS];
+    CELL *data;
+    CELL *address;
+    CELL *ports;
     CELL a, b;
 
-#ifndef BOARD_native
     _delay_ms(1000);
-#endif
 
 #ifdef DISPLAY_ACTIVATED
     char string_buffer[STRING_BUFFER_SIZE+1];
 #endif
 
     console_prepare();
-    console_puts("\nInitialize Ngaro VM.\n\n");
+
+#if BOARD != native
+    spi_master_init();
+#endif
 
 #ifdef DISPLAY_ACTIVATED
     display_init();
@@ -184,18 +348,53 @@ int main(void)
     display_set_xy(0, 0);
 #endif
 
-    for (j = 0; j < IMAGE_CACHE_SIZE; ++j) image_cache[j].key = -1;
-    for (j = 0; j < STACK_DEPTH; ++j) data[j] = 0;
-    for (j = 0; j < ADDRESSES; ++j) address[j] = 0;
-    for (j = 0; j < PORTS; ++j) ports[j] = 0;
-    for (j = 0; j < CHANGE_TABLE_SIZE; ++j) {
-        change_table[j].full = change_table[j].size = 0;
-        change_table[j].elements = NULL;
+#ifdef STORAGE_ACTIVATED
+    if (0 != storage_init()) {
+        console_pute(ERR_INIT_STORAGE);
+        goto finish;
     }
+#endif
 
+#if IMAGE_MODE == rwstorage
+    image_sector_data = (CELL*)malloc(STORAGE_SECTOR_SIZE);
+    if (image_sector_data == NULL) {
+        console_pute(ERR_ALLOCATE_SECTOR_BUFFER);
+        goto finish;
+    }
+    image_sector_flags.changed = 0;
+    image_sector_flags.sector_num = 1;
+    img_storage_load(0);
+#endif
+
+    cell_cache_keys = (CELL*) malloc(sizeof(CELL) * IMAGE_CACHE_SIZE);
+    cell_cache_nexts = (cell_cache_pointer_t*) malloc(sizeof(cell_cache_pointer_t) * IMAGE_CACHE_SIZE);
+    cell_cache_values = (CELL*) malloc(sizeof(CELL) * IMAGE_CACHE_SIZE);
+    if (cell_cache_keys == NULL || cell_cache_nexts == NULL || cell_cache_values == NULL) {
+        console_pute(ERR_ALLOCATE_CELL_CACHE);
+        goto finish;
+    }
+    for (a = 0; a < IMAGE_CACHE_SIZE; ++a) {
+        cell_cache_keys[a] = a;
+        cell_cache_values[a] = img_storage_get(a);
+        cell_cache_nexts[a] = a + 1;
+    }
+    cell_cache_nexts[a-1] = CELL_CACHE_END;
+    cell_cache_first = 0;
+
+    data = (CELL*) malloc(sizeof(CELL) * STACK_DEPTH);
+    address = (CELL*) malloc(sizeof(CELL) * ADDRESSES);
+    ports = (CELL*) malloc(sizeof(CELL) * PORTS);
+    if (data == NULL || address == NULL || ports == NULL) {
+        console_pute(ERR_ALLOCATE_STACKS);
+        goto finish;
+    }
+    for (a = 0; a < STACK_DEPTH; ++a) data[a] = 0;
+    for (a = 0; a < ADDRESSES; ++a) address[a] = 0;
+    for (a = 0; a < PORTS; ++a) ports[a] = 0;
 
     for (S_IP = 0; S_IP >= 0 && S_IP < IMAGE_SIZE; ++S_IP) {
-        switch(img_get(S_IP)) {
+        register CELL op = img_get(S_IP);
+        switch(op) {
             case     VM_NOP: break;
             case     VM_LIT: S_SP++; S_IP++; S_TOS = img_get(S_IP); break;
             case     VM_DUP: S_SP++; S_TOS = S_NOS; break;
@@ -245,7 +444,7 @@ int main(void)
             case     VM_INC: S_TOS += 1; break;
             case     VM_DEC: S_TOS -= 1; break;
             case      VM_IN: a = S_TOS; S_TOS = ports[a]; ports[a] = 0; break;
-            case     VM_OUT: t = (size_t) S_TOS; ports[0] = 0; ports[t] = S_NOS; S_DROP; S_DROP; break;
+            case     VM_OUT: a = S_TOS; ports[0] = 0; ports[a] = S_NOS; S_DROP; S_DROP; break;
             case    VM_WAIT:
                 if (ports[0] != 1) {
                     /* Input */
@@ -263,8 +462,20 @@ int main(void)
                     if (ports[4] != 0) {
                         ports[0] = 1;
                         switch (ports[4]) {
+#if IMAGE_MODE == roflash
                             case 1: ports[4] = save_to_eeprom(); break;
                             case 2: ports[4] = load_from_eeprom(); break;
+                            case 3: ports[4] = IMAGE_CACHE_SIZE; break;
+                            case 4: for (a = 0, b = 0; a < IMAGE_CACHE_SIZE; ++a) {
+                                        if (cell_cache_keys[a] & CELL_CHANGED)
+                                            ++b;
+#if BOARD == native
+                                        printf("\n# %03d: %05d (%d) ", cell_cache_keys[a] & (~CELL_CHANGED), cell_cache_values[b], (cell_cache_keys[a] & CELL_CHANGED) != 0);
+#endif
+                                    }
+                                    ports[4] = b;
+                                    break;
+#endif
                             default: ports[4] = 0;
                         }
                     }
@@ -304,11 +515,21 @@ int main(void)
                                 else _SFR_IO8(a) &= ~(1 << b);
                                 ports[13] = 0;
                                 S_DROP; break;
-#ifndef BOARD_native
+#if BOARD != native
                             case -5: a = S_TOS; S_DROP;
                                      _delay_ms(a);
                                      ports[13] = 0;
                                      break;
+                            case -6: spi_master_init(); ports[13] = 0; break;
+                            case -7: spi_slave_init(); ports[13] = 0; break;
+                            case -8:
+                                a = S_TOS; S_DROP;
+                                ports[13] = spi_transfer_byte(a);
+                                break;
+                            case -9:
+                                a = S_TOS; S_DROP;
+                                ports[13] = spi_transfer_cell(a);
+                                break;
 #endif
                             default: ports[13] = 0;
                         }
@@ -354,10 +575,13 @@ int main(void)
         ports[3] = 1;
     }
 
-    console_puts("\n\nNgaro VM is down.\n");
+finish:
+    img_sync();
+    console_puts("\n\nVM down.\n");
     console_finish();
-#ifndef BOARD_native
+#if BOARD != native
     while(1) _delay_ms(100);
 #endif
     return 0;
 }
+// vim:sts=4:sw=4:expandtab:

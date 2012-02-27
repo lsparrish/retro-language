@@ -1,5 +1,5 @@
-#ifndef CONSOLE_MEGA2560_H
-#define CONSOLE_MEGA2560_H
+#ifndef CONSOLE_ATMEGA_H
+#define CONSOLE_ATMEGA_H
 #ifdef CONSOLE_ACTIVATED
 #error "Only one console can be activated."
 #endif
@@ -10,6 +10,7 @@ static void console_prepare() {
     UCSR0B |= (1 << RXEN0);
     UCSR0B |= (1 << TXEN0);
     UCSR0C  = (1 << USBS0) | (1 << UCSZ00) | (1 << UCSZ01);
+    console_putc('\n');
 }
 
 static void console_finish() {

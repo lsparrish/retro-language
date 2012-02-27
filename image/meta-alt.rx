@@ -43,7 +43,8 @@ IMAGE-SIZE allot
 : shrink      (  -  ) t-here origin @ 6 + ! t-here 256 + origin @ 3 + ! ;
 
 ( Metacompiler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-: t: ( "-  ) label: nop, nop, ['] m, last @ d->class ! ;
+: t: ( "- ) label: nop, nop, ['] m, last @ d->class ! ;
+: i: ( "- ) label: ['] m, last @ d->class ! ;
 
 {{
   : cond ( -a ) target @ 0 m, ;

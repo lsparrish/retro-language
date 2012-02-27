@@ -41,7 +41,8 @@ here [ !target ] [ !origin ] bi IMAGE-SIZE allot
                       t-here @origin 6 + ! t-here 256 + @origin 3 + ! ;
 
 ( Metacompiler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-: t: ( "-  ) label: nop, nop, &m, reclass ;
+: t: ( "- ) label: nop, nop, &m, reclass ;
+: i: ( "- ) label: &m, reclass ;
 
 {{
   : cond ( -a ) @target 0 m, ;

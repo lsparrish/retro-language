@@ -1,11 +1,20 @@
 *This is a random collection of notes and snippits related to things I'm working on*
 
+== Documentation ==
+
+I want to rewrite a lot of this, but time is lacking. There's still a good amount of
+time before 11.3 though, so it seems likely that I'll at least have a decent start
+by then.
+
+
 == Embedded Boards ==
 
 arduino
 mega 2560
 ATmega2560
 16MHz, 256K flash (8K for bootloader), 8K RAM, 4K EEPRON
+
+Oleksandr is working on an implementation for this.
 
 
 mbed
@@ -21,7 +30,9 @@ NXP LPC11U24
 Cortex-M0
 48MHz, 32K flash, 8K RAM, ARM
 
-The mbed implemenation does not support this board.
+The mbed implemenation does not support this board. If we adapt the VM to use an SD
+card as the memory, read/write caching, and take some care, we could probably make it
+work slowly. I don't have plans for this though.
 
 
 ubw32
@@ -29,49 +40,7 @@ PIC32MX795
 80MHz, 512K Flash, 128K RAM, MIPS
 
 This one looks like a nice target. Not too pricey, lots of RAM, and plenty of flash.
-
-
-== Images for Embedded Use ==
-
-A standard image is 32-bit, and assumes a big memory area (a typical VM will provide
-around 1,000,000 cells). Assume that a standard image consumes around 10k cells. So
-just to have everything in memory needs 40 KiB. In addition to this, we have some
-necessary buffers for temporary strings and such. So add another 8 - 10k cells. On
-a 32-bit system, you need at least 80 KiB of RAM to comfortably hold the image and
-buffers.
-
-What we can do is:
-
-1) Use 16 bits per cell if possible
-
-With a 16 bit cell, this cuts the physical memory use in half. So we can be around
-40 KiB for a base image and buffers. This is still pretty big, especially as we
-also want room to actually hold our own code and data. This brings to the next step:
-
-2) Reduce the max string length
-
-Most of the buffers are for strings. A standard image has 512 cells per string. With
-12 temporary buffers, this is 6k cells. There's another couple of buffers used for
-strings as well, bringing us to 8-10k. On an embedded system, we can cut the size of
-the strings down a lot:
-
-[ 128 ] is STRING-LENGTH
-
-This cuts the memory consumption down to around 2 - 3k cells., or about 24 KiB of
-physical memory. This alone makes it viable on some of the larger boards. With
-32 KiB, you can have the standard image and around 4k cells for your programs.
-If you need more, then:
-
-3) Reduce the number of rotating buffers:
-
-[ 4 ] is STRING-BUFFERS
-
-This would reduce memory down to approx 1.5k cells. This won't net as much, but
-could be helpful if you are very tight.
-
-Once either (or both) of these are executed, they remain active until the image
-is shut down. You can use 'save' to make them remain active on subsequent reloads
-of the image.
+As of February 1, Retro is able to run under RetroBSD on this (and similar) boards.
 
 
 == Image Naming ==

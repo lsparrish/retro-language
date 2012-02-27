@@ -23,10 +23,12 @@ sbcl:
 image: retro
 	cd image && cat meta.rx kernel.rx >../core.rx
 	./retro --shrink --image retroImage --with core.rx
+	rm core.rx
+
+jsimage:
 	./retro --with vm/web/html5/dumpImage.rx
 	cp retroImage.js vm/web/android-phonegap/assets/www
 	mv retroImage.js vm/web/html5
-	rm core.rx
 
 images:
 	$(CC) $(CFLAGS) tools/convert.c -o convert
@@ -37,6 +39,7 @@ clean:
 	rm -f retro
 	rm -f retroImage16 retroImage64
 	rm -f retroImage16BE retroImageBE retroImage64BE
+	rm -f *~
 
 webdocs:
 	sh tools/exportHTML.sh doc

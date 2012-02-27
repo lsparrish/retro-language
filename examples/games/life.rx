@@ -29,14 +29,14 @@ create next
     SW SS SE @surrounding ;
   : alive  ( rc-n )
     count
-    [ 0 1 within ] [ drop 0 ] when
-    [ 4 8 within ] [ drop 0 ] when
-    [ 2 3 within ] [ drop 1 ] when ;
+    [ 0 1 within ] [ 0 ] whend
+    [ 4 8 within ] [ 0 ] whend
+    [ 2 3 within ] [ 1 ] whend ;
   : dead   ( rc-n )
     count
-    [ 3 =        ] [ drop 1 ] when
-    [ 0 2 within ] [ drop 0 ] when
-    [ 4 8 within ] [ drop 0 ] when ;
+    [ 3 =        ] [ 1 ] whend
+    [ 0 2 within ] [ 0 ] whend
+    [ 4 8 within ] [ 0 ] whend ;
   : newState  ( rc-n )
     2over get 1 = [ alive ] [ dead ] if ;
   : set   ( nrc- )  next + [ 20 * ] dip + ! ;
@@ -82,12 +82,12 @@ create next
   : display (   -   ) bounds pos get va show ;
 
   : keys
-    [ 'i = ] [ drop line --   -1 ] when
-    [ 'k = ] [ drop line ++   -1 ] when
-    [ 'j = ] [ drop column -- -1 ] when
-    [ 'l = ] [ drop column ++ -1 ] when
-    [ 32 = ] [ drop @line toLine @column + dup @ [ 0 ] [ 1 ] if swap ! -1 ] when
-    [ 'z = ] [ drop            0 ] when ;
+    [ 'i = ] [ line --   -1 ] whend
+    [ 'k = ] [ line ++   -1 ] whend
+    [ 'j = ] [ column -- -1 ] whend
+    [ 'l = ] [ column ++ -1 ] whend
+    [ 32 = ] [ @line toLine @column + dup @ [ 0 ] [ 1 ] if swap ! -1 ] whend
+    [ 'z = ] [ 0 ] whend ;
 ---reveal---
   : edit
     [ display getc keys ] while ;
