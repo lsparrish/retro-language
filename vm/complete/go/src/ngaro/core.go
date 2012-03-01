@@ -2,7 +2,7 @@ package ngaro
 
 import (
 	"fmt"
-	"os"
+	"errors"
 )
 
 const (
@@ -40,14 +40,14 @@ const (
 	Wait
 )
 
-func (vm *VM) core(ip int32) (err os.Error) {
+func (vm *VM) core(ip int32) (err error) {
 	var port [nports]int32
 	var sp, rsp int
 	var tos int32
 	var data, addr [stackDepth]int32
 	defer func() {
 		if v := recover(); v != nil {
-			err = os.NewError(fmt.Sprint(v))
+			err = errors.New(fmt.Sprint(v))
 		}
 	}()
 	for ; int(ip) < len(vm.img); ip++ {

@@ -3,13 +3,15 @@ package ngaro
 import (
 	"encoding/binary"
 	"os"
+	"errors"
+	"io"
 )
 
 // Ngaro Image
 type Image []int32
 
 // Load returns an Image of the given size
-func Load(filename string, size int) (Image, os.Error) {
+func Load(filename string, size int) (Image, error) {
 	f, err := os.OpenFile(filename, os.O_RDONLY, 0)
 	if err != nil {
 		return nil, err
@@ -23,12 +25,12 @@ func Load(filename string, size int) (Image, os.Error) {
 	buf := make([]byte, 512) // 512%4 == 0
 	for i := 0; err == nil; {
 		var n int
-		if n, err = f.Read(buf); err != nil && err != os.EOF {
+		if n, err = f.Read(buf); err != nil && err != io.EOF {
 			return nil, err
 		}
 		for b := buf[:n]; len(b) > 0; b = b[4:] {
 			if len(b) < 4 { // partial value, discard the image
-				return nil, os.NewError("partial value in image file")
+				return nil, errors.New("partial value in image file")
 			}
 			img[i] = int32(binary.LittleEndian.Uint32(b[:4]))
 			if i++; i == len(img) {
@@ -39,7 +41,7 @@ func Load(filename string, size int) (Image, os.Error) {
 	return img, nil
 }
 
-func (img Image) save(filename string, shrink bool) os.Error {
+func (img Image) save(filename string, shrink bool) error {
 	f, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return err
