@@ -1,6 +1,7 @@
-package ngaro 
+package main
 
 import (
+	"ngaro"
 	"flag"
 	"fmt"
 	"io"
@@ -68,12 +69,12 @@ func main() {
 
 	switch flag.NArg() {
 	case 0:
-		img, err = Load("gongaImage", *size)
+		img, err = ngaro.Load("gongaImage", *size)
 		if err != nil {
-			img, err = Load("retroImage", *size)
+			img, err = ngaro.Load("retroImage", *size)
 		}
 	case 1:
-		img, err = Load(flag.Arg(0), *size)
+		img, err = ngaro.Load(flag.Arg(0), *size)
 	default:
 		fmt.Fprintln(os.Stderr, "too many arguments")
 		flag.Usage()
@@ -99,8 +100,8 @@ func main() {
 	}
 
 	// Run a new VM
-	term := NewTerm(clr, dim, input, os.Stdout)
-	vm := New(img, *dump, *shrink, term)
+	term := ngaro.NewTerm(clr, dim, input, os.Stdout)
+	vm := ngaro.New(img, *dump, *shrink, term)
 	err = vm.Run()
 	if *tty { // Unset raw mode
 		exec.Command("/bin/stty", "-F", "/dev/tty", "echo", "cooked").Run()
