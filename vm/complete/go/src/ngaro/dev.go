@@ -179,9 +179,7 @@ func (vm *VM) wait(data, addr, port []int32) (drop int) {
 		case -7: // mouse exists?
 			port[5] = 0
 		case -8: // Seconds from the epoch
-//						if t, _, err := os.Time(); err == nil {
-//							port[5] = int32(t)
-//						}
+			port[5] = 0
 		case -9: // Bye!
 			panic(nil) // core will recover()
 		case -10: // getenv
