@@ -35,12 +35,12 @@
    it and experience odd problems, try raising it a bit higher.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #define CELL            int32_t
-#define IMAGE_SIZE        10000
-#define ADDRESSES          1024
+#define IMAGE_SIZE        21000
+#define ADDRESSES           768
 #define STACK_DEPTH         128
 #define PORTS                12
-#define MAX_FILE_NAME      1024
-#define MAX_REQUEST_LENGTH 1024
+#define MAX_FILE_NAME       512
+#define MAX_REQUEST_LENGTH  512
 #define MAX_OPEN_FILES        8
 #define LOCAL                 "/lib/retroImage"
 #define CELLSIZE             32
