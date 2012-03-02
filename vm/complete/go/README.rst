@@ -6,5 +6,6 @@ To build:
 
 ::
 
-  go install gonga
+  export GOPATH=`pwd`
+  go install
 

@@ -1,6 +1,7 @@
 package ngaro
 
 import (
+	"time"
 	"io"
 	"os"
 )
@@ -179,7 +180,7 @@ func (vm *VM) wait(data, addr, port []int32) (drop int) {
 		case -7: // mouse exists?
 			port[5] = 0
 		case -8: // Seconds from the epoch
-			port[5] = 0
+			port[5] = int32(time.Now().Unix()) 
 		case -9: // Bye!
 			panic(nil) // core will recover()
 		case -10: // getenv

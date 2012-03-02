@@ -1,4 +1,4 @@
-package gonga 
+package main 
 
 import (
 	"ngaro"
