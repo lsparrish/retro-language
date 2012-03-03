@@ -24,14 +24,14 @@
 chain: editor'
 
 {{
-  2 elements buffer count
+  variables| buffer count |
   : restore ( -   ) &getc :devector ok ;
   : get     ( -c  ) @buffer @ ;
   : next    ( -c  ) @count [ count -- get buffer ++ ] [ 32 restore ] if ;
   : replace ( -   ) &next &getc :is ;
   : eval    ( an- ) !count !buffer replace ;
 
-  7 elements #blocks offset blk line column mode active
+  variables| #blocks offset blk line column mode active |
   : toBlock   1600 * @offset + ;
   : thisBlock @blk toBlock ;
   : toLine    80 * thisBlock + ;

@@ -2,7 +2,7 @@
 ( display all lines containing "substring" in "filename" )
 
 {{
-  2 elements token content
+  variables| token content |
 
   : clean ( $- )
     withLength
