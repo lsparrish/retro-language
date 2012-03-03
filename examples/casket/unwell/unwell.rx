@@ -22,8 +22,7 @@ with casket'
 ( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 
 {{
-  variable this
-  variable str
+  variables| this str |
 
   : asc      " ' ' " ;
 
@@ -127,7 +126,7 @@ serve: css as text/css
 
 
 {{
-  2 elements buffer count
+  variables| buffer count |
   : restore ( -   ) &getc :devector ok ;
   : get     ( -c  ) @buffer @ ;
   : next    ( -c  ) @count [ count -- get buffer ++ ] [ 32 restore ] if ;

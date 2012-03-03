@@ -8,7 +8,7 @@ Recursive
 
 Iterative
 
-2 elements previous result
+variables| previous result |
 : fib ( n-m )
   -1 !previous 1 !result
    1+ [ @result @previous over + !result !previous ] times @result ;
