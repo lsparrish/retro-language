@@ -16,7 +16,7 @@ include dict.retro
 
 ( --[ Variables ]--------------------------------------------- )
 
-5 elements target guessed lifeline this-char foul-count
+variables| target guessed lifeline this-char foul-count |
 stages constant lives                     ( see graphics.retro )
 create foul-addr lives allot
 
