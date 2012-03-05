@@ -7,6 +7,10 @@ Release Notes
 Retro 11.3
 ----------
 
+
+Compatibility Issues
+====================
+
 This release of Retro brings a number of changes that may require small
 alterations to existing sources. Specifically:
 
@@ -41,9 +45,8 @@ won't break anything in the standard language or libraries, but could
 be a problem if you rely on the old behavior in your code.
 
 
-------------------------------
 core language / standard image
-------------------------------
+==============================
 
   - new method of implementing quotes
   - maximum string length can be altered now
@@ -58,9 +61,8 @@ core language / standard image
   - hidden functions are no longer revectorable
 
 
----------
 libraries
----------
+=========
 
   - fixed all reported bugs
   - added diet' library for reducing memory usage by trimming string size, buffers
@@ -68,17 +70,15 @@ libraries
   - documentation blocks have consistent formatting now
 
 
-----------
 extensions
-----------
+==========
 
   - include lua bindings (now updated for the lua 5.2 release)
   - include sqlite bindings
 
 
---------
 ngaro vm
---------
+========
 
   - c
 
@@ -105,10 +105,8 @@ ngaro vm
     - slightly lower memory usage in mbed implementation
 
 
-
---------
 examples
---------
+========
 
   - fixed bugs
   - updated to use new language features
@@ -118,18 +116,16 @@ examples
   - added example of building strings using a combinator
 
 
--------------
 documentation
--------------
+=============
 
   - add single file covering all of the libraries
   - expansions to quick reference
   - minor updates to fix small mistakes, clarify things
 
 
------
 other
------
+=====
 
   - properly support multi-line strings in vim highlighter
   - the debugger now has a source display view
