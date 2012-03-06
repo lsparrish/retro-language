@@ -66,7 +66,7 @@ func New(img Image, dump string, shrink bool, term *Term) *VM {
 }
 
 // Run executes a VM and blocks until it finishes.
-func (vm *VM) Run() os.Error {
+func (vm *VM) Run() error {
 	return vm.core(0)
 }
 

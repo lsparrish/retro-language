@@ -8,7 +8,7 @@
   8000 constant MAX-APP-SIZE
 
   ( Assembler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-  3 elements target origin fid
+  variables| target origin fid |
   : pad ( - ) @origin 32 + !target ;
   : m,  ( n-  ) @target !+ !target ;
   : vm: ( n"- ) ` : .data ` m, ` ; ;

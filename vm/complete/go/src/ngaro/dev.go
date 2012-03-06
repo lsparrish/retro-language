@@ -1,6 +1,7 @@
 package ngaro
 
 import (
+	"time"
 	"io"
 	"os"
 )
@@ -25,9 +26,9 @@ var fd int32
 
 type input []io.Reader
 
-func (in *input) Read(b []byte) (n int, err os.Error) {
+func (in *input) Read(b []byte) (n int, err error) {
 	r := (*in)[len(*in)-1]
-	if n, err = r.Read(b); err == os.EOF {
+	if n, err = r.Read(b); err == io.EOF {
 		if rc, ok := r.(io.ReadCloser); ok {
 			rc.Close()
 		}
@@ -74,7 +75,7 @@ func (vm *VM) wait(data, addr, port []int32) (drop int) {
 
 	case port[1] > 1: // Receive from (or delete) channel
 		if port[2] == port[1] {
-			vm.ch[port[1]] = nil, false
+			vm.ch[port[1]] = nil
 			port[1] = 0
 			port[2] = 0
 		} else {
@@ -96,7 +97,7 @@ func (vm *VM) wait(data, addr, port []int32) (drop int) {
 		drop = 1
 
 	case port[4] != 0: // Files
-		var err os.Error
+		var err error
 		var p int64
 		switch port[4] {
 		case 1: // Write dump
@@ -133,7 +134,7 @@ func (vm *VM) wait(data, addr, port []int32) (drop int) {
 		case -4:
 			err = vm.file[tos].Close()
 			if err != nil {
-				vm.file[tos] = nil, false
+				vm.file[tos] = nil
 			}
 			if err != nil {
 				port[4] = 1
@@ -150,9 +151,9 @@ func (vm *VM) wait(data, addr, port []int32) (drop int) {
 			port[4] = int32(p)
 			drop = 2
 		case -7:
-			var fi *os.FileInfo
+			var fi os.FileInfo
 			fi, err = vm.file[tos].Stat()
-			port[4] = int32(fi.Size)
+			port[4] = int32(fi.Size())
 			drop = 1
 		case -8:
 			port[4], err = 1, os.Remove(vm.img.string(tos))
@@ -179,9 +180,7 @@ func (vm *VM) wait(data, addr, port []int32) (drop int) {
 		case -7: // mouse exists?
 			port[5] = 0
 		case -8: // Seconds from the epoch
-			if t, _, err := os.Time(); err == nil {
-				port[5] = int32(t)
-			}
+			port[5] = int32(time.Now().Unix()) 
 		case -9: // Bye!
 			panic(nil) // core will recover()
 		case -10: // getenv

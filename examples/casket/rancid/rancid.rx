@@ -20,7 +20,7 @@ with casket'
 
 ( paths ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 {{
-  2 elements content lines
+  variables| content lines |
 
   : clean ( $- )
     withLength

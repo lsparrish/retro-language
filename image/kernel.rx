@@ -21,7 +21,7 @@ TIB  variable: <tib>  ( Start of default text input buffer                    )
 
 label: copytag   "Retro" $,
 label: version   "11.3" $,
-label: build     "2012.02.09" $,
+label: build     "2012.03.04" $,
 label: okmsg     "ok  " $,
 pad
 
@@ -119,6 +119,8 @@ i: (accept) ( a-a )
 t: accept ( c- ) break # !, tib eat (accept) 0 # swap, !+ drop, ;
 
 ( Colon Compiler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+-1 variable: vector
+
 t: d->class ( a-a )  1+, ;
 t: d->xt    ( a-a )  1+, 1+, ;
 t: d->name  ( a-a )  1+, 1+, 1+, ;
@@ -132,7 +134,8 @@ t: header   ( $-  )  push, here        ( Entry Start      )
 t: create   ( "-  )  32 # accept tib header ;
 t: [[       (  -  )  compiler # off ;
 t: ]]       (  -  )  compiler # on ;
-t: :        ( "-  )  create ' .word # last # @, d->class !, ]] 0 # , 0 # , ;
+t: vector?  (  -  )  vector # @, 0; drop, 0 # , 0 # , ;
+t: :        ( "-  )  create ' .word # last # @, d->class !, ]] vector? ;
 t: t-(      ( "-  )  ') # accept ;
 
 ( Quotes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
@@ -301,6 +304,7 @@ t: listen  (   - ) repeat ok 32 # accept tib find process again ;
   remapping      data: remapping      eatLeading?  data: eatLeading?
   base           data: base           update       data: update
   version        data: version        build        data: build
+  vector         data: vector
   tabAsWhitespace data: tabAsWhitespace
 patch
 
@@ -326,10 +330,10 @@ endKernel shrink bootNew
 
 ( Scope ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 create list  ( -a )  0 , 0 ,
-: {{ ( - )  last @ dup list ! list 1+ ! ;
-: ---reveal--- ( - ) last @ list 1+ ! ;
+: {{ ( - )  vector off last @ dup list ! list 1+ ! ;
+: ---reveal--- ( - ) vector on last @ list 1+ ! ;
 : }} ( - )
-  list @ list 1+ @ =
+  vector on list @ list 1+ @ =
   [ list @ last ! ]
   [ list @ [ last repeat @ dup @ list 1+ @ <> 0; drop again ] do ! ] if ;
 
@@ -357,6 +361,7 @@ create list  ( -a )  0 , 0 ,
   : hide       ( "-  ) ' 0; :hide ;
 }}
 hide list
+hide vector
 : reclass      (  a- ) last @ d->class ! ;
 : reclass:     ( a"- ) d' d->class ! ;
 

@@ -1,4 +1,4 @@
-4 elements a b c n
+variables| a b c n |
 
 : vars !c !b !a !n ;
 : hanoi ( num from to via -- )

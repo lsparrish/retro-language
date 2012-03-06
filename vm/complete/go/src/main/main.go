@@ -1,12 +1,12 @@
-package main
+package main 
 
 import (
 	"ngaro"
-	"exec"
 	"flag"
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 )
 
 var Usage = func() {
@@ -60,12 +60,12 @@ func ttyDimensions() (width int32, height int32) {
 
 func main() {
 	var wf withFiles
-	flag.Var(&wf, "w", "input files")
-	flag.Usage = Usage
+//	flag.Var(&wf, "w", "input files")
+//	flag.Usage = Usage
 	flag.Parse()
 
 	var img []int32
-	var err os.Error
+	var err error
 
 	switch flag.NArg() {
 	case 0:
@@ -81,7 +81,7 @@ func main() {
 		os.Exit(2)
 	}
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "error starting gonga: ", err.String())
+		fmt.Fprintln(os.Stderr, "error starting gonga: ", err)
 		os.Exit(1)
 	}
 
