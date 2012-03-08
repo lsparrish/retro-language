@@ -3,10 +3,7 @@ default: clean
 	ln -s ../../../../library .
 	cp ../../../../retroImage .
 	./retro --with image.rx --shrink
-	$(CC) ../../../../tools/convert.c -o convert
-	./convert
-	rm -f convert retroImage*BE retroImage64 retroImage
-	mv retroImage16 retro-src/retroImage
+	mv retroImage retro-src/retroImage
 
 clean:
 	rm -f retro library

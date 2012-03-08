@@ -1,6 +1,6 @@
-========================
-Time & Date Calculations
-========================
+=========
+calendar'
+=========
 
 
 --------
@@ -56,4 +56,5 @@ Functions
 | toDayOfWeek     | dmy-n | Convert a date to the numeric day of |
 |                 |       | the week                             |
 +-----------------+-------+--------------------------------------+
+
 

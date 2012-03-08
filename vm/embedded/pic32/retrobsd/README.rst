@@ -8,6 +8,13 @@ Overview
 This is an implementation of Retro for use with RetroBSD.
 
 
+-----------
+Constraints
+-----------
+This build uses a 32-bit image and provides 21k cells of memory. The
+default image used is using diet' to reduce the length of strings.
+
+
 ----------
 Setting Up
 ----------

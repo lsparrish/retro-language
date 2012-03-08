@@ -468,11 +468,37 @@ cat - | ./retro retroImage
 </div>
 <div class="section" id="c">
 <h2>C</h2>
-<p>The C implementation can be built to support use of 16-bit,
-32-bit, or 64-bit images. The default is to build for standard
-32-bit images.</p>
-<p>To build for 16-bit, define <strong>RX16</strong>, and for 64-bit, define
-<strong>RX64</strong>. To actually get a 16-bit or 64-bit image, do:</p>
+<p>The C implementation is the oldest and most flexible of the VM
+implementations. It is feature complete, can track opcode
+and stack usage, and serves as the reference implementation.</p>
+<p>Thiis implementation can be built for 16-bit, 32-bit, or 64-bit
+cell sizes in little or big endian. The default settings are for
+a standard little endian, 32-bit image.</p>
+<p>Add one of the following flags via CFLAGS to get a non-standard
+configuration:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="29%" />
+<col width="71%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Flag</th>
+<th class="head">Usage</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>-DRX16</td>
+<td>16-bit cells</td>
+</tr>
+<tr><td>-DRX64</td>
+<td>32-bit cells</td>
+</tr>
+<tr><td>-DRXBE</td>
+<td>Big endian cells</td>
+</tr>
+</tbody>
+</table>
+<p>To generate a non-standard image, use:</p>
 <pre class="literal-block">
 make images
 </pre>
@@ -512,8 +538,8 @@ the overall functionality, or special extensions to use features of the
 target platforms. See the individual implementations for notes.</p>
 <table border="1" class="docutils">
 <colgroup>
-<col width="26%" />
-<col width="74%" />
+<col width="33%" />
+<col width="67%" />
 </colgroup>
 <thead valign="bottom">
 <tr><th class="head">CPU</th>
@@ -526,6 +552,9 @@ target platforms. See the individual implementations for notes.</p>
 </tr>
 <tr><td>AVR</td>
 <td>arduino mega</td>
+</tr>
+<tr><td>PIC32</td>
+<td>various</td>
 </tr>
 </tbody>
 </table>

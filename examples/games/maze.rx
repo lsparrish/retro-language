@@ -13,7 +13,7 @@
 
 16 constant ROWS
 16 constant COLUMNS
-6  elements x y lastChar oldX oldY play?
+variables| x y lastChar oldX oldY play? |
 
 : $, ( $- )
   withLength [ @+ , ] times drop ;

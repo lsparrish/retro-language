@@ -17,13 +17,16 @@ chain: math'
 ;chain
 
 doc{
-Overview
-========
+=====
+math'
+=====
 This library provides support for additional mathmatic operations not provided
 by the core Retro language.
 
+
+---------
 Functions
-=========
+---------
 +------------+-------+-----------------------------------------------------+
 | Function   | Stack | Description                                         |
 +============+=======+=====================================================+

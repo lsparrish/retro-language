@@ -1,6 +1,6 @@
-==========================
-Decompose: HTML Generation
-==========================
+==========
+decompose'
+==========
 
 
 --------
@@ -33,4 +33,5 @@ Example
     [ [ [ "Hello" ] title ] head
       [ [ "Welcome" ] h1
         [ "This is a paragraph." ] p ] body ] html ;
+
 

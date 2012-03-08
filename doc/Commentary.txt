@@ -1,3 +1,10 @@
+Note
+----
+This commentary was done for the initial 11.0 release of Retro. Some things
+in the implementation have changed since then. Even so, this should help
+with understanding most of the internals.
+
+
 Building Retro
 --------------
 The process of building a new retroImage is a straightforward, though not

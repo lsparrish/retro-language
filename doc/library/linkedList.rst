@@ -1,6 +1,6 @@
-============
-Linked Lists
-============
+===========
+linkedList'
+===========
 
 --------
 Overview
@@ -79,3 +79,4 @@ Functions
 | nth          | nL-N  | Return the *nth* node from the list. Indexing |
 |              |       | starts at *1*.                                |
 +--------------+-------+-----------------------------------------------+
+
