@@ -225,3 +225,8 @@ table.corefunc td, table.corefunc th {
 
 table.corefunc th {
   background-color: #dddddd; }
+
+tbody tr:nth-child(odd) td, tbody tr:nth-child(odd) th {
+  background-color: #f9f9f9;
+}
+
