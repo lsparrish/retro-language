@@ -1717,6 +1717,16 @@ Functions
 | clone | a-a   | Given a structure address, return a new anonyous instance|
 +-------+-------+----------------------------------------------------------+
 
+========
+subcell'
+========
+
+
+--------
+Overview
+--------
+This library provides functions for accessing 16-bit and 8-bit subsets of cells.
+
 =======
 values'
 =======

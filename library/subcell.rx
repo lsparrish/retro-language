@@ -1,3 +1,4 @@
+chain: subcell'
 
 : highWord ( cellAddr -- highwordAddr )
    2 * ;
@@ -55,7 +56,9 @@
     highWord highByte
     [ 0 swap repeat c@+ 0; drop swap 1+ swap again ]
     do drop ;
+;chain
 
+with subcell'
 variable testVal
 
 : testWord
@@ -89,4 +92,17 @@ variable testVal
     cr c@+ putn
     cr c@+ putn
     cr c@+ putn cr ;
+
+
+doc{
+========
+subcell'
+========
+
+
+--------
+Overview
+--------
+This library provides functions for accessing 16-bit and 8-bit subsets of cells.
+}doc
 
