@@ -2358,19 +2358,80 @@ allocated structure.</td>
 <h2>Overview</h2>
 <p>This library provides functions for accessing 16-bit and 8-bit subsets of cells.</p>
 </div>
+<div class="section" id="id70">
+<h2>Functions</h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="37%" />
+<col width="63%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Function</th>
+<th class="head">Stack</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>highWord</td>
+<td>cellAddr -- highwordAddr</td>
+</tr>
+<tr><td>lowWord</td>
+<td>cellAddr -- lowwordAddr</td>
+</tr>
+<tr><td>w&#64;</td>
+<td>wordAddr -- val</td>
+</tr>
+<tr><td>w&#64;+</td>
+<td>wordAddr -- wordAddr val</td>
+</tr>
+<tr><td>w!</td>
+<td>val wordAddr --</td>
+</tr>
+<tr><td>w!+</td>
+<td>val wordAddr -- wordAddr+1</td>
+</tr>
+<tr><td>highByte</td>
+<td>wordAddr -- highbyteAddr</td>
+</tr>
+<tr><td>lowByte</td>
+<td>wordAddr -- lowbyteAddr</td>
+</tr>
+<tr><td>c&#64;</td>
+<td>byteAddr -- val</td>
+</tr>
+<tr><td>c&#64;+</td>
+<td>byteAddr -- byteAddr val</td>
+</tr>
+<tr><td>c!</td>
+<td>val byteaddr --</td>
+</tr>
+<tr><td>c!+</td>
+<td>val byteAddr -- byteAddr+1</td>
+</tr>
+<tr><td>packString</td>
+<td>strAddr --</td>
+</tr>
+<tr><td>printPack</td>
+<td>strAddr --</td>
+</tr>
+<tr><td>getPackedLength</td>
+<td>strAddr -- strLen</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <div class="section" id="values">
 <h1>values'</h1>
 <p>A value is a variable that returns the stored value when used. This
 library provides an implementation for Retro.</p>
-<div class="section" id="id70">
+<div class="section" id="id71">
 <h2>Loading</h2>
 <p>The following should suffice:</p>
 <pre class="literal-block">
 needs values'
 </pre>
 </div>
-<div class="section" id="id71">
+<div class="section" id="id72">
 <h2>Examples</h2>
 <pre class="literal-block">
 with values'
@@ -2385,7 +2446,7 @@ foo foo + .s
 foo foo + .s
 </pre>
 </div>
-<div class="section" id="id72">
+<div class="section" id="id73">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2429,7 +2490,7 @@ mode</td>
 </div>
 <div class="section" id="variations">
 <h1>variations'</h1>
-<div class="section" id="id73">
+<div class="section" id="id74">
 <h2>Overview</h2>
 <p>This library provides some functions for determining the differences between
 VM implementations and conditionally evaluating code blocks based on these
@@ -2437,7 +2498,7 @@ differences.</p>
 <p>Specifically, it provides functions for determining the number of bits per
 cell and the endian nature of an implementation.</p>
 </div>
-<div class="section" id="id74">
+<div class="section" id="id75">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
