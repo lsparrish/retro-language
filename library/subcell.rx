@@ -1,11 +1,15 @@
 
-: highWord ( cellAddr -- highwordAddr ) 2 * ;
+: highWord ( cellAddr -- highwordAddr ) 
+   2 * ;
 
-: lowWord  ( cellAddr -- lowwordAddr  ) 2 * 1 + ;
+: lowWord  ( cellAddr -- lowwordAddr  ) 
+   2 * 1 + ;
 
-: w@ ( wordAddr -- val ) 2 /mod  @ swap [ 16 >> ] ifFalse $FFFF and ;
+: w@ ( wordAddr -- val ) 
+   2 /mod  @ swap [ 16 >> ] ifFalse $FFFF and ;
     
-: w@+ ( wordAddr -- wordAddr val ) dup 1+ push w@ pop swap ;
+: w@+ ( wordAddr -- wordAddr val ) 
+   dup 1+ push w@ pop swap ;
 
 : w! ( val wordAddr -- )
    2 /mod dup push swap 
@@ -36,6 +40,22 @@
   
 : c!+ ( val byteAddr -- byteAddr+1 )
    dup 1+ push c! pop ;
+    
+: packString ( strAddr -- )
+    dup highWord highByte
+    [ repeat push @+ pop swap 0; swap c!+ again ] 
+    do 0 c! drop ;
+    
+: printPack ( strAddr -- )
+    highWord highByte
+    [ repeat c@+ 0; putc again ] 
+    do drop ;
+    
+: getPackedLength ( strAddr -- strLen )
+    highWord highByte 
+    [ 0 swap repeat c@+ 0; drop swap 1+ swap again ]
+    do drop ;
+   
 
 variable testVal
 
