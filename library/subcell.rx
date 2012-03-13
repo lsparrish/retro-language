@@ -13,7 +13,8 @@
    [ @ $0000FFFF and swap 16 << + ] 
    if pop ! ;
    
-: w!+ dup 1+ push w! pop ;
+: w!+ ( val wordAddr -- wordAddr+1 )
+   dup 1+ push w! pop ;
 
 : highByte ( wordAddr -- highbyteAddr ) 
    2 * ;
@@ -33,7 +34,8 @@
   [ w@ $00FF and swap 8 << + ] 
   if pop w! ;
   
-: c!+ dup 1+ push c! pop ;
+: c!+ ( val byteAddr -- byteAddr+1 )
+   dup 1+ push c! pop ;
 
 variable testVal
 
@@ -45,6 +47,12 @@ variable testVal
    $FFFF testVal lowWord w! 
    cr " High: " puts testVal highWord w@ putn
    cr " Low: "  puts testVal lowWord  w@ putn ; 
+   
+: testWords
+    1 2 swap testVal highWord w!+ w!+ drop
+    testVal highWord 
+    cr w@+ putn 
+    cr w@+ putn cr ;
 
 : testByte
     $FF01 testVal !
@@ -54,4 +62,12 @@ variable testVal
     $FF testVal lowWord lowByte  c! 
     cr " High: " puts testVal lowWord highByte c@ putn
     cr " Low: "  puts testVal lowWord lowByte  c@ putn ; 
+    
+: testBytes
+    4 3 2 1 testVal highWord highByte c!+ c!+ c!+ c!+ drop
+    testVal highWord highByte 
+    cr c@+ putn 
+    cr c@+ putn 
+    cr c@+ putn 
+    cr c@+ putn cr ;
 
