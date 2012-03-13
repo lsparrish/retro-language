@@ -1,0 +1,51 @@
+
+: wordAddress ( wordAddr -- highFlag cellAddr ) 
+   2 /mod ;
+
+: highWord ( cellAddr -- highwordAddr ) 
+   2 * ;
+
+: lowWord  ( cellAddr -- lowwordAddr  ) 
+   2 * 1 + ;
+
+: w@ ( highFlag cellAddr -- val )    
+    @ swap [ 16 >> ] ifFalse $FFFF and ;
+
+: w! (val highFlag cellAddr -- )
+    dup push swap 
+    [ @ $FFFF0000 and + ]        
+    [ @ $0000FFFF and swap 16 << + ] 
+    if pop ! ;
+
+: byteAddress ( byteAddr -- highFlag wordAddr ) 
+   2 /mod ;
+
+: highByte ( wordAddr -- highbyteAddr ) 
+   2 * ;
+
+: lowByte  ( wordAddr -- lowbyteAddr  ) 
+   2 * 1 + ;
+
+
+: c@ ( highFlag wordAddr -- val )
+   w@ swap [ 8 >> ] ifFalse $FF and ;
+
+: c! ( val highFlag wordaddr -- )    
+   dup push swap
+   [ w@ $FF00 and + ] 
+   [ w@ $00FF and swap 8 << + ] 
+   if pop w! ;
+
+
+variable testVal
+
+: testWord
+   $FFFF0001 testVal !
+   cr " High: " puts testVal highWord wordAddress w@ putn
+   cr " Low: "  puts testVal lowWord  wordAddress w@ putn ; 
+
+: testByte
+    $FF01 testVal !
+    cr " High: " puts testVal lowWord highByte byteAddress c@ putn
+    cr " Low: "  puts testVal lowWord lowByte  byteAddress c@ putn ;
+
