@@ -15,7 +15,7 @@ try:
   startwrite = False
   towrite = ''
 except: pass
-	
+
 set_termio = False
 try:
     import termios
@@ -88,7 +88,7 @@ def rxHandleDevices( ip, stack, address, ports, memory, files, inputs ):
           sys.stdout.write(chr(stack.pop()))
       else:
         stack.pop()
-    else: 
+    else:
       if stack[-1] > 0 and stack[-1] < 128:
         sys.stdout.write(chr(stack.pop()))
     sys.stdout.flush()
