@@ -91,6 +91,10 @@ ngaro vm
     - updated to work with current weekly builds
     - added README to explain how to build it and cover concurrency additions
 
+  - html5
+
+    - use bootstrap for ui elements
+
   - php
 
     - fixed bugs in host environment queries, now feature complete
