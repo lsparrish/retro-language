@@ -12,6 +12,8 @@
    [ @ $FFFF0000 and + ] 
    [ @ $0000FFFF and swap 16 << + ] 
    if pop ! ;
+   
+: w!+ dup 1+ push w! pop ;
 
 : highByte ( wordAddr -- highbyteAddr ) 
    2 * ;
@@ -30,6 +32,8 @@
   [ w@ $FF00 and + ] 
   [ w@ $00FF and swap 8 << + ] 
   if pop w! ;
+  
+: c!+ dup 1+ push c! pop ;
 
 variable testVal
 
