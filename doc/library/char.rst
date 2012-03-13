@@ -51,4 +51,6 @@ Functions
 | toLower       | c-c     | Convert an upperacase character to lowercase.  |
 |               |         | This will only work on an uppercase character. |
 +---------------+---------+------------------------------------------------+
+| toString      | c-$     | Convert a character into a string              |
++---------------+---------+------------------------------------------------+
 
