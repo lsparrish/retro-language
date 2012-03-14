@@ -10,7 +10,7 @@ chain: subcell'
    2 /mod  @ swap [ 16 >> ] ifFalse $FFFF and ;
 
 : w@+ ( wordAddr -- wordAddr val )
-   dup 1+ push w@ pop swap ;
+  [ 1+ ] [ w@ ] bi ;
 
 : w! ( val wordAddr -- )
    2 /mod dup push swap
@@ -19,7 +19,7 @@ chain: subcell'
    if pop ! ;
 
 : w!+ ( val wordAddr -- wordAddr+1 )
-   dup 1+ push w! pop ;
+   [ w! ] [ 1+ ] bi ;
 
 : highByte ( wordAddr -- highbyteAddr )
    2 * ;
@@ -31,7 +31,7 @@ chain: subcell'
    2 /mod w@ swap [ 8 >> ] ifFalse $FF and ;
 
 : c@+ ( byteAddr -- byteAddr val )
-  dup 1+ push c@ pop swap ;
+  [ 1+ ] [ c@ ] bi ;
 
 : c! ( val byteaddr -- )
   2 /mod dup push swap
@@ -40,7 +40,7 @@ chain: subcell'
   if pop w! ;
 
 : c!+ ( val byteAddr -- byteAddr+1 )
-   dup 1+ push c! pop ;
+   [ c! ] [ 1+ ] bi ;
 
 : packString ( strAddr -- )
     dup highWord highByte
