@@ -13,7 +13,7 @@ chain: subcell'
    dup 1+ push w@ pop swap ;
 
 : w! ( val wordAddr -- )
-   2 /mod dup push swap 
+   2 /mod dup push swap
    [ @ $FFFF0000 and + ]
    [ @ $0000FFFF and swap 16 << + ]
    if pop ! ;
@@ -57,41 +57,6 @@ chain: subcell'
     [ 0 swap repeat c@+ 0; drop swap 1+ swap again ]
     do drop ;
 ;chain
-
-with subcell'
-variable testVal
-
-: testWord
-   $FFFF0001 testVal !
-   cr " High: " puts testVal highWord w@ putn
-   cr " Low: "  puts testVal lowWord  w@ putn
-   $0000 testVal highWord w!
-   $FFFF testVal lowWord w!
-   cr " High: " puts testVal highWord w@ putn
-   cr " Low: "  puts testVal lowWord  w@ putn ;
-
-: testWords
-    1 2 swap testVal highWord w!+ w!+ drop
-    testVal highWord
-    cr w@+ putn
-    cr w@+ putn cr ;
-
-: testByte
-    $FF01 testVal !
-    cr " High: " puts testVal lowWord highByte c@ putn
-    cr " Low: "  puts testVal lowWord lowByte  c@ putn
-    $00 testVal lowWord highByte c!
-    $FF testVal lowWord lowByte  c!
-    cr " High: " puts testVal lowWord highByte c@ putn
-    cr " Low: "  puts testVal lowWord lowByte  c@ putn ;
-
-: testBytes
-    4 3 2 1 testVal highWord highByte c!+ c!+ c!+ c!+ drop
-    testVal highWord highByte
-    cr c@+ putn
-    cr c@+ putn
-    cr c@+ putn
-    cr c@+ putn cr ;
 
 
 doc{
