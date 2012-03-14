@@ -35,3 +35,9 @@ variable testVal
     cr c@+ putn
     cr c@+ putn cr ;
 
+testWord
+testWords
+testByte
+testBytes
+bye
+
