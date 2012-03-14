@@ -4,7 +4,7 @@ chain: subcell'
    2 * ;
 
 : lowWord  ( cellAddr -- lowwordAddr  )
-   2 * 1 + ;
+   2 * 1+ ;
 
 : w@ ( wordAddr -- val )
    2 /mod  @ swap [ 16 >> ] ifFalse $FFFF and ;
@@ -25,7 +25,7 @@ chain: subcell'
    2 * ;
 
 : lowByte  ( wordAddr -- lowbyteAddr  )
-   2 * 1 + ;
+   2 * 1+ ;
 
 : c@ ( byteAddr -- val )
    2 /mod w@ swap [ 8 >> ] ifFalse $FF and ;
