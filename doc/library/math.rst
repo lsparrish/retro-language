@@ -1,10 +1,13 @@
-Overview
-========
+=====
+math'
+=====
 This library provides support for additional mathmatic operations not provided
 by the core Retro language.
 
+
+---------
 Functions
-=========
+---------
 +------------+-------+-----------------------------------------------------+
 | Function   | Stack | Description                                         |
 +============+=======+=====================================================+
@@ -24,3 +27,4 @@ Functions
 | odd?       | n-f   | Returns a flag indicating whether or not a number is|
 |            |       | false                                               |
 +------------+-------+-----------------------------------------------------+
+

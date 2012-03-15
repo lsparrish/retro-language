@@ -206,7 +206,8 @@ syn match forthInteger '\<\x*\d\x*\>'  " *2* --- this order!
 syn match forthInteger '\<%[0-1]*[0-1]\+\>'
 
 " Strings ("foo")
-syn region forthString start=+\.*\"+ end=+"+ end=+$+
+syn region forthString start=+\.*\"+ end=+"+
+" end=+$+
 
 " Comments
 syn region forthComment start='\(\s\|^\)(\s' skip='\\)' end=')' end='$' contains=forthTodo,forthSpaceError

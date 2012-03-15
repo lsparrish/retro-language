@@ -124,11 +124,12 @@ let devices () =
                     name := name.Value + 1)
                     (var |> Environment.GetEnvironmentVariable
                          |> Encoding.ASCII.GetBytes)
+                memory.[name.Value] <- 0
                 0
             | -11 -> Console.WindowWidth
             | -12 -> Console.WindowHeight
             | _ -> 0
- 
+
 let rec exec () =
     let dyadic fn = let x = pop () in fn (pop ()) x |> push
     let dyadic2 fn = let x, y = fn (pop ()) (pop ()) in push y; push x

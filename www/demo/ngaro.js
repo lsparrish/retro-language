@@ -956,7 +956,7 @@ portHandlers[6] = function()
  **********************************************************************/
 function rxSaveProject()
 {
-  var project = "rx_" + document.getElementById('rxProjectName').value;
+  var project = "rx_project";
   try
   {
     localStorage.setItem(project, document.getElementById('project').value);
@@ -965,12 +965,11 @@ function rxSaveProject()
   {
     alert("Sorry, but we couldn't save your project.");
   }
-  rxListProjects();
 }
 
 function rxLoadSavedProject()
 {
-  var project = "rx_" + document.getElementById('rxProjectName').value;
+  var project = "rx_project";
   if (localStorage.getItem(project) === null)
   {
     document.getElementById('project').value = "";
@@ -986,47 +985,9 @@ function rxRunProject()
   tib += document.getElementById('project').value + "  ";
 }
 
-function rxDeleteProject()
-{
-  var project = "rx_" + document.getElementById('rxProjectName').value;
-  var answer = confirm("Are you sure you want to delete the '" + document.getElementById('rxProjectName').value + "' project?");
-  if (answer)
-  {
-    document.getElementById('project').value = "";
-    document.getElementById('rxProjectName').value = "";
-    localStorage.removeItem(project);
-  }
-  rxListProjects();
-}
-
-function rxListProjects()
-{
-  var items = localStorage.length - 1;
-  var list = document.getElementById("projectList");
-  list.length = 0;
-
-  for (var i = 0; i <= items; i++)
-  {
-    var key = localStorage.key(i).split('_', 2);
-    if (key[0] == "rx")
-      list.add(new Option(key[1], key[1]), null);
-  }
-}
-
-function rxSelectProject(x)
-{
-  if (x != -1)
-  {
-    var list = document.getElementById("projectList");
-    document.getElementById('rxProjectName').value = list.options[x].value;
-    rxLoadSavedProject();
-  }
-}
-
 function rxNewProject()
 {
   document.getElementById('project').value = "";
-  document.getElementById('rxProjectName').value = "";
 }
 
 

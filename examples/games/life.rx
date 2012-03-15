@@ -56,7 +56,7 @@ create next
 
 
 {{
-  2 elements line column
+  variables| line column |
   : toLine    20 * world + ;
 
   ( check boundaries ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )

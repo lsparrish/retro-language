@@ -5,226 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="Docutils 0.7: http://docutils.sourceforge.net/" />
 <title>Ngaro VM Implementation Status</title>
-<style type="text/css">
-
-body {
-  font: 100% sans-serif;
-  background: #ffffff;
-  color: black;
-  margin: 2em;
-  padding: 0em 2em; }
-
-p.topic-title {
-  font-weight: bold; }
-
-table.docinfo {
-  text-align: left;
-  margin: 2em 0em; }
-
-a[href] {
-  color: #436976;
-  background-color: transparent; }
-
-a.toc-backref {
-  text-decoration: none; }
-
-h1 a[href] {
-  color: #003a6b;
-  text-decoration: none;
-  background-color: transparent; }
-
-a.strong {
-  font-weight: bold; }
-
-img {
-  margin: 0;
-  border: 0; }
-
-p {
-  margin: 0.5em 0 1em 0;
-  line-height: 1.5em; }
-
-p a:visited {
-  color: purple;
-  background-color: transparent; }
-
-p a:active {
-  color: red;
-  background-color: transparent; }
-
-a:hover {
-  text-decoration: none; }
-
-p img {
-  border: 0;
-  margin: 0; }
-
-p.rubric {
-  font-weight: bold;
-  font-style: italic; }
-
-h1.title {
-  color: #003a6b;
-  font-size: 250%;
-  margin-bottom: 0em; }
-
-h2.subtitle {
-  color: #003a6b;
-  border-bottom: 0px; }
-
-h1, h2, h3, h4, h5, h6 {
-  color: #555;
-  background-color: transparent;
-  margin: 0em;
-  padding-top: 0.5em; }
-
-h1 {
-  font-size: 160%;
-  margin-bottom: 0.5em;
-  border-bottom: 2px solid #aaa; }
-
-h2 {
-  font-size: 140%;
-  margin-bottom: 0.5em;
-  border-bottom: 1px solid #aaa; }
-
-h3 {
-  font-size: 130%;
-  margin-bottom: 0.5em; }
-
-h4 {
-  font-size: 110%;
-  font-weight: bold;
-  margin-bottom: 0.5em; }
-
-h5 {
-  font-size: 105%;
-  font-weight: bold;
-  margin-bottom: 0.5em; }
-
-h6 {
-  font-size: 100%;
-  font-weight: bold;
-  margin-bottom: 0.5em; }
-
-dt {
-  font-style: italic; }
-
-dd {
-  margin-bottom: 1.5em; }
-
-div.admonition, div.note, div.tip, div.caution, div.important {
-  margin: 2em 2em;
-  padding: 0em 1em;
-  border-top: 1px solid #aaa;
-  border-left: 1px solid #aaa;
-  border-bottom: 2px solid #555;
-  border-right: 2px solid #555; }
-
-div.important {
-  background: transparent url('../images/important.png') 10px 2px no-repeat; }
-
-div.caution {
-  background: transparent url('../images/caution.png') 10px 2px no-repeat; }
-
-div.note {
-  background: transparent url('../images/note.png') 10px 2px no-repeat; }
-
-div.tip {
-  background: transparent url('../images/tip.png') 10px 2px no-repeat; }
-
-div.admonition-example {
-  background: transparent url('../images/tip.png') 10px 2px no-repeat; }
-
-div.admonition-critical-example {
-  background: transparent url('../images/important.png') 10px 2px no-repeat; }
-
-p.admonition-title {
-  font-weight: bold;
-  border-bottom: 1px solid #aaa;
-  padding-left: 30px; }
-
-table.docutils {
-  text-align: left;
-  border: 1px solid gray;
-  border-collapse: collapse;
-  width: 100%;
-  margin: 1.5em 0em; }
-
-table.docutils caption {
-  font-style: italic; }
-
-table.docutils td, table.docutils th {
-  padding: 0.25em 0.5em; }
-
-table.docutils th {
-  background-color: #dddddd; }
-
-div.sidebar {
-  width: 33%;
-  float: right;
-  margin: 0em 2em;
-  padding: 0em 1em;
-  border-top: 1px solid #aaa;
-  border-left: 1px solid #aaa;
-  border-bottom: 2px solid #555;
-  border-right: 2px solid #555; }
-
-p.sidebar-title {
-  margin-bottom: 0em;
-  color: #003a6b;
-  border-bottom: 1px solid #aaa;
-  font-weight: bold; }
-
-p.sidebar-subtitle {
-  margin-top: 0em;
-  font-style: italic;
-  color: #003a6b; }
-
-pre.literal-block {
-  margin-left: 1em;
-  margin-right: 1em;
-  background: #dddddd; }
-
-ol.simple, ul.simple {
-  margin-bottom: 1em }
-
-ol.arabic {
-  list-style: decimal }
-
-ol.loweralpha {
-  list-style: lower-alpha }
-
-ol.upperalpha {
-  list-style: upper-alpha }
-
-ol.lowerroman {
-  list-style: lower-roman }
-
-ol.upperroman {
-  list-style: upper-roman }
-
-td.label {
-  width: 8%; }
-
-table.corefunc td:nth-child(2n) { text-align: center; }
-table.corefunc {
-  text-align: left;
-  border: 1px solid gray;
-  border-collapse: collapse;
-  width: 100%;
-  margin: 1.5em 0em; }
-
-table.corefunc caption {
-  font-style: italic; }
-
-table.corefunc td, table.corefunc th {
-  padding: 0.25em 0.5em; }
-
-table.corefunc th {
-  background-color: #dddddd; }
-
-</style>
+<link rel="stylesheet" href="/documentation.css" type="text/css" />
 </head>
 <body>
 <div class="document" id="ngaro-vm-implementation-status">
@@ -468,11 +249,37 @@ cat - | ./retro retroImage
 </div>
 <div class="section" id="c">
 <h2>C</h2>
-<p>The C implementation can be built to support use of 16-bit,
-32-bit, or 64-bit images. The default is to build for standard
-32-bit images.</p>
-<p>To build for 16-bit, define <strong>RX16</strong>, and for 64-bit, define
-<strong>RX64</strong>. To actually get a 16-bit or 64-bit image, do:</p>
+<p>The C implementation is the oldest and most flexible of the VM
+implementations. It is feature complete, can track opcode
+and stack usage, and serves as the reference implementation.</p>
+<p>Thiis implementation can be built for 16-bit, 32-bit, or 64-bit
+cell sizes in little or big endian. The default settings are for
+a standard little endian, 32-bit image.</p>
+<p>Add one of the following flags via CFLAGS to get a non-standard
+configuration:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="29%" />
+<col width="71%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Flag</th>
+<th class="head">Usage</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>-DRX16</td>
+<td>16-bit cells</td>
+</tr>
+<tr><td>-DRX64</td>
+<td>32-bit cells</td>
+</tr>
+<tr><td>-DRXBE</td>
+<td>Big endian cells</td>
+</tr>
+</tbody>
+</table>
+<p>To generate a non-standard image, use:</p>
 <pre class="literal-block">
 make images
 </pre>
@@ -512,8 +319,8 @@ the overall functionality, or special extensions to use features of the
 target platforms. See the individual implementations for notes.</p>
 <table border="1" class="docutils">
 <colgroup>
-<col width="26%" />
-<col width="74%" />
+<col width="33%" />
+<col width="67%" />
 </colgroup>
 <thead valign="bottom">
 <tr><th class="head">CPU</th>
@@ -526,6 +333,9 @@ target platforms. See the individual implementations for notes.</p>
 </tr>
 <tr><td>AVR</td>
 <td>arduino mega</td>
+</tr>
+<tr><td>PIC32</td>
+<td>various</td>
 </tr>
 </tbody>
 </table>

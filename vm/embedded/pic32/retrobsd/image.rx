@@ -1,5 +1,8 @@
 needs diet'
 
-^diet'extreme
+chain: pic32'
+  include extend/hex8.rx
+;chain
+
 save bye
 

@@ -39,3 +39,4 @@ Functions
 | bloat       | ``-``     | Restore buffers and string length to the       |
 |             |           | default                                        |
 +-------------+-----------+------------------------------------------------+
+

@@ -9,7 +9,7 @@ with casket'
 
 ( variables and buffers ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : article   (  -n ) @memory 65535 - ;
-3 elements current requested this
+variables| current requested this |
 
 ( support code ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : getCurrent   ( - )

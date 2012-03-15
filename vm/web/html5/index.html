@@ -1,104 +1,67 @@
 <!DOCTYPE html>
 <head>
-<head>
-<meta name="description" content="Retro Language and the Ngaro VM in HTML5" />
-<meta name="viewport" content="initial-scale=1.0; maximum-scale=1.0; user-scalable=yes;">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<link rel="stylesheet" href="theme.css" />
-<link rel="stylesheet" href="tab.css" />
-<script src="jquery.js"></script>
-<script src="idtabs.js"></script>
+<title>Retro Language</title>
+<link rel="stylesheet" href="retro.css" />
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<meta charset=UTF-8>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+<meta name="apple-mobile-web-app-capable" content="yes" />
 </head>
 
 <body onload="rxPrepareCanvas('framebuffer', 'framebuffer'); rxLoadCleanImage(); rxPrepareVM(); rxStartVM(); rxListProjects();">
-<div style="display: none"><p>Retro Language and Ngaro VM in HTML5</p></div>
-<div class="idTabs">
-  <ul>
-    <li><a href="#console">Console</a></li>
-    <li><a href="#editor">Editor</a></li>
-    <li><a href="#docs">Documentation</a></li>
-    <li><a href="#settings">Settings</a></li>
-  </ul>
-
-  <div id="console">
-    <div>
-      <div style="float: right">
-        <input type="button" onClick="javascript:rxLoadCleanImage()" value="new" />
-        <input type="button" onClick="javascript:rxSaveImage()" value="save" />
-        <input type="button" onClick="javascript:rxLoadImage()" value="load" />
-        <br/>
-        <input type="button" onClick="javascript:rxClearCanvas()" value="clear screen" />
-        <input type="button" onClick="javascript:rxToggleVM()" value="pause vm" id="vmtoggle"/>
-      </div>
-      <div><canvas name="framebuffer" id="framebuffer" width="640" height="480" /></div>
-      <form action="javascript:rxProcessInput()">
-        <input type="textarea" onBlur="javascript:rxProcessInput();"
-               class="placeholder" placeholder="enter code here"
-               id="tib" size="80"></input>
-        <br>
-        <input type="checkbox" onClick="javascript:rxToggleInputMethod()"
-               checked="true">Use buffered input</input>
-      </form>
+<div class="container">
+<div class="row">
+<div class="span12"><p></p></div>
+</div>
+<div class="row">
+  <div class="span6">
+    <div><canvas id="framebuffer" width="400" height="400"></canvas></div>
+    <form action="javascript:rxProcessInput()">
+      <input onBlur="javascript:rxProcessInput();"
+             placeholder="enter code here"
+             class="span4" id="tib" size="30">
+    <div class="btn-group">
+      <a class="btn" onClick="javascript:rxLoadCleanImage()"><i class="icon-plus-sign"></i> new</a>
+      <a class="btn" onClick="javascript:rxSaveImage()"><i class="icon-download-alt"></i> save</a>
+      <a class="btn" onClick="javascript:rxLoadImage()"><i class="icon-refresh"></i> load</a>
     </div>
-  </div>
+    </form>
+    <hr>
+    <p>Process up to <input class="span1" onBlur="javascript:rxSetCyclesPerInterval()" id="cycles" value="5000"/>
+    instructions every <input class="span1" onBlur="javascript:rxSetInterval()" id="frequency" value="75"/> milliseconds.</p>
 
-  <div id="editor">
-    <div>
-      <div style="float: right">
-        <input type="textarea" class="placeholder" placeholder="project name"
-               id="rxProjectName" size="25"></input>
-        <br/>
-        <input type="button" onClick="javascript:rxNewProject()" value="new" />
-        <input type="button" onClick="javascript:rxSaveProject()" value="save" />
-        <input type="button" onClick="javascript:rxLoadSavedProject()" value="load" />
-        <input type="button" onClick="javascript:rxRunProject()" value="evaluate" />
-        <hr/>
-        <select id="projectList" size="4" style="width: 200px" onChange="javascript:rxSelectProject(this.selectedIndex)">
-        </select>
-        <hr/>
-        <input type="button" onClick="javascript:rxDeleteProject()" value="delete current project" />
+  </div>
+  <div class="span6">
+    <form>
+    <textarea placeholder="code editor" class="span4" rows="22" id="project"></textarea>
+    <div class="btn-toolbar">
+      <div class="btn-group">
+        <a class="btn" onClick="javascript:rxNewProject()"><i class="icon-plus-sign"></i> new</a>
+        <a class="btn" onClick="javascript:rxSaveProject()"><i class="icon-download-alt"></i> save</a>
+        <a class="btn" onClick="javascript:rxLoadSavedProject()"><i class="icon-refresh"></i> reload</a>
       </div>
-      <textarea rows="35" cols="80" id="project"></textarea>
-    </div>
-  </div>
-
-  <div id="docs">
-    <div>
-      <div style="float: right">
-        <a href="javascript:rxLoadCoreDocs()">Core Functions</a><br/>
-        <a href="javascript:rxLoadVocabDocs()">Vocabularies</a><br/>
+      <div class="btn-group">
+        <a class="btn" onClick="javascript:rxRunProject()">eval</a>
       </div>
-      <pre id="documentation" style="max-height: 600px; width: 600px; overflow: auto">&nbsp</pre>
     </div>
+    </form>
   </div>
-
-  <div id="settings">
-    Process opcodes every <input type="textarea" onBlur="javascript:rxSetInterval()"
-                                 id="frequency" value="75"/> milliseconds.
-    <br>
-    Process <input type="textarea" onBlur="javascript:rxSetCyclesPerInterval()" id="cycles"
-                   value="5000"/> instructions per cycle.
-  </div>
-
+</div>
 </div>
 
 <script src="canvastext.js"></script>
 <script src="ngaro.js"></script>
 <script src="retroImage.js"></script>
 <script type="text/javascript">
-  $("#idTabs ul").idTabs();
-  $('#documentation').load('Core_Functions.rst');
-
-  function rxLoadCoreDocs()
-  {
-    $('#documentation').load('Core_Functions.rst');
-  }
-
-  function rxLoadVocabDocs()
-  {
-    $('#documentation').load('Libraries.rst');
-  }
+  FB_WIDTH=400;
+  FB_HEIGHT=400;
+  TERM_WIDTH  = Math.floor(FB_WIDTH / 8);
+  TERM_HEIGHT = Math.floor(FB_HEIGHT / 16);
 </script>
 </body>
 </html>

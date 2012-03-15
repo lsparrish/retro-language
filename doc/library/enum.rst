@@ -1,6 +1,6 @@
-===========
-Enumeration
-===========
+=====
+enum'
+=====
 
 --------
 Overview
@@ -37,3 +37,4 @@ Functions
 | ``enum|`` | n"-   | Create a series of enumerated values, incremented by    |
 |           |       | **step**                                                |
 +-----------+-------+---------------------------------------------------------+
+

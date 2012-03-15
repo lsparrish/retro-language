@@ -14,9 +14,9 @@ chain: enum'
 ;chain
 
 doc{
-===========
-Enumeration
-===========
+=====
+enum'
+=====
 
 --------
 Overview

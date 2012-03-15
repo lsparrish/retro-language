@@ -50,4 +50,5 @@ webdocs:
 libdocs:
 	sh tools/extractDocs.sh library
 	mv library/*.rst doc/library
+	cat doc/library/*.rst >doc/Libraries.rst
 

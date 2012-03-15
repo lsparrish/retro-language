@@ -20,9 +20,9 @@ chain: infix'
 ;chain
 
 doc{
-==========
-Infix Math
-==========
+======
+infix'
+======
 
 --------
 Overview

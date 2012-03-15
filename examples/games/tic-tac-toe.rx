@@ -1,6 +1,6 @@
 with canvas'
 
-3 elements mx my color
+variables| mx my color |
 
 : toggle dup @ not swap ! ;
 : player @color [ red ] [ blue ] if color toggle ;

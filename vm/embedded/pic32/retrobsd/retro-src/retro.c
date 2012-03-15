@@ -1,30 +1,85 @@
 /* Ngaro VM ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   Copyright (c) 2008 - 2012, Charles Childers
+   Copyright (c) 2008 - 2011, Charles Childers
    Copyright (c) 2009 - 2010, Luke Parrish
    Copyright (c) 2010,        Marc Simpson
    Copyright (c) 2010,        Jay Skeer
    Copyright (c) 2011,        Kenneth Keating
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
 #include <stdio.h>
+#include <machine/io.h> //makes ufetch work
 #include <stdlib.h>
-#include <stdint.h>
 #include <time.h>
 #include <unistd.h>
 #include <string.h>
-#include <termios.h>
+#include <termios-todo.h>
 #include <sys/ioctl.h>
+#include <stdint.h>
 
-#define CELL            int16_t
-#define IMAGE_SIZE        20000
+//so rxPrepare works
+#   define termios sgttyb
+
+/* Configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+                +---------+---------+---------+
+                | 16 bit  | 32 bit  | 64 bit  |
+   +------------+---------+---------+---------+
+   | IMAGE_SIZE | 32000   | 1000000 | 1000000 |
+   +------------+---------+---------+---------+
+   | CELL       | int16_t | int32_t | int64_t |
+   +------------+---------+---------+---------+
+
+   If memory is tight, cut the MAX_FILE_NAME and MAX_REQUEST_LENGTH.
+
+   You can also cut the ADDRESSES stack size down, but if you have
+   heavy nesting or recursion this may cause problems. If you do modify
+   it and experience odd problems, try raising it a bit higher.
+
+   Use -DRX16 to select defaults for 16-bit, or -DRX64 to select the
+   defaults for 64-bit. Without these, the compiler will generate a
+   standard 32-bit VM.
+
+   Use -DRXBE to enable the BE suffix for big endian images. This is
+   only useful on big endian systems.
+   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+#define CELL            int32_t
+#define IMAGE_SIZE        12000
 #define ADDRESSES           512
 #define STACK_DEPTH         128
 #define PORTS                12
-#define MAX_FILE_NAME      1024
-#define MAX_REQUEST_LENGTH 1024
+#define MAX_FILE_NAME       512
+#define MAX_REQUEST_LENGTH  512
 #define MAX_OPEN_FILES        8
 #define LOCAL                 "/lib/retroImage"
-#define CELLSIZE             16
-#define VM_ENDIAN             0
+#define CELLSIZE             32
+
+#ifdef RX64
+#undef CELL
+#undef CELLSIZE
+#undef LOCAL
+#define CELL     int64_t
+#define CELLSIZE 64
+#define LOCAL    "retroImage64"
+#endif
+
+#ifdef RX16
+#undef CELL
+#undef CELLSIZE
+#undef LOCAL
+#undef IMAGE_SIZE
+#define CELL        int16_t
+#define CELLSIZE    16
+#define IMAGE_SIZE  32000
+#define LOCAL       "retroImage16"
+#endif
+
+#ifdef RXBE
+#define LOCAL_FNAME (LOCAL "BE")
+#define VM_ENDIAN 1
+#else
+#define LOCAL_FNAME (LOCAL)
+#define VM_ENDIAN 0
+#endif
 
 
 enum vm_opcode {VM_NOP, VM_LIT, VM_DUP, VM_DROP, VM_SWAP, VM_PUSH, VM_POP,
@@ -103,18 +158,23 @@ void rxPrepareInput(VM *vm) {
 }
 
 void rxPrepareOutput(VM *vm) {
-  tcgetattr(0, &vm->old_termios);
+
+  ioctl(0, TIOCGETP, &vm->old_termios);
   vm->new_termios = vm->old_termios;
-  vm->new_termios.c_iflag &= ~(BRKINT+ISTRIP+IXON+IXOFF);
-  vm->new_termios.c_iflag |= (IGNBRK+IGNPAR);
-  vm->new_termios.c_lflag &= ~(ICANON+ISIG+IEXTEN+ECHO);
-  vm->new_termios.c_cc[VMIN] = 1;
-  vm->new_termios.c_cc[VTIME] = 0;
-  tcsetattr(0, TCSANOW, &vm->new_termios);
+// need to expand lf to cr-lf
+//  vm->new_termios.sg_flags &= ~(ECHO | CRMOD | XTABS | RAW);
+  vm->new_termios.sg_flags &= ~(ECHO | XTABS | RAW);
+  vm->new_termios.sg_flags |= CBREAK;
+  ioctl(0, TIOCSETP, &vm->new_termios);
+
 }
 
 void rxRestoreIO(VM *vm) {
-  tcsetattr(0, TCSANOW, &vm->old_termios);
+
+//restore terminal mode
+  vm->new_termios = vm->old_termios;
+  ioctl(0, TIOCSETP, &vm->new_termios);
+
 }
 
 /* File I/O Support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -259,6 +319,18 @@ void rxQueryEnvironment(VM *vm) {
     vm->image[dest] = 0;
 }
 
+//void userout (int addr, int value)
+//{
+//        /* 2BSD system call extension. */
+//        ustore (addr, value);
+//}
+
+//unsigned userin (int addr)
+//{
+//        /* 2BSD system call extension. */
+//	return ufetch (addr);
+//}
+
 /* Device I/O Handler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 void rxDeviceHandler(VM *vm) {
   struct winsize w;
@@ -343,6 +415,53 @@ void rxDeviceHandler(VM *vm) {
         case -14: vm->ports[5] = VM_ENDIAN;
                   break;
         default:  vm->ports[5] = 0;
+      }
+    }
+    /* RetroBSD syscall interface */
+    if (vm->ports[6] != 0) {
+      vm->ports[0] = 1;
+      switch (vm->ports[6]) {
+        case -1:  vm->ports[6] = TOS; DROP;
+                  vm->ports[7] = TOS; DROP;
+                  vm->ports[6] = ustore(vm->ports[6],vm->ports[7]);
+                  break;
+        case -2:  vm->ports[6] = TOS; DROP;
+                  vm->ports[6] = ufetch(vm->ports[6]);
+                  break;
+        case -3:  vm->ports[6] = 1;
+                  vm->ports[7] = TOS; DROP;
+                  vm->ports[8] = TOS; DROP;
+                  vm->ports[9] = TOS; DROP;
+  vm->ports[6] = ucall(vm->ports[6],(void *)vm->ports[7],vm->ports[8],vm->ports[9]);
+                  break;
+        case -4:  vm->ports[6] = 0;
+                  vm->ports[7] = TOS; DROP;
+                  vm->ports[8] = TOS; DROP;
+                  vm->ports[9] = TOS; DROP;
+  vm->ports[6] = ucall(vm->ports[6],(void *)vm->ports[7],vm->ports[8],vm->ports[9]);
+                  break;
+        case -5:  vm->ports[6] = TOS; DROP;
+                  vm->ports[7] = TOS; DROP;
+                  vm->ports[6] = xstore(vm->ports[6],vm->ports[7]);
+                  break;
+        case -6:  vm->ports[6] = TOS; DROP;
+                  vm->ports[6] = xfetch(vm->ports[6]);
+                  break;
+        case -7:  vm->ports[6] = 1;
+                  vm->ports[7] = TOS; DROP;
+                  vm->ports[8] = TOS; DROP;
+                  vm->ports[9] = TOS; DROP;
+  vm->ports[6] = xcall(vm->ports[6],(void *)vm->ports[7],vm->ports[8],vm->ports[9]);
+                  break;
+        case -8:  vm->ports[6] = 0;
+                  vm->ports[7] = TOS; DROP;
+                  vm->ports[8] = TOS; DROP;
+                  vm->ports[9] = TOS; DROP;
+  vm->ports[6] = xcall(vm->ports[6],(void *)vm->ports[7],vm->ports[8],vm->ports[9]);
+                  break;
+        case -9:  vm->ports[6] = (unsigned) TOS; DROP;
+                  break;
+        default: vm->ports[6] = 0;
       }
     }
   }
@@ -553,10 +672,10 @@ void rxProcessOpcode(VM *vm) {
 /* Stats ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 void rxDisplayStats(VM *vm)
 {
-  int s, i;
+//  int s, i;
 
   printf("Runtime Statistics\n");
-  printf("NOP:     %d\n", vm->stats[VM_NOP]);
+/*  printf("NOP:     %d\n", vm->stats[VM_NOP]);
   printf("LIT:     %d\n", vm->stats[VM_LIT]);
   printf("DUP:     %d\n", vm->stats[VM_DUP]);
   printf("DROP:    %d\n", vm->stats[VM_DROP]);
@@ -594,6 +713,7 @@ void rxDisplayStats(VM *vm)
   for (s = i = 0; s < NUM_OPS; s++)
     i += vm->stats[s];
   printf("Total opcodes processed: %d\n", i);
+*/
 }
 
 /* Main ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -603,8 +723,9 @@ int main(int argc, char **argv) {
 
   wantsStats = 0;
   vm = calloc(sizeof(VM), sizeof(char));
-  strcpy(vm->filename, LOCAL);
+  strcpy(vm->filename, LOCAL_FNAME);
 
+//  raw();
   rxPrepareInput(vm);
 
   /* Parse the command line arguments */
@@ -617,15 +738,6 @@ int main(int argc, char **argv) {
       vm->shrink = 1;
     if (strcmp(argv[i], "--stats") == 0)
       wantsStats = 1;
-    if (strcmp(argv[i], "--help") == 0)
-    {
-      printf("--with filename    Add filename to the input stack\n");
-      printf("--image filename   Use filename as the image to load\n");
-      printf("--shrink           When saving, don't save unused cells\n");
-      printf("--stats            Display opcode usage and stack summaries upon exit\n");
-      printf("--help             Display this text\n");
-      exit(1);
-    }
   }
 
   if (rxLoadImage(vm, vm->filename) == 0) {

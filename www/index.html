@@ -1,158 +1,86 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
-<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en'>
+<!DOCTYPE html>
 <head>
-  <title>the Retro Language</title>
-  <style>
-  div { float: left; padding: 10px; width: 35%; }
-  .head { font-size: large; color: navy; font-weight: bold; }
-  .Constant { color: #ff40ff; font-weight: bold; }
-  .Statement { color: #ffff00; font-weight: bold; }
-  .Identifier { color: #00ffff; font-weight: bold; }
-  .Special { color: #ff6060; font-weight: bold; }
-  pre { font-family: monospace; color: #ffffff; background-color: #000000; }
-  .Comment { color: #00ffff; font-weight: bold; }
-  .PreProc { color: #8080ff; font-weight: bold; }
-  </style>
+<title>Retro Language</title>
+<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap-responsive.css" rel="stylesheet">
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-246810-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<meta charset=UTF-8>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
+
 <body>
+<div class="container">
+  <div class="row"><div class="span12">&nbsp;</div></div>
 
-<div id="about" style="float: clear; width: 80%">
-  <p class="head">Retro Language</p>
-  <p>Retro is a concatenative, stack based language with roots in Forth. Designed to be small,
-     easily learned, and easily modified to meet specific needs, it has been developed and
-     refined through use by a small community over the last decade.</p>
+  <div class="row">
+    <div class="span5">
+      <div class="row">
+        <div class="span2">
+          <ul class="nav nav-list">
+            <li class="nav-header">downloads</li>
+            <li><a href="http://s3.retroforth.org/download/11.x/retro-11.3.tar.gz">Retro 11.3</a></li>
+            <li><a href="snapshot.tar.gz">Latest snapshot</a></li>
+          </ul>
+          <br>
+          <ul class="nav nav-list">
+            <li class="nav-header">community</li>
+            <li><a href="http://rx-core.org/dev/corpse">Blog</a></li>
+            <li><a href="http://groups.google.com/group/retro-10">the mailing list</a></li>
+            <li><a href="irc://irc.freenode.net:6667/retro">#retro IRC channel</a></li>
+            <li><a href="http://rx-core.org/dev/rancid">IRC channel logs</a></li>
+          </ul>
+        </div>
+        <div class="span3">
+          <ul class="nav nav-list">
+            <li class="nav-header">documentation</li>
+            <li><a href="docs/An_Introduction_to_Retro.html">An Introduction to Retro</a></li>
+            <li><a href="docs/Core_Functions.html">Functions and Data Structures</a></li>
+            <li><a href="docs/quickref.html">Quick Reference</a></li>
+            <li><a href="docs/Libraries.html">Libraries</a></li>
+            <li><a href="docs/The_Ngaro_Virtual_Machine.html">The Ngaro Virtual Machine</a></li>
+            <li><a href="docs/Coding_Style.html">Coding Style</a></li>
+            <li><a href="docs/Contributing.html">Contributing</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="row"><div class="span5">&nbsp;</div></div>
+      <div class="row">
+        <div class="span5">
+          <ul class="nav nav-list">
+            <li class="nav-header">repositoriess</li>
+            <li><a href="https://code.launchpad.net/retro-languagehttps://code.launchpad.net/retro-language">bzr branch lp:retro-language</a></li>
+            <li><a href="https://github.com/crcx/retro-language">git clone git://github.com/crcx/retro-language.git</a></li>
+            <li><a href="https://bitbucket.org/crcx/retro-languagehttps://bitbucket.org/crcx/retro-language">hg clone https://bitbucket.org/crcx/retro-language</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="span7">
+      <div class="well">
+      <p>Retro is a concatenative, stack based language with roots in Forth.</p>
+      <p>It is designed to be small, easily learned, and easily modified to meet specific
+         needs, it has been developed and refined through continual use by a small
+         community over the last decade.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row"><div class="span12">&nbsp;</div></div>
+
 </div>
-
-<div id="download">
-  <p class="head">downloads</p>
-  <p>Stable release: <a href="http://s3.retroforth.org/download/11.x/retro-11.2.tar.gz">11.2</a></p>
-  <p>Development: <a href="snapshot.tar.gz">hourly snapshot</a></p>
-</div>
-
-<div id="repository">
-  <p class="head">repositories</p>
-  <p><tt>bzr branch lp:retro-language</tt></p>
-  <p><tt>git clone git://github.com/crcx/retro-language.git</tt></p>
-</div>
-
-<div id="docs">
-  <p class="head">documentation</a>
-  <p><a href="docs/An_Introduction_to_Retro.html">An Introduction to Retro</a></p>
-  <p><a href="docs/Core_Functions.html">Core Functions and Data Structures</a></p>
-  <p><a href="docs/The_Ngaro_Virtual_Machine.html">The Ngaro Virtual Machine</a></p>
-  <p>Libraries and other <a href="docs.html">documentation</a></p>
-</div>
-
-<div id="community">
-  <p class="head">community</p>
-  <p>Read <a href="http://rx-core.org/dev/corpse">the blog</a></p>
-  <p>Join or read <a href="http://groups.google.com/group/retro-10">the mailing list</a></p>
-  <p><a href="https://code.launchpad.net/retro-language">Launchpad</a> and
-     <a href="https://github.com/crcx/retro-language">Github</a></p>
-</div>
-
-<div id="about" style="float: clear; width: 80%">
-  <p class="head">Code Sample</p>
-<pre>
-<span class="Comment">( Conway's Game of Life                )</span>
-<span class="Comment">( Copyright [c] 2011, charles Childers )</span>
-
-<span class="PreProc">create</span> world
-  <span class="Constant">20</span> <span class="Constant">20</span> <span class="Statement">*</span> <span class="Identifier">allot</span>
-
-<span class="PreProc">create</span> next
-  <span class="Constant">20</span> <span class="Constant">20</span> <span class="Statement">*</span> <span class="Identifier">allot</span>
-
-<span class="Comment">( Assumes anything outside the bounds is &quot;dead&quot; )</span>
-<span class="Statement">{{</span>
-  <span class="PreProc">variable</span> surrounding
-  <span class="PreProc">: get</span>  <span class="Comment"> ( rc- )</span>
-    2over [ <span class="Constant">0</span> <span class="Constant">19</span> <span class="Statement">within</span> ] <span class="Special">bi@</span> <span class="Statement">and</span>
-    [ world <span class="Statement">+</span> [ <span class="Constant">20</span> <span class="Statement">*</span> ] <span class="Special">dip</span> <span class="Statement">+</span> <span class="Identifier">@</span> ] [ <span class="Special">2drop</span> <span class="Constant">0</span> ] <span class="Statement">if</span> <span class="PreProc">;</span>
-  <span class="PreProc">: neighbor?</span> <span class="Comment"> ( rc- )</span>  get +surrounding <span class="PreProc">;</span>
-  <span class="PreProc">: NW</span> <span class="Comment"> ( rc-rc )</span>  2over [ <span class="Statement">1-</span> ] <span class="Special">bi@</span>     neighbor? <span class="PreProc">;</span>
-  <span class="PreProc">: NN</span> <span class="Comment"> ( rc-rc )</span>  2over [ <span class="Statement">1-</span> ] <span class="Special">dip</span>     neighbor? <span class="PreProc">;</span>
-  <span class="PreProc">: NE</span> <span class="Comment"> ( rc-rc )</span>  2over [ <span class="Statement">1-</span> ] <span class="Special">dip</span> <span class="Statement">1+</span>  neighbor? <span class="PreProc">;</span>
-  <span class="PreProc">: WW</span> <span class="Comment"> ( rc-rc )</span>  2over <span class="Statement">1-</span>             neighbor? <span class="PreProc">;</span>
-  <span class="PreProc">: EE</span> <span class="Comment"> ( rc-rc )</span>  2over <span class="Statement">1+</span>             neighbor? <span class="PreProc">;</span>
-  <span class="PreProc">: SW</span> <span class="Comment"> ( rc-rc )</span>  2over [ <span class="Statement">1+</span> ] <span class="Special">dip</span> <span class="Statement">1-</span>  neighbor? <span class="PreProc">;</span>
-  <span class="PreProc">: SS</span> <span class="Comment"> ( rc-rc )</span>  2over [ <span class="Statement">1+</span> ] <span class="Special">dip</span>     neighbor? <span class="PreProc">;</span>
-  <span class="PreProc">: SE</span> <span class="Comment"> ( rc-rc )</span>  2over [ <span class="Statement">1+</span> ] <span class="Special">bi@</span>     neighbor? <span class="PreProc">;</span>
-  <span class="PreProc">: count</span>   <span class="Comment"> ( rc-rcn )</span>
-    <span class="Constant">0</span> !surrounding
-    NW NN NE
-    WW    EE
-    SW SS SE @surrounding <span class="PreProc">;</span>
-  <span class="PreProc">: alive</span> <span class="Comment"> ( rc-n )</span>
-    count
-    [ <span class="Constant">0</span> <span class="Constant">1</span> <span class="Statement">within</span> ] [ <span class="Special">drop</span> <span class="Constant">0</span> ] <span class="Statement">when</span>
-    [ <span class="Constant">4</span> <span class="Constant">8</span> <span class="Statement">within</span> ] [ <span class="Special">drop</span> <span class="Constant">0</span> ] <span class="Statement">when</span>
-    [ <span class="Constant">2</span> <span class="Constant">3</span> <span class="Statement">within</span> ] [ <span class="Special">drop</span> <span class="Constant">1</span> ] <span class="Statement">when</span> <span class="PreProc">;</span>
-  <span class="PreProc">: dead</span>  <span class="Comment"> ( rc-n )</span>
-    count
-    [ <span class="Constant">3</span> <span class="Statement">=</span>        ] [ <span class="Special">drop</span> <span class="Constant">1</span> ] <span class="Statement">when</span>
-    [ <span class="Constant">0</span> <span class="Constant">2</span> <span class="Statement">within</span> ] [ <span class="Special">drop</span> <span class="Constant">0</span> ] <span class="Statement">when</span>
-    [ <span class="Constant">4</span> <span class="Constant">8</span> <span class="Statement">within</span> ] [ <span class="Special">drop</span> <span class="Constant">0</span> ] <span class="Statement">when</span> <span class="PreProc">;</span>
-  <span class="PreProc">: newState</span> <span class="Comment"> ( rc-n )</span>
-    2over get <span class="Constant">1</span> <span class="Statement">=</span> [ alive ] [ dead ] <span class="Statement">if</span> <span class="PreProc">;</span>
-  <span class="PreProc">: set</span>  <span class="Comment"> ( nrc- )</span>  next <span class="Statement">+</span> [ <span class="Constant">20</span> <span class="Statement">*</span> ] <span class="Special">dip</span> <span class="Statement">+</span> <span class="Identifier">!</span> <span class="PreProc">;</span>
-  <span class="PreProc">: cols</span> <span class="Comment"> ( r- )</span>
-    <span class="Constant">20</span> [ <span class="Special">over</span> <span class="Special">swap</span> newState 2rot set ] <span class="Statement">iter</span> <span class="Special">drop</span> <span class="PreProc">;</span>
-  <span class="PreProc">: output</span> <span class="Comment"> ( n- )</span>  [ <span class="Constant">'o </span>] [ <span class="Constant">'. </span>] <span class="Statement">if</span> <span class="Constant">putc</span> <span class="Constant">space</span> <span class="PreProc">;</span>
-<span class="Statement">---reveal---</span>
-  <span class="PreProc">: display</span> <span class="Comment"> ( - )</span>
-    <span class="Constant">cr</span> world <span class="Constant">20</span> [ <span class="Constant">20</span> [ <span class="Identifier">@+</span> output ] <span class="Statement">times</span> <span class="Constant">cr</span> ] <span class="Statement">times</span> <span class="Special">drop</span> <span class="PreProc">;</span>
-  <span class="PreProc">: gen</span>     <span class="Comment"> ( - )</span>
-    <span class="Constant">20</span> [ cols ] <span class="Statement">iter</span>  next world <span class="Constant">20</span> <span class="Constant">20</span> <span class="Statement">*</span> <span class="Identifier">copy</span> <span class="PreProc">;</span>
-  <span class="PreProc">: delay</span> <span class="Comment"> ( - )</span>  time <span class="Statement">1+</span> [ time <span class="Special">over</span> &lt;= ] <span class="Statement">while</span> <span class="Special">drop</span> <span class="PreProc">;</span>
-  <span class="PreProc">: generations</span> <span class="Comment"> ( n- )</span>
-    [ delay <span class="Statement">clear</span> gen display ] <span class="Statement">times</span> <span class="PreProc">;</span>
-<span class="Statement">}}</span>
-
-
-
-<span class="Statement">{{</span>
-  <span class="Constant">2</span> <span class="PreProc">elements</span> line column
-  <span class="PreProc">: toLine</span>    <span class="Constant">20</span> <span class="Statement">*</span> world <span class="Statement">+</span> <span class="PreProc">;</span>
-
- <span class="Comment"> ( check boundaries ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )</span>
-  <span class="PreProc">: top</span><span class="Comment"> ( - )</span>  <span class="Constant">0</span> !line <span class="PreProc">;</span>
-  <span class="PreProc">: bot</span><span class="Comment"> ( - )</span> <span class="Constant">19</span> !line <span class="PreProc">;</span>
-  <span class="PreProc">: beg</span><span class="Comment"> ( - )</span>  <span class="Constant">0</span> !column <span class="PreProc">;</span>
-  <span class="PreProc">: end</span><span class="Comment"> ( - )</span> <span class="Constant">19</span> !column <span class="PreProc">;</span>
-  <span class="PreProc">: bounds</span><span class="Comment"> ( - )</span>
-    @column <span class="Constant">-1</span> <span class="Statement">=</span> [ end line <span class="Statement">--</span> ] <span class="Statement">ifTrue</span>
-    @column <span class="Constant">20</span> <span class="Statement">=</span> [ beg line <span class="Statement">++</span> ] <span class="Statement">ifTrue</span>
-    @line   <span class="Constant">-1</span> <span class="Statement">=</span> [ top ] <span class="Statement">ifTrue</span>
-    @line   <span class="Constant">20</span> <span class="Statement">=</span> [ bot ] <span class="Statement">ifTrue</span> <span class="PreProc">;</span>
-
- <span class="Comment"> ( display a block ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )</span>
-  <span class="PreProc">: rows</span>    <span class="Constant">20</span> [ <span class="Constant">20</span> [ <span class="Identifier">@+</span> [ <span class="Constant">'o </span>] [ <span class="Constant">'. </span>] <span class="Statement">if</span> <span class="Constant">putc</span> <span class="Constant">space</span> ] <span class="Statement">times</span> <span class="Constant">cr</span> ] <span class="Statement">times</span> <span class="PreProc">;</span>
-  <span class="PreProc">: vb</span>      world rows <span class="Special">drop</span> <span class="PreProc">;</span>
-  <span class="PreProc">: (v)</span>    <span class="Comment"> (   -   )</span> <span class="Statement">clear</span> vb <span class="PreProc">;</span>
-  <span class="PreProc">: pos</span>    <span class="Comment"> (   -cl )</span> @column @line <span class="PreProc">;</span>
-  <span class="PreProc">: get</span>    <span class="Comment"> ( cl-a  )</span> toLine <span class="Statement">+</span> <span class="PreProc">;</span>
-  <span class="PreProc">: va</span>     <span class="Comment"> (  a-va )</span> <span class="Special">dup</span> <span class="Identifier">@</span> <span class="Special">swap</span> <span class="PreProc">;</span>
-  <span class="PreProc">: c!</span>     <span class="Comment"> (  a-   )</span> <span class="Constant">'@ </span><span class="Special">swap</span> <span class="Identifier">!</span> <span class="PreProc">;</span>
-  <span class="PreProc">: show</span>   <span class="Comment"> ( va-   )</span> <span class="Special">dup</span> c! (v) <span class="Identifier">!</span> <span class="PreProc">;</span>
-  <span class="PreProc">: display</span><span class="Comment"> (   -   )</span> bounds pos get va show <span class="PreProc">;</span>
-
-  <span class="PreProc">: keys</span>
-    [ <span class="Constant">'i </span><span class="Statement">=</span> ] [ line <span class="Statement">--</span>   <span class="Constant">-1</span> ] <span class="Statement">whend</span>
-    [ <span class="Constant">'k </span><span class="Statement">=</span> ] [ line <span class="Statement">++</span>   <span class="Constant">-1</span> ] <span class="Statement">whend</span>
-    [ <span class="Constant">'j </span><span class="Statement">=</span> ] [ column <span class="Statement">--</span> <span class="Constant">-1</span> ] <span class="Statement">whend</span>
-    [ <span class="Constant">'l </span><span class="Statement">=</span> ] [ column <span class="Statement">++</span> <span class="Constant">-1</span> ] <span class="Statement">whend</span>
-    [ <span class="Constant">32</span> <span class="Statement">=</span> ] [ @line toLine @column <span class="Statement">+</span> <span class="Special">dup</span> <span class="Identifier">@</span> [ <span class="Constant">0</span> ] [ <span class="Constant">1</span> ] <span class="Statement">if</span> <span class="Special">swap</span> <span class="Identifier">!</span> <span class="Constant">-1</span> ] <span class="Statement">whend</span>
-    [ <span class="Constant">'z </span><span class="Statement">=</span> ] [ <span class="Constant">0</span> ] <span class="Statement">whend</span> <span class="PreProc">;</span>
-<span class="Statement">---reveal---</span>
-  <span class="PreProc">: edit</span>
-    [ display <span class="Constant">getc</span> keys ] <span class="Statement">while</span> <span class="PreProc">;</span>
-<span class="Statement">}}</span>
-
-</pre>
-</div>
-
 </body>
 </html>
 

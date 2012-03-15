@@ -1,6 +1,6 @@
-===========
-Combinators
-===========
+============
+combinators'
+============
 
 
 --------
@@ -38,3 +38,4 @@ Functions
 | indexi   | -n      | Return the current index for an incrementing   |
 |          |         | loop.                                          |
 +----------+---------+------------------------------------------------+
+
