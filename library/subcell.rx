@@ -4,34 +4,34 @@ chain: subcell'
    2 * ;
 
 : lowWord  ( cellAddr -- lowwordAddr  )
-   2 * 1 + ;
+   2 * 1+ ;
 
 : w@ ( wordAddr -- val )
    2 /mod  @ swap [ 16 >> ] ifFalse $FFFF and ;
 
 : w@+ ( wordAddr -- wordAddr val )
-   dup 1+ push w@ pop swap ;
+  [ 1+ ] [ w@ ] bi ;
 
 : w! ( val wordAddr -- )
-   2 /mod dup push swap 
+   2 /mod dup push swap
    [ @ $FFFF0000 and + ]
    [ @ $0000FFFF and swap 16 << + ]
    if pop ! ;
 
 : w!+ ( val wordAddr -- wordAddr+1 )
-   dup 1+ push w! pop ;
+   [ w! ] [ 1+ ] bi ;
 
 : highByte ( wordAddr -- highbyteAddr )
    2 * ;
 
 : lowByte  ( wordAddr -- lowbyteAddr  )
-   2 * 1 + ;
+   2 * 1+ ;
 
 : c@ ( byteAddr -- val )
    2 /mod w@ swap [ 8 >> ] ifFalse $FF and ;
 
 : c@+ ( byteAddr -- byteAddr val )
-  dup 1+ push c@ pop swap ;
+  [ 1+ ] [ c@ ] bi ;
 
 : c! ( val byteaddr -- )
   2 /mod dup push swap
@@ -40,7 +40,7 @@ chain: subcell'
   if pop w! ;
 
 : c!+ ( val byteAddr -- byteAddr+1 )
-   dup 1+ push c! pop ;
+   [ c! ] [ 1+ ] bi ;
 
 : packString ( strAddr -- )
     dup highWord highByte
@@ -58,41 +58,6 @@ chain: subcell'
     do drop ;
 ;chain
 
-with subcell'
-variable testVal
-
-: testWord
-   $FFFF0001 testVal !
-   cr " High: " puts testVal highWord w@ putn
-   cr " Low: "  puts testVal lowWord  w@ putn
-   $0000 testVal highWord w!
-   $FFFF testVal lowWord w!
-   cr " High: " puts testVal highWord w@ putn
-   cr " Low: "  puts testVal lowWord  w@ putn ;
-
-: testWords
-    1 2 swap testVal highWord w!+ w!+ drop
-    testVal highWord
-    cr w@+ putn
-    cr w@+ putn cr ;
-
-: testByte
-    $FF01 testVal !
-    cr " High: " puts testVal lowWord highByte c@ putn
-    cr " Low: "  puts testVal lowWord lowByte  c@ putn
-    $00 testVal lowWord highByte c!
-    $FF testVal lowWord lowByte  c!
-    cr " High: " puts testVal lowWord highByte c@ putn
-    cr " Low: "  puts testVal lowWord lowByte  c@ putn ;
-
-: testBytes
-    4 3 2 1 testVal highWord highByte c!+ c!+ c!+ c!+ drop
-    testVal highWord highByte
-    cr c@+ putn
-    cr c@+ putn
-    cr c@+ putn
-    cr c@+ putn cr ;
-
 
 doc{
 ========
@@ -104,5 +69,46 @@ subcell'
 Overview
 --------
 This library provides functions for accessing 16-bit and 8-bit subsets of cells.
+
+
+---------
+Functions
+---------
+
++-----------------+-----------------------------+
+| Function        | Stack                       |
++=================+=============================+
+| highWord        | cellAddr -- highwordAddr    |
++-----------------+-----------------------------+
+| lowWord         | cellAddr -- lowwordAddr     |
++-----------------+-----------------------------+
+| w@              | wordAddr -- val             |
++-----------------+-----------------------------+
+| w@+             | wordAddr -- wordAddr val    |
++-----------------+-----------------------------+
+| w!              | val wordAddr --             |
++-----------------+-----------------------------+
+| w!+             | val wordAddr -- wordAddr+1  |
++-----------------+-----------------------------+
+| highByte        | wordAddr -- highbyteAddr    |
++-----------------+-----------------------------+
+| lowByte         | wordAddr -- lowbyteAddr     |
++-----------------+-----------------------------+
+| c@              | byteAddr -- val             |
++-----------------+-----------------------------+
+| c@+             | byteAddr -- byteAddr val    |
++-----------------+-----------------------------+
+| c!              | val byteaddr --             |
++-----------------+-----------------------------+
+| c!+             | val byteAddr -- byteAddr+1  |
++-----------------+-----------------------------+
+| packString      | strAddr --                  |
++-----------------+-----------------------------+
+| printPack       | strAddr --                  |
++-----------------+-----------------------------+
+| getPackedLength | strAddr -- strLen           |
++-----------------+-----------------------------+
+
+
 }doc
 
