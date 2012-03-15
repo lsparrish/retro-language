@@ -1,10 +1,37 @@
 *This is a random collection of notes and snippits related to things I'm working on*
 
-== Documentation ==
+== Ideas for 11.4 ==
 
-I want to rewrite a lot of this, but time is lacking. There's still a good amount of
-time before 11.3 though, so it seems likely that I'll at least have a decent start
-by then.
+- add port for console interactions
+
+  This would allow for portable setting of colors and cursor
+  positioning.
+
+- add secondary time port for millisecond time resolution
+
+  Probably this will be purely optional, with VM or OSes that
+  don't support it returning zero.
+
+- ngaro vm test suite
+
+  A set of omages to test the instruction set and IO functionality
+
+- look into finishng the C# VM
+
+- fully document casket and decompose, add detailed instructions
+  on setting this up
+
+- further expansions to the library
+
+  - simple vectors
+  - expand operatins on arrays
+  - rewrite console' to use vm-level console support
+  - form processing for casket apps
+  - finish the calendar' vocabulary
+
+- rewrite rancid to be pure retro + html
+
+- cleanp css for documentaion
 
 
 == Embedded Boards ==

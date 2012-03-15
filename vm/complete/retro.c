@@ -305,6 +305,7 @@ void rxQueryEnvironment(VM *vm) {
     {
       vm->image[dest] = *r;
       dest++;
+      vm->image[dest] = 0;
       r++;
     }
   else

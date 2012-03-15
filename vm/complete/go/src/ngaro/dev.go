@@ -188,6 +188,7 @@ func (vm *VM) wait(data, addr, port []int32) (drop int) {
 			off := int(data[sp-1])
 			for i, b := range env {
 				vm.img[off+i] = int32(b)
+				vm.img[off+i+1] = 0
 			}
 			drop = 2
 		case -11: // Width
