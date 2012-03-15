@@ -8,6 +8,7 @@ with subcell'
 chain: dump'
 
 {{
+
 : A+ @A 1+ !A ;
 
 : highNibble ( byteAddr -- highNibbleAddr )
@@ -19,21 +20,21 @@ chain: dump'
 : nibble@ ( nibbleAddr -- val )
     2 /mod c@ swap [ 4 >> ] ifFalse $F and ;
     
-: visible?
-    dup 32 > swap 126 < + -2 = ;
+: visible? ( val -- t | f )
+    dup 31 > swap 126 < + -2 = ;
     
-: printField
+: printField ( val -- )
     dup 10 < [ 48 + ] [ 55 + ] if putc ;
     
-: printWords
+: printWords ( addr -- )
     highWord highByte highNibble
     8 [  dup nibble@ printField 1+ ] 
     times drop space ;
     
-: printChar
+: printChar ( val -- )
     dup visible? [ putc ] [ drop 95 putc ] if ;
     
-: printChars
+: printChars ( addr -- )
     highWord highByte
     16 [ dup c@ printChar 1+ ]
     times drop cr ;
@@ -49,14 +50,15 @@ chain: dump'
    cr dup !A !B  [ dumpLine ] times ;
    
 }}
+   
 ;chain
 
 with dump'
    
 variable myVar
-" hello world " myVar !
+"What's up dude?" myVar !
 
 : testDump
-    5 myVar @ dump
-    myVar @ packString
-    5 myVar @ dump ;
+    4 myVar over over @ dump
+    dup @ packString
+    @ dump ;

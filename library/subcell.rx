@@ -44,8 +44,9 @@ chain: subcell'
 
 : packString ( strAddr -- )
     dup highWord highByte
-    [ repeat push @+ pop swap 0; swap c!+ again ]
-    do 0 c! drop ;
+    [ repeat push @+ pop swap 0; 
+    swap c!+ again ]
+    do 0 swap c! drop ;
 
 : printPack ( strAddr -- )
     highWord highByte
@@ -53,8 +54,8 @@ chain: subcell'
     do drop ;
 
 : getPackedLength ( strAddr -- strLen )
-    highWord highByte
-    [ 0 swap repeat c@+ 0; drop swap 1+ swap again ]
+    highWord highByte 0 swap 
+    [ repeat c@+ 0; drop swap 1+ swap again ]
     do drop ;
 ;chain
 
