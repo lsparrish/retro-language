@@ -214,6 +214,7 @@ namespace Retro.Ngaro
           memory[name] = (int)element;
           name++;
         }
+        memory[name] = 0;
         ports[5] = 0;
       }
       if (ports[5] == -11)
