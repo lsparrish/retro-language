@@ -9,7 +9,8 @@ chain: dump'
 
 {{
 
-: A+ @A 1+ !A ;
+: A+ ( -- ) 
+    @A 1+ !A ;
 
 : highNibble ( byteAddr -- highNibbleAddr )
     2 * ;

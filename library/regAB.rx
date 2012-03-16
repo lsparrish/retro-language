@@ -42,20 +42,18 @@ variable B
 
 with regAB'
 
-: vadd ( v3 v1 v2 - )
+: vadd ( v3 numElements v1 v2 -- )
    !A !B
-   3 [ A@+ B@+ + swap !+ ] 
+   [ A@+ B@+ + swap !+ ] 
    times drop ;
    
 create a 1 , 2 , 3 ,
 create b 4 , 5 , 6 ,
 create c 0 , 0 , 0 ,
 
-: testRegisters	   
-   c a b vadd
-   cr c @+ putn 
-   cr   @+ putn 
-   cr   @+ putn ;
+: testRegisters ( -- )
+   c 3 over over a b vadd
+   [ cr @+ putn ] times drop ;
    
 doc{
 
