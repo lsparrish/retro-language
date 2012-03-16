@@ -63,7 +63,12 @@ with assertion'
   "Testing toString : " puts
   '1 ^char'toString "1" compare -1 assert= ; assertion
 
+: a8
+  "Testing isVisible? : " puts
+  '1 ^char'isVisible? -1 assert=
+  23 ^char'isVisible?  0 assert= ; assertion
+
 : go
-  cr a0 a1 a2 a3 a4 a5 a6 a7 bye ;
+  cr a0 a1 a2 a3 a4 a5 a6 a7 a8 bye ;
 
 go
