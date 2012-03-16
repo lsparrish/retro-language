@@ -9,9 +9,6 @@ chain: dump'
 
 {{
 
-: A+ ( -- ) 
-    @A 1+ !A ;
-
 : highNibble ( byteAddr -- highNibbleAddr )
     2 * ;
     
@@ -42,7 +39,7 @@ chain: dump'
     
 : dumpLine ( addr -- )
    @A putn space
-   4 [ @A printWords A+ ] times 
+   4 [ @A printWords A ++ ] times 
    @B printChars @A !B ;
    
 ---reveal---
