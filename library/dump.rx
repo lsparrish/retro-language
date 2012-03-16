@@ -1,13 +1,13 @@
 
-needs regAB'
-with regAB'
-
 needs subcell'
 with subcell'
 
 chain: dump'
 
 {{
+
+variable A
+variable B
 
 : highNibble ( byteAddr -- highNibbleAddr )
     2 * ;
