@@ -1,11 +1,6 @@
 chain: regAB'
 
 variable A
-: !A ( addr -- )
-   A ! ;
-   
-: @A ( -- addr )
-   A @ ;
    
 : A! ( val -- ) 
    @A ! ;
@@ -14,17 +9,30 @@ variable A
    @A @ ;
    
 : A@+ ( -- val )
-   @A @+ swap !A ;
+   A@ A ++ ;
+   
+: +A@
+   A ++ A@ ;
+   
+: A@-
+   A@ A -- ;
+   
+: -A@
+   A -- A@ ;
    
 : A!+ ( val -- )
-   @A !+ !A ;
+   A! A ++ ;
+   
+: +A!
+   A ++ A! ;
+   
+: A!-
+    A! A -- ;
+    
+: -A!
+    A -- A! ;
 
 variable B
-: !B ( addr -- )
-   B ! ;
-   
-: @B ( -- addr ) 
-   B @ ;
    
 : B! ( val -- ) 
    @B ! ;
@@ -33,10 +41,28 @@ variable B
    @B @ ;
    
 : B@+ ( == val )
-   @B @+ swap !B ;
+   B@ B ++ ;
+   
+: +B@
+   B ++ B@ ;
+   
+: B@-
+   B@ B -- ;
+   
+: -B@
+  B -- B@ ;
    
 : B!+ ( -- val )
-   @B !+ !B ;
+   B! B ++ ;
+   
+: +B!
+   B ++ B! ;
+   
+: B!-
+   B! B -- ;
+   
+: -B!
+   B -- B! ;
    
 ;chain
 
