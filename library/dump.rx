@@ -19,7 +19,7 @@ variable B
     2 /mod c@ swap [ 4 >> ] ifFalse $F and ;
     
 : visible? ( val -- t | f )
-    dup 31 > swap 126 < + -2 = ;
+    31 126 within ;
     
 : printField ( val -- )
     dup 10 < [ 48 + ] [ 55 + ] if putc ;
@@ -45,7 +45,7 @@ variable B
 ---reveal---
 
 : dump ( numLines addr -- )
-   cr dup !A !B  [ dumpLine ] times ;
+   cr dup !A !B [ dumpLine ] times ;
    
 }}
    
