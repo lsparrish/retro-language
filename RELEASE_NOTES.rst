@@ -4,6 +4,27 @@ Release Notes
 
 
 ----------
+Retro 11.4
+----------
+
+
+Libraries
+=========
+
+  - d' renamed to decimal' (resolve naming conflict)
+  - add queries'
+
+
+Website
+=======
+
+  - fix broken links
+
+
+
+
+
+----------
 Retro 11.3
 ----------
 
