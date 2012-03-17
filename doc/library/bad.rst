@@ -40,7 +40,7 @@ Example
   'g 2 ^bad'b!
   'h 3 ^bad'b!
   ^bad'pool @ putn
-  2 ^bad'@ putn
+  2 ^bad'b@ putn
 
 
 ---------

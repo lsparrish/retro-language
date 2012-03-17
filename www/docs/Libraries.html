@@ -312,7 +312,7 @@ needs bad'
 'g 2 ^bad'b!
 'h 3 ^bad'b!
 ^bad'pool &#64; putn
-2 ^bad'&#64; putn
+2 ^bad'b&#64; putn
 </pre>
 </div>
 <div class="section" id="id5">
@@ -935,6 +935,11 @@ inclusive, or false otherwise</td>
 <td>Return true if character is a space, tab, or
 end of line. Returns false otherwise</td>
 </tr>
+<tr><td>isVisible?</td>
+<td>c-f</td>
+<td>Return true if character is visible, or false
+if it is a control-type character</td>
+</tr>
 <tr><td>toUpper</td>
 <td>c-c</td>
 <td>Convert a lowercase character to uppercase.
@@ -1189,9 +1194,53 @@ should be 26 characters long.</td>
 </table>
 </div>
 </div>
+<div class="section" id="decimal">
+<h1>decimal'</h1>
+<div class="section" id="id26">
+<h2>Overview</h2>
+<p>This vocabulary provides a prefix and some functions for working with
+simple decimal values. It's not intended as a replacement for fixed or
+floating point math.</p>
+</div>
+<div class="section" id="id27">
+<h2>Functions</h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="14%" />
+<col width="10%" />
+<col width="76%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Function</th>
+<th class="head">Stack</th>
+<th class="head">Usage</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>__d</td>
+<td>&quot;-n</td>
+<td>Prefix to parse a value like &quot;nn.nnn&quot; into an integer</td>
+</tr>
+<tr><td>putn</td>
+<td>n-</td>
+<td>Display a decimal number, based on <strong>scale</strong></td>
+</tr>
+<tr><td>scale</td>
+<td>-a</td>
+<td>Variable containing the number of decimal places</td>
+</tr>
+<tr><td>split</td>
+<td>-n</td>
+<td>Return a factor to divide by for display/working with
+decimal values</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <div class="section" id="decompose">
 <h1>decompose'</h1>
-<div class="section" id="id26">
+<div class="section" id="id28">
 <h2>Overview</h2>
 <p>The core Casket framework provides minimal templating, but no easy way to
 generate HTML from code.</p>
@@ -1199,13 +1248,13 @@ generate HTML from code.</p>
 combinators. Textual data returned will be displayed (using <strong>^casket'tputs</strong>),
 and various attributes are supported.</p>
 </div>
-<div class="section" id="id27">
+<div class="section" id="id29">
 <h2>Loading</h2>
 <pre class="literal-block">
 needs decompose'
 </pre>
 </div>
-<div class="section" id="id28">
+<div class="section" id="id30">
 <h2>Example</h2>
 <pre class="literal-block">
 : /index
@@ -1218,7 +1267,7 @@ needs decompose'
 </div>
 <div class="section" id="decorator">
 <h1>decorator'</h1>
-<div class="section" id="id29">
+<div class="section" id="id31">
 <h2>Overview</h2>
 <p>A decorator extends an existing function by appending ocde that will be
 executed before (and possibly after) execution of the original function.</p>
@@ -1240,7 +1289,7 @@ ok  foo 2 + 1 = 3
 ok
 </pre>
 </div>
-<div class="section" id="id30">
+<div class="section" id="id32">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -1269,21 +1318,21 @@ ok
 </div>
 <div class="section" id="diet">
 <h1>diet'</h1>
-<div class="section" id="id31">
+<div class="section" id="id33">
 <h2>Overview</h2>
 <p>This library reduces overall memory consumption by reducing the string length
 and number of string buffers.</p>
 <p>While easy enough to do manually, this automates the process and makes it
 easily reversible.</p>
 </div>
-<div class="section" id="id32">
+<div class="section" id="id34">
 <h2>Loading</h2>
 <p>The following should suffice:</p>
 <pre class="literal-block">
 needs diet'
 </pre>
 </div>
-<div class="section" id="id33">
+<div class="section" id="id35">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -1319,14 +1368,14 @@ default</td>
 </div>
 <div class="section" id="dissect">
 <h1>dissect'</h1>
-<div class="section" id="id34">
+<div class="section" id="id36">
 <h2>Overview</h2>
 <p>This vocabulary provides a basic decompiler for the Ngaro instruction set.</p>
 </div>
-<div class="section" id="id35">
+<div class="section" id="id37">
 <h2>Usage</h2>
 </div>
-<div class="section" id="id36">
+<div class="section" id="id38">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -1359,11 +1408,11 @@ default</td>
 </div>
 <div class="section" id="enum">
 <h1>enum'</h1>
-<div class="section" id="id37">
+<div class="section" id="id39">
 <h2>Overview</h2>
 <p>This vocabulary adds support for enumerated values.</p>
 </div>
-<div class="section" id="id38">
+<div class="section" id="id40">
 <h2>Usage</h2>
 <pre class="literal-block">
 0 enum A enum B enum C enum D drop
@@ -1373,7 +1422,7 @@ default</td>
 0 enum| A B C D |
 </pre>
 </div>
-<div class="section" id="id39">
+<div class="section" id="id41">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -1409,7 +1458,7 @@ using <strong>step</strong></td>
 </div>
 <div class="section" id="eval">
 <h1>eval'</h1>
-<div class="section" id="id40">
+<div class="section" id="id42">
 <h2>Overview</h2>
 <p>This library provides a vocabulary for evaluating code contained in strings.</p>
 <p>Retro was not designed to allow textual strings to be evaluated. This works
@@ -1419,14 +1468,14 @@ input immediately, rather than after the function returns.</p>
 <p>This library should be used only if there's no other (clean) way to solve a
 problem.</p>
 </div>
-<div class="section" id="id41">
+<div class="section" id="id43">
 <h2>Loading</h2>
 <p>The following should suffice:</p>
 <pre class="literal-block">
 needs eval'
 </pre>
 </div>
-<div class="section" id="id42">
+<div class="section" id="id44">
 <h2>Examples</h2>
 <pre class="literal-block">
 : foo  ( -n )  99 &quot;54 + putn&quot; ^eval'eval 5 ;
@@ -1435,7 +1484,7 @@ needs eval'
 ^eval'ifDefined foo { foo 10 * putn }
 </pre>
 </div>
-<div class="section" id="id43">
+<div class="section" id="id45">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -1470,13 +1519,13 @@ string block. If found, ignore the string block.</td>
 </div>
 <div class="section" id="fiction">
 <h1>fiction'</h1>
-<div class="section" id="id44">
+<div class="section" id="id46">
 <h2>Overview</h2>
 <p>I have always enjoyed playing interactive fiction games. This library provides a
 framework for building simple games of this type. It's been used for an implemention
 of <em>Cloak of Darkness</em>, as well as various small puzzle games for my children.</p>
 </div>
-<div class="section" id="id45">
+<div class="section" id="id47">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -1629,7 +1678,7 @@ of <em>Cloak of Darkness</em>, as well as various small puzzle games for my chil
 </div>
 <div class="section" id="forth">
 <h1>forth'</h1>
-<div class="section" id="id46">
+<div class="section" id="id48">
 <h2>Overview</h2>
 <p>This vocabulary will make Retro closer to a traditional Forth system. When
 it is visible, some things will be significantly different than in a standard
@@ -1654,7 +1703,7 @@ length,characters
 <p>These can be unpacked into address/length pairs using <strong>count</strong>.</p>
 </div>
 </div>
-<div class="section" id="id47">
+<div class="section" id="id49">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -1803,7 +1852,7 @@ Returns the remainder and the quotient.</td>
 </div>
 <div class="section" id="hash">
 <h1>hash'</h1>
-<div class="section" id="id48">
+<div class="section" id="id50">
 <h2>Overview</h2>
 <p>This library provides a vocabulary for generating hashes from strings.</p>
 <p>Most documented hash functions leverage unsigned longs during computation.
@@ -1816,21 +1865,21 @@ between clashing and key size -- this is to ensure that associative arrays
 built using <strong>hash</strong> don't need to allocate too much heap.  This can be
 adjusted by revectoring <strong>hash</strong> in the [unlikely] event of large tables.</p>
 </div>
-<div class="section" id="id49">
+<div class="section" id="id51">
 <h2>Loading</h2>
 <p>The following should suffice:</p>
 <pre class="literal-block">
 needs hash'
 </pre>
 </div>
-<div class="section" id="id50">
+<div class="section" id="id52">
 <h2>Examples</h2>
 <pre class="literal-block">
 needs hash'
 &quot;hello&quot; ^hash'hash
 </pre>
 </div>
-<div class="section" id="id51">
+<div class="section" id="id53">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -1884,18 +1933,18 @@ use.</td>
 </div>
 <div class="section" id="infix">
 <h1>infix'</h1>
-<div class="section" id="id52">
+<div class="section" id="id54">
 <h2>Overview</h2>
 <p>This library provides a vocabulary for supporting simple infix math.</p>
 <p>Expressions are processed from left to right.</p>
-<div class="section" id="id53">
+<div class="section" id="id55">
 <h3>Loading</h3>
 <p>The following should suffice:</p>
 <pre class="literal-block">
 needs infix'
 </pre>
 </div>
-<div class="section" id="id54">
+<div class="section" id="id56">
 <h3>Examples</h3>
 <pre class="literal-block">
 with infix'
@@ -1904,7 +1953,7 @@ with infix'
 4 * 2 + 3 putn
 </pre>
 </div>
-<div class="section" id="id55">
+<div class="section" id="id57">
 <h3>Functions</h3>
 <table border="1" class="docutils">
 <colgroup>
@@ -1954,7 +2003,7 @@ with infix'
 </div>
 <div class="section" id="linkedlist">
 <h1>linkedList'</h1>
-<div class="section" id="id56">
+<div class="section" id="id58">
 <h2>Overview</h2>
 <p>While linked lists are a simple data structure, they are very useful.
 This vocabulary provides a foundation for creating and using them in
@@ -1968,7 +2017,7 @@ the prior node. The list pointer variable is updated with each <strong>add</stro
 or <strong>remove</strong> to point to the newest node in the chain.</p>
 </div>
 </div>
-<div class="section" id="id57">
+<div class="section" id="id59">
 <h2>Examples</h2>
 <div class="section" id="creating-a-list">
 <h3>Creating A List</h3>
@@ -1995,7 +2044,7 @@ L ^linkList'remove
 </pre>
 </div>
 </div>
-<div class="section" id="id58">
+<div class="section" id="id60">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2054,7 +2103,7 @@ starts at <em>1</em>.</td>
 </div>
 <div class="section" id="locals">
 <h1>locals'</h1>
-<div class="section" id="id59">
+<div class="section" id="id61">
 <h2>Overview</h2>
 <p>This vocabulary provides an easy way to give functions access to local variables within
 certain limitations.</p>
@@ -2063,7 +2112,7 @@ certain limitations.</p>
 <li>Functions using local variables are not reentrant</li>
 </ul>
 </div>
-<div class="section" id="id60">
+<div class="section" id="id62">
 <h2>Example</h2>
 <pre class="literal-block">
 : foo ( nos tos - result )  locals{ tos nos }  &#64;nos &#64;tos + &#64;nos * ;
@@ -2071,7 +2120,7 @@ certain limitations.</p>
 <p>Note here that <strong>locals{</strong> will modify the temporary variable names to match the names
 you specify.</p>
 </div>
-<div class="section" id="id61">
+<div class="section" id="id63">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2136,7 +2185,7 @@ stack comments.</td>
 <h1>math'</h1>
 <p>This library provides support for additional mathmatic operations not provided
 by the core Retro language.</p>
-<div class="section" id="id62">
+<div class="section" id="id64">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2185,17 +2234,115 @@ false</td>
 </table>
 </div>
 </div>
+<div class="section" id="queries">
+<h1>queries'</h1>
+<div class="section" id="id65">
+<h2>Overview</h2>
+<p>This library provides symbolic constants and helper functions for
+using the VM queries in a clean, portable manner.</p>
+</div>
+<div class="section" id="id66">
+<h2>Functions</h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="41%" />
+<col width="8%" />
+<col width="51%" />
+</colgroup>
+<tbody valign="top">
+<tr><td>MEMORY-SIZE</td>
+<td>-n</td>
+<td>Query for determining amount
+of memory provided by the
+virtual machine</td>
+</tr>
+<tr><td>CANVAS?</td>
+<td>-n</td>
+<td>Query for determining whether
+the virtual machine provides
+a canvas device</td>
+</tr>
+<tr><td>CANVAS-WIDTH</td>
+<td>-n</td>
+<td>Query returning canvas width</td>
+</tr>
+<tr><td>CANVAS-HEIGHT</td>
+<td>-n</td>
+<td>Query returning canvas height</td>
+</tr>
+<tr><td>STACK-DEPTH</td>
+<td>-n</td>
+<td>Query returning data stack
+depth</td>
+</tr>
+<tr><td>ADDRESS-STACK-DEPTH</td>
+<td>-n</td>
+<td>Query returning address stack
+depth</td>
+</tr>
+<tr><td>MOUSE?</td>
+<td>-n</td>
+<td>Query for determining if the
+virtual machine provides a
+mouse device</td>
+</tr>
+<tr><td>TIME</td>
+<td>-n</td>
+<td>Query returning current time
+in seconds</td>
+</tr>
+<tr><td>QUIT-VM</td>
+<td>-n</td>
+<td>Query to shutdown the virtual
+machine</td>
+</tr>
+<tr><td>HOST-ENVIRONMENT-QUERY</td>
+<td>-n</td>
+<td>Query to lookup and return
+the value of an environment
+variable in the host system</td>
+</tr>
+<tr><td>CONSOLE-WIDTH</td>
+<td>-n</td>
+<td>Query returning the console
+width</td>
+</tr>
+<tr><td>CONSOLE-HEIGHT</td>
+<td>-n</td>
+<td>Query returning the console
+height</td>
+</tr>
+<tr><td>BITS-PER-CELL</td>
+<td>-n</td>
+<td>Query returning the number of
+bits in a cell</td>
+</tr>
+<tr><td>ENDIAN</td>
+<td>-n</td>
+<td>Query returning a flag which
+indicates endian used by the
+virtual machine</td>
+</tr>
+<tr><td>query</td>
+<td>?-?</td>
+<td>Perform a query. Actual stack
+effect varies by query</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <div class="section" id="stack">
 <h1>stack'</h1>
 <p>This library provides a vocabulary for creating and using custom LIFO stacks.</p>
-<div class="section" id="id63">
+<div class="section" id="id67">
 <h2>Loading</h2>
 <p>The following should suffice:</p>
 <pre class="literal-block">
 needs stack'
 </pre>
 </div>
-<div class="section" id="id64">
+<div class="section" id="id68">
 <h2>Examples</h2>
 <pre class="literal-block">
 with stack'
@@ -2222,7 +2369,7 @@ pop putn
 pop putn
 </pre>
 </div>
-<div class="section" id="id65">
+<div class="section" id="id69">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2271,12 +2418,12 @@ pop putn
 </div>
 <div class="section" id="struct">
 <h1>struct'</h1>
-<div class="section" id="id66">
+<div class="section" id="id70">
 <h2>Overview</h2>
 <p>This vocabulary provides support for creating and using simple data
 structures.</p>
 </div>
-<div class="section" id="id67">
+<div class="section" id="id71">
 <h2>Example</h2>
 <pre class="literal-block">
 with struct'
@@ -2305,7 +2452,7 @@ Sue &#64;.id putn
 Sue .initials puts
 </pre>
 </div>
-<div class="section" id="id68">
+<div class="section" id="id72">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2354,11 +2501,11 @@ allocated structure.</td>
 </div>
 <div class="section" id="subcell">
 <h1>subcell'</h1>
-<div class="section" id="id69">
+<div class="section" id="id73">
 <h2>Overview</h2>
 <p>This library provides functions for accessing 16-bit and 8-bit subsets of cells.</p>
 </div>
-<div class="section" id="id70">
+<div class="section" id="id74">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2424,14 +2571,14 @@ allocated structure.</td>
 <h1>values'</h1>
 <p>A value is a variable that returns the stored value when used. This
 library provides an implementation for Retro.</p>
-<div class="section" id="id71">
+<div class="section" id="id75">
 <h2>Loading</h2>
 <p>The following should suffice:</p>
 <pre class="literal-block">
 needs values'
 </pre>
 </div>
-<div class="section" id="id72">
+<div class="section" id="id76">
 <h2>Examples</h2>
 <pre class="literal-block">
 with values'
@@ -2446,7 +2593,7 @@ foo foo + .s
 foo foo + .s
 </pre>
 </div>
-<div class="section" id="id73">
+<div class="section" id="id77">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2490,7 +2637,7 @@ mode</td>
 </div>
 <div class="section" id="variations">
 <h1>variations'</h1>
-<div class="section" id="id74">
+<div class="section" id="id78">
 <h2>Overview</h2>
 <p>This library provides some functions for determining the differences between
 VM implementations and conditionally evaluating code blocks based on these
@@ -2498,7 +2645,7 @@ differences.</p>
 <p>Specifically, it provides functions for determining the number of bits per
 cell and the endian nature of an implementation.</p>
 </div>
-<div class="section" id="id75">
+<div class="section" id="id79">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
