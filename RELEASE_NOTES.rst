@@ -14,6 +14,7 @@ core language / standard image
   - refactorings
     - {{ and }}
     - :is and :devector
+    - each@
 
 
 libraries

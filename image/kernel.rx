@@ -434,10 +434,10 @@ here
 }}
 
 {{
-  : <each> (  qa- ) [ dup [ swap dup &do dip ] dip 1+ ] times 2drop ;
-  : array  (  aq- ) swap @+ dup 1 > [ <each> ] [ 2drop ] if ;
-  : buffer ( anq- ) 2rot <each> ;
-  : list   (  lq- ) [ &@ dip 2over [ [ do ] dip ] dip over @ ] while 2drop ;
+  : each   (  qa- ) [ [ swap dup &do dip ] sip 1+ ] times 2drop ;
+  : array  (  aq- ) swap @+ dup 1 > [ each ] [ 2drop ] if ;
+  : buffer ( anq- ) 2rot each ;
+  : list   (  lq- ) [ &@ dip 2over [ &do dip ] dip over @ ] while 2drop ;
 ---reveal---
   : <each@> ( ...t- ) drop ;
   : each@   ( ...t- )
