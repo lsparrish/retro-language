@@ -20,8 +20,8 @@ variable which        ( Pointer to dictionary header of the most recently     )
 TIB  variable: <tib>  ( Start of default text input buffer                    )
 
 label: copytag   "Retro" $,
-label: version   "11.3" $,
-label: build     "2012.03.04" $,
+label: version   "11.4" $,
+label: build     "2012.03.19" $,
 label: okmsg     "ok  " $,
 pad
 
@@ -338,8 +338,8 @@ create list  ( -a )  0 , 0 ,
   [ list @ [ last repeat @ dup @ list 1+ @ <> 0; drop again ] do ! ] if ;
 
 ( Vectored Execution ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-: :devector ( a-  ) dup 0 swap ! 1+ 0 swap ! ;
-: :is       ( aa- ) dup 8 swap ! 1+ ! ;
+: :devector ( a-  ) 0 swap !+ 0 swap ! ;
+: :is       ( aa- ) 8 swap !+ ! ;
 : devector  ( "-  ) ' 0; :devector ;
 : is        ( a"- ) ' 0; :is ;
 : default:  ( "-  ) ' 2 + , ; ' .macro last @ d->class !
