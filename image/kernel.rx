@@ -330,10 +330,10 @@ endKernel shrink bootNew
 
 ( Scope ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 create list  ( -a )  0 , 0 ,
-: {{ ( - )  vector off last @ dup list ! list 1+ ! ;
+: {{ ( - )  vector off last @ dup list !+ ! ;
 : ---reveal--- ( - ) vector on last @ list 1+ ! ;
 : }} ( - )
-  vector on list @ list 1+ @ =
+  vector on list @+ swap @ =
   [ list @ last ! ]
   [ list @ [ last repeat @ dup @ list 1+ @ <> 0; drop again ] do ! ] if ;
 
