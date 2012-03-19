@@ -11,10 +11,11 @@ Retro 11.4
 core language / standard image
 ==============================
 
-  - refactorings
+  - clean ups and refactorings
     - {{ and }}
     - :is and :devector
     - each@
+    - <puts>
 
 
 libraries

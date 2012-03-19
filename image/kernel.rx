@@ -635,8 +635,7 @@ create dicts 64 allot
       putc
     again ;
   : simple ( $- ) [ @ putc ] 2 ( STRING ) each@ ;
-  : defer  ( q- ) update off do update on redraw ;
-  [ [ @formatted [ complex drop ] &simple if ] defer ] is <puts>
+  [ update off @formatted [ complex drop ] &simple if update on redraw ] is <puts>
 }}
 
 ( Debugging ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
