@@ -731,12 +731,12 @@ chain: strings'
     buffer 0 STRING-LENGTH fill
     !right !left !src
     @src @left + @right buffer swap copy buffer tempString ;
-  : trimLeft  ( $-$ ) [ @+ [ 32 = ] [ 0 <> ] bi = ] while 1- ;
+  : trimLeft  ( $-$ ) [ @+ [ 32 = ] [ 0 <> ] bi and ] while 1- ;
   : trimRight ( $-$ )
     buffer [ 0 STRING-LENGTH fill ] [ over getLength copy ] [ trim ] tri tempString ;
   : prepend ( $$-$ )
     buffer 0 STRING-LENGTH fill
-    withLength buffer swap dup &copy dip
+    withLength buffer swap &copy sip
     &withLength dip buffer + swap copy buffer tempString ;
   : append ( $$-$ ) swap prepend ;
   : appendChar ( $c-$ ) swap tempString [ withLength + !+ 0 swap ! ] sip ;
