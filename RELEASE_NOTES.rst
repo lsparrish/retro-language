@@ -8,14 +8,22 @@ Retro 11.4
 ----------
 
 
-Libraries
+core language / standard image
+==============================
+
+  - refactorings
+    - {{ and }}
+    - :is and :devector
+
+
+libraries
 =========
 
   - d' renamed to decimal' (resolve naming conflict)
   - add queries'
 
 
-Website
+website
 =======
 
   - fix broken links
