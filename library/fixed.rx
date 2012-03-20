@@ -1,0 +1,27 @@
+
+: */ ( n1 n2 n3 -- result ) 
+    push * pop / ;
+
+16384 constant +1
+
+: *. ( n n -- n ) 
+    +1 */ ;
+
+: /. ( n n -- n )
+    +1 swap */ ;
+
+: D->F ( d -- fraction ) 
+    10000 /. ;
+
+: pDec
+    abs
+    1000 /mod putn
+    100  /mod putn 
+    10   /mod putn
+    1    /mod putn drop ;
+    
+
+: .F ( fraction -- ) 10000 *. 10000 /mod putn 46 putc pDec cr ;
+
+: __d 
+    ^strings'splitAtChar: . ^strings'chop toNumber swap toNumber swap 10000 * + D->F ; parsing
