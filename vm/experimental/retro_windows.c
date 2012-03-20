@@ -6,10 +6,10 @@
    Copyright (c) 2011,        Kenneth Keating
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #include <stdio.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <time.h>
-#include <unistd.h>
-#include <string.h>
+//#include <unistd.h>
+//#include <string.h>
 
 /* Configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -34,7 +34,7 @@
    Use -DRXBE to enable the BE suffix for big endian images. This is
    only useful on big endian systems.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-#define CELL            int32_t
+#define CELL            int//int32_t
 #define IMAGE_SIZE      1000000
 #define ADDRESSES          1024
 #define STACK_DEPTH         128
