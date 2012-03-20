@@ -1,0 +1,22 @@
+chain: unsigned'
+  : toNumber  (  $-u  )  ;
+  : +         ( uu-u  )  ;
+  : -         ( uu-u  )  ;
+  : *         ( uu-u  )  ;
+  : /mod      ( uu-uu )  ;
+  : putn      (  u-   )  ;
+;chain
+
+doc{
+=========
+unsigned'
+=========
+
+--------
+Overview
+--------
+This vocabulary will provide support for creation and use of unsigned values.
+
+
+}doc
+
