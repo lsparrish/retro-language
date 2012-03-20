@@ -1,0 +1,42 @@
+chain: introspection'
+  : isRevectorable?  ( a-f )
+    xt->d dup [ [ @d->class &.data <> ] [ @d->xt @+ swap @ [ 0 = ] bi@ and ] bi and ] ifTrue ;
+
+  : getClass  ( a-a )
+    xt->d dup [ @d->class ] ifTrue ;
+
+  : isVisible?  ( a-f )
+    xt->d 0 <> ;
+
+;chain
+
+
+doc{
+==============
+introspection'
+==============
+
+--------
+Overview
+--------
+This vocabulary provides functions for examining functions and data structures.
+
+}doc
+
+
+---------
+Functions
+---------
+
++------------------+-------+----------------------------------------------------+
+| Function         | Stack | Usage                                              |
++==================+=======+====================================================+
+| isRevectorable?  | a-f   | Returns -1 if a function can be revectored, or 0   |
+|                  |       | if not.                                            |
++------------------+-------+----------------------------------------------------+
+| isVisible?       | a-f   | Returns -1 if a function is visible in the current |
+|                  |       | dictionary, or 0 if not                            |
++------------------+-------+----------------------------------------------------+
+| getClass         | a-a   | Return the class of a function, or 0 if not found  |
++------------------+-------+----------------------------------------------------+
+

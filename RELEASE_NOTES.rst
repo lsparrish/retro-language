@@ -4,6 +4,37 @@ Release Notes
 
 
 ----------
+Retro 11.4
+----------
+
+
+core language / standard image
+==============================
+
+  - clean ups and refactorings
+    - {{ and }}
+    - :is and :devector
+    - each@
+    - <puts>
+
+
+libraries
+=========
+
+  - d' renamed to decimal' (resolve naming conflict)
+  - add queries'
+
+
+website
+=======
+
+  - fix broken links
+
+
+
+
+
+----------
 Retro 11.3
 ----------
 
