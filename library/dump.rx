@@ -8,15 +8,6 @@ chain: dump'
 
 variable A
 variable B
-
-: highNibble ( byteAddr -- highNibbleAddr )
-    2 * ;
-    
-: lowNibble ( byteAddr -- lowNibbleAddr )
-    2 * 1 + ;
-    
-: nibble@ ( nibbleAddr -- val )
-    2 /mod c@ swap [ 4 >> ] ifFalse $F and ;
     
 : visible? ( val -- t | f )
     31 126 within ;
@@ -26,7 +17,7 @@ variable B
     
 : printWords ( addr -- )
     highWord highByte highNibble
-    8 [  dup nibble@ printField 1+ ] 
+    8 [ dup nibble@ printField 1+ ] 
     times drop space ;
     
 : printChar ( val -- )
