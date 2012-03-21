@@ -15,13 +15,14 @@
 
 : pDec
     abs
+    46 putc 
     1000 /mod putn
     100  /mod putn 
     10   /mod putn
     1    /mod putn drop ;
     
 
-: .F ( fraction -- ) 10000 *. 10000 /mod putn 46 putc pDec cr ;
+: .F ( fraction -- ) 10000 *. 10000 /mod putn pDec cr ;
 
 : __d 
     ^strings'splitAtChar: . ^strings'chop toNumber [ toNumber ] dip 10000 * + D->F ; parsing
