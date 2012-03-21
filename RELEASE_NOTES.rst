@@ -23,6 +23,8 @@ libraries
 
   - d' renamed to decimal' (resolve naming conflict)
   - add queries'
+  - add dump'
+  - add fixed'
 
 
 website
