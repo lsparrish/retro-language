@@ -24,4 +24,4 @@
 : .F ( fraction -- ) 10000 *. 10000 /mod putn 46 putc pDec cr ;
 
 : __d 
-    ^strings'splitAtChar: . ^strings'chop toNumber swap toNumber swap 10000 * + D->F ; parsing
+    ^strings'splitAtChar: . ^strings'chop toNumber [ toNumber ] dip 10000 * + D->F ; parsing
