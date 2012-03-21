@@ -16,9 +16,11 @@ chain: forth'
   : >r   ( n-  ) ` push ; compile-only
   : r>   (  -n ) ` pop ; compile-only
 
-
   ( data stack ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
   : 2dup ( xy-xyxy ) 2over ;
+  : pick ( ...n-...m )  dup if swap [ 1- pick ] dip swap else drop dup then ;
+  : roll ( xu xu-1 ... x0 u -- xu-1 ... x0 xu )
+    dup 1 > if swap [ 1- roll ] dip swap else swap then ;
 
 
   ( console i/o ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
@@ -183,4 +185,12 @@ Functions
 | lateBinding | ``$-``   | "on" binds names to functions after execution of   |
 |             |          | **;**, "off" binds immediately                     |
 +-------------+----------+----------------------------------------------------+
+| pick        |...n-..m  | Evil function to access arbitrary stack items      |
++-------------+----------+----------------------------------------------------+
+| roll        | xu xu-1  | Remove u. Rotate u+1 items on the top of the stack |
+|             | ... x0 u |                                                    |
+|             | -- xu-1  |                                                    |
+|             | ... x0 xu|                                                    |
++-------------+----------+----------------------------------------------------+
+
 }doc

@@ -1,53 +1,33 @@
-
 needs subcell'
-with subcell'
 
 chain: dump'
-
 {{
-
-variable A
-variable B
+  variables| A B |
     
-: visible? ( val -- t | f )
+  : visible? ( val -- t | f )
     31 126 within ;
-    
-: printField ( val -- )
-    dup 10 < [ 48 + ] [ 55 + ] if putc ;
-    
-: printWords ( addr -- )
-    highWord highByte highNibble
-    8 [ dup nibble@ printField 1+ ] 
-    times drop space ;
-    
-: printChar ( val -- )
-    dup visible? [ putc ] [ drop 95 putc ] if ;
-    
-: printChars ( addr -- )
-    highWord highByte
-    16 [ dup c@ printChar 1+ ]
-    times drop cr ;
-    
-: dumpLine ( addr -- )
-   @A putn space
-   4 [ @A printWords A ++ ] times 
-   @B printChars @A !B ;
-   
----reveal---
 
-: dump ( numLines addr -- )
-   cr dup !A !B [ dumpLine ] times ;
-   
+  : printField ( val -- )
+    dup 10 < [ 48 + ] [ 55 + ] if putc ;
+
+  : printWords ( addr -- )
+    ^subcell'highWord ^subcell'highByte ^subcell'highNibble
+    8 [ dup ^subcell'nibble@ printField 1+ ] times drop space ;
+
+  : printChar ( val -- )
+    dup visible? [ putc ] [ drop 95 putc ] if ;
+
+  : printChars ( addr -- )
+    ^subcell'highWord ^subcell'highByte
+    16 [ dup ^subcell'c@ printChar 1+ ] times drop cr ;
+
+  : dumpLine ( addr -- )
+    @A putn space
+    4 [ @A printWords A ++ ] times @B printChars @A !B ;
+---reveal---
+  : dump ( numLines addr -- )
+    cr dup !A !B [ dumpLine ] times ;
 }}
-   
+
 ;chain
 
-with dump'
-   
-variable myVar
-"What's up dude?" myVar !
-
-: testDump
-    4 myVar over over @ dump
-    dup @ packString
-    @ dump ;
