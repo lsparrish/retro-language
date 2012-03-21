@@ -19,6 +19,7 @@ chain: forth'
 
   ( data stack ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
   : 2dup ( xy-xyxy ) 2over ;
+  : pick ( ...n-...m )  dup if swap [ 1- pick ] dip swap else drop dup then ;
 
 
   ( console i/o ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
@@ -183,4 +184,7 @@ Functions
 | lateBinding | ``$-``   | "on" binds names to functions after execution of   |
 |             |          | **;**, "off" binds immediately                     |
 +-------------+----------+----------------------------------------------------+
+| pick        |...n-..m  | Evil function to access arbitrary stack items      |
++-------------+----------+----------------------------------------------------+
+
 }doc
