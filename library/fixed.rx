@@ -3,7 +3,7 @@ chain: fixed'
 16384 constant +1
 
 : */ ( n1 n2 n3 -- result )
-    push * pop / ;
+    [ * ] dip / ;
 
 : *. ( n n -- n )
     +1 */ ;
@@ -16,7 +16,7 @@ chain: fixed'
 
 : pDec
     abs
-    46 putc 
+    '. putc 
     1000 /mod putn
     100  /mod putn
     10   /mod putn
