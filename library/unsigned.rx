@@ -1,14 +1,14 @@
 chain: unsigned'
 {{
   %100000000000000000000000000000 constant MASK
-
-  : defines  ( q"- ) constant &.word reclass ;
 ---reveal---
   : signsDiffer?  ( nn-f )  xor MASK and 0 <> ;
   : u<  ( uu-f )  2over signsDiffer? [ nip ] [ - ] if 0 < ;
   : u>  ( uu-f )  swap u< ;
 }}
 ;chain
+
+
 
 doc{
 =========
