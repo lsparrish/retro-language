@@ -25,6 +25,7 @@ libraries
   - add queries'
   - add dump'
   - add fixed'
+  - add double'
 
 
 website

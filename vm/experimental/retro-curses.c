@@ -10,8 +10,6 @@
 #include <time.h>
 #include <unistd.h>
 #include <string.h>
-#include <termios.h>
-#include <sys/ioctl.h>
 #include <curses.h>
 /* ATH */
 #include <sys/stat.h>
@@ -102,7 +100,6 @@ typedef struct {
   int max_sp, max_rsp;
   char filename[MAX_FILE_NAME];
   char request[MAX_REQUEST_LENGTH];
-  struct termios new_termios, old_termios;
 } VM;
 
 /* Macros ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -313,7 +310,6 @@ void rxQueryEnvironment(VM *vm) {
 
 /* Device I/O Handler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 void rxDeviceHandler(VM *vm) {
-  struct winsize w;
   if (vm->ports[0] != 1) {
     /* Input */
     if (vm->ports[0] == 0 && vm->ports[1] == 1) {
@@ -384,11 +380,9 @@ void rxDeviceHandler(VM *vm) {
         case -10: vm->ports[5] = 0;
                   rxQueryEnvironment(vm);
                   break;
-        case -11: ioctl(0, TIOCGWINSZ, &w);
-                  vm->ports[5] = w.ws_col;
+        case -11: vm->ports[5] = getmaxx(stdscr);
                   break;
-        case -12: ioctl(0, TIOCGWINSZ, &w);
-                  vm->ports[5] = w.ws_row;
+        case -12: vm->ports[5] = getmaxy(stdscr);
                   break;
         case -13: vm->ports[5] = CELLSIZE;
                   break;
