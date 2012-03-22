@@ -3,16 +3,7 @@ needs subcell'
 chain: dump'
 {{
   variables| A B |
-
-  : highNibble ( byteAddr -- highNibbleAddr )
-    2 * ;
-
-  : lowNibble ( byteAddr -- lowNibbleAddr )
-    2 * 1 + ;
-
-  : nibble@ ( nibbleAddr -- val )
-    2 /mod ^subcell'c@ swap [ 4 >> ] ifFalse $F and ;
-
+    
   : visible? ( val -- t | f )
     31 126 within ;
 
@@ -20,18 +11,30 @@ chain: dump'
     dup 10 < [ 48 + ] [ 55 + ] if putc ;
 
   : printWords ( addr -- )
-    ^subcell'highWord ^subcell'highByte highNibble
-    8 [ dup nibble@ printField 1+ ] times drop space ;
+    ^subcell'highWord ^subcell'highByte ^subcell'highNibble
+    8 [ dup ^subcell'nibble@ printField 1+ ] times drop space ;
 
   : printChar ( val -- )
-    dup visible? [ putc ] [ drop 95 putc ] if ;
+    dup visible? [ putc ] [ drop '_ putc ] if ;
 
   : printChars ( addr -- )
     ^subcell'highWord ^subcell'highByte
     16 [ dup ^subcell'c@ printChar 1+ ] times drop cr ;
+    
+  : printAddr ( addr -- )
+      '[ putc
+      10000000 /mod putn
+      1000000  /mod putn
+      100000   /mod putn
+      10000    /mod putn
+      1000     /mod putn
+      100      /mod putn
+      10       /mod putn
+      1        /mod putn 
+      '] putc  drop ;
 
   : dumpLine ( addr -- )
-    @A putn space
+    @A printAddr space
     4 [ @A printWords A ++ ] times @B printChars @A !B ;
 ---reveal---
   : dump ( numLines addr -- )
