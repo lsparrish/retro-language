@@ -17,7 +17,7 @@ double'
 Overview
 --------
 This library provides functions for creating and working with double-cell values.
-
+The functions here are based on the equivilent functions from ANS Forth.
 
 ---------
 Functions
