@@ -99,7 +99,7 @@ i: ws        ( c-c )
    dup,   13 # =if drop, 10 # then
    remapping # @, 0; drop,
    dup,   10 # =if drop, 32 # then
-   tabAsWhitespace # @, 0 # !if dup, 9 # =if drop, 32 # then then ;
+   tabAsWhitespace # @, 0; drop dup, 9 # =if drop, 32 # then ;
 
 i: <getc> (  -c ) 1 # 1 # out, wait 1 # in, ;
 t: getc   (  -c ) repeat <getc> remapKeys dup 0 # !if ws ; then drop, again ;
