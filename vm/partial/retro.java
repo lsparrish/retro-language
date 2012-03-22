@@ -31,7 +31,7 @@ public class retro {
   */
   public int switchEndian(int value)
   {
-    int b1 = (value >>  0) & 0xff;
+    int b1 =  value & 0xff;
     int b2 = (value >>  8) & 0xff;
     int b3 = (value >> 16) & 0xff;
     int b4 = (value >> 24) & 0xff;
