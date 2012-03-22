@@ -35,7 +35,7 @@ public class retro {
     int b2 = (value >>  8) & 0xff;
     int b3 = (value >> 16) & 0xff;
     int b4 = (value >> 24) & 0xff;
-    return b1 << 24 | b2 << 16 | b3 << 8 | b4 << 0;
+    return b1 << 24 | b2 << 16 | b3 << 8 | b4;
   }
 
 
