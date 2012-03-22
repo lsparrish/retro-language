@@ -28,6 +28,12 @@ libraries
   - add double'
 
 
+vm
+==
+
+  - add retro-curses
+
+
 website
 =======
 
