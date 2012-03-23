@@ -1,12 +1,12 @@
 {{
     : ?CR  
-	over 1+ @ 110 = [ drop over 10 swap ! 1+ 0 ] [ -1 ] if ;
+	over 1+ @ 'n = [ drop over 10 swap ! 1+ 0 ] [ -1 ] if ;
 	    
     : ?NL  
-	over 1+ @ 114 = [ drop over 13 swap ! 1+ 0 ] [ -1 ] if ;
+	over 1+ @ 'r = [ drop over 13 swap ! 1+ 0 ] [ -1 ] if ;
 
     : ?ESCAPE 
-	dup 92 = [ ?CR [ ?NL ] [ 0 ]  if ] [ -1 ]  if ;
+	dup '\ = [ ?CR [ ?NL ] [ 0 ]  if ] [ -1 ]  if ;
 	    
     : COPYNULL
 	dup 1+ @ 0 = [ over 1+ 0 swap ! ] ifTrue ;
