@@ -55,12 +55,12 @@ variable sock
 
     ( Request Page )
     sock @ "GET / HTTP/1.1\r\nHost: www.osnews.com\r\n\r\n" 
-    ^socket'NORMALIZE withLength swap ^socket'write
+    ^socket'NORMALIZE withLength swap ^socket'write drop
 
     ( Print results )
     sock @ 1024 buffer
     [ ^socket'copyargs ^socket'read dup buffer ^socket'PRINTCHARS 0 > ] while
-    2drop 2drop
+    2drop drop
 
     ( Close Socket )
     sock @ ^socket'close
