@@ -53,7 +53,12 @@ def rxHandleDevices( ip, stack, address, ports, memory, files, inputs ):
       ports[1] = 10
   if ports[2] == 1:
     if stack[-1] > 0 and stack[-1] < 128:
-      sys.stdout.write(chr(stack.pop()))
+      if stack[-1] == 8:
+        sys.stdout.write(chr(stack.pop()))
+        sys.stdout.write(chr(32))
+        sys.stdout.write(chr(8))
+      else:
+        sys.stdout.write(chr(stack.pop()))
     else:
       sys.stdout.write("\033[2J\033[1;1H")
       stack.pop()
