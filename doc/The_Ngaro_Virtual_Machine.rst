@@ -356,6 +356,30 @@ pushed to the data stack.
 +-------+---------------------------------------+
 
 
+Port 8: Enhanced Text Console
+=============================
+Set port 8 to one of the following values and wait.
+
+*This device is optional.*
+
+Due to platform constraints, implementations may not offer all of these
+functions. An implementation providing this port should at least support
+cursor positioning. *Any non-implemented functions should be silently
+ignored.*
+
++-------+-------+--------------------------------------------------------+
+| value | stack | action                                                 |
++=======+=======+========================================================+
+| 1     | rc-   | Move the cursor to the specified row and column        |
++-------+-------+--------------------------------------------------------+
+| 2     | n-    | Set the foreground text color                          |
++-------+-------+--------------------------------------------------------+
+| 3     | n-    | Set the background color                               |
++-------+-------+--------------------------------------------------------+
+| 4     | n-    | Set a text attribute                                   |
++-------+-------+--------------------------------------------------------+
+
+
 ---------------
 Instruction Set
 ---------------
