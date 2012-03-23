@@ -182,6 +182,10 @@ def rxHandleDevices( ip, stack, address, ports, memory, files, inputs ):
     ports[5] = 0
   elif ports[5] == -13: # bits per cell
     ports[5] = 32
+  elif ports[5] == -14: # endian
+    ports[5] = 0
+  elif ports[5] == -15: # console extensions
+    ports[5] = -1
 
   if ports[8] == 1:
     ports[8] = 0
