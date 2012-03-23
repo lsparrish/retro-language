@@ -54,6 +54,9 @@ def rxHandleDevices( ip, stack, address, ports, memory, files, inputs ):
   if ports[2] == 1:
     if stack[-1] > 0 and stack[-1] < 128:
       sys.stdout.write(chr(stack.pop()))
+    else:
+      sys.stdout.write("\033[2J\033[1;1H")
+      stack.pop()
     sys.stdout.flush()
     ports[2] = 0
   if ports[4] ==  1:    # file save
@@ -179,6 +182,21 @@ def rxHandleDevices( ip, stack, address, ports, memory, files, inputs ):
     ports[5] = 0
   elif ports[5] == -13: # bits per cell
     ports[5] = 32
+
+  if ports[8] == 1:
+    ports[8] = 0
+    a = stack[-2]
+    stack[-2] = stack[-1]
+    stack[-1] = a
+    sys.stdout.write("\33[" + str(stack.pop()) + ";" + str(stack.pop()) + "H")
+  elif ports[8] == 2:
+    ports[8] = 0
+    sys.stdout.write("\33[3" + str(stack.pop()) + "m")
+  elif ports[8] == 3:
+    ports[8] = 0
+    sys.stdout.write("\33[4" + str(stack.pop()) + "m")
+  else:
+    ports[8] = 0
 
   return ip
 
