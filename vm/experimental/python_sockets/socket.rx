@@ -39,9 +39,6 @@
 
 : copyargs ( v1 v2 v3 -- v1 v2 v3 v1 v2 v3 )
     [ 2over ] dip dup [ 2rot ] dip ;
-    
-: readall ( sock count buffer -- ) 
-    copyargs read ;
 
 ( Create read buffer )
 create buffer 1024 allot 
@@ -58,7 +55,7 @@ socket @ "GET / HTTP/1.1\r\nHost: www.osnews.com\r\n\r\n"
 
 ( Print results )
 socket @ 1024 buffer
-[ readall dup buffer PRINTCHARS 0 > ] while
+[ copyargs read dup buffer PRINTCHARS 0 > ] while
 2drop 2drop
 
 ( Close Socket )
