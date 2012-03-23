@@ -395,6 +395,8 @@ void rxDeviceHandler(VM *vm) {
                   break;
         case -14: vm->ports[5] = VM_ENDIAN;
                   break;
+        case -15: vm->ports[5] = -1;
+                  break;
         default:  vm->ports[5] = 0;
       }
     }

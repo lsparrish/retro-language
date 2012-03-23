@@ -251,6 +251,8 @@ Set port 5 to one of the following values; wait; then read the result back.
 +-------+---------------------------------------+
 | -14   | 0 for little endian, 1 for big endian |
 +-------+---------------------------------------+
+| -15   | -1 if Port 8 enabled, 0 if disabled   |
++-------+---------------------------------------+
 
 At a minimum, an implementation must provide support for -1, -5, -6, -8, and -9.
 
