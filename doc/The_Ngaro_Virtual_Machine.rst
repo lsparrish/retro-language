@@ -369,6 +369,9 @@ functions. An implementation providing this port should at least support
 cursor positioning. *Any non-implemented functions should be silently
 ignored.*
 
+An implementation may provide additional, non-standard functionality
+using negative values.
+
 +-------+-------+--------------------------------------------------------+
 | value | stack | action                                                 |
 +=======+=======+========================================================+
@@ -377,8 +380,6 @@ ignored.*
 | 2     | n-    | Set the foreground text color                          |
 +-------+-------+--------------------------------------------------------+
 | 3     | n-    | Set the background color                               |
-+-------+-------+--------------------------------------------------------+
-| 4     | n-    | Set a text attribute                                   |
 +-------+-------+--------------------------------------------------------+
 
 The VM is expected to understand the following colors:
