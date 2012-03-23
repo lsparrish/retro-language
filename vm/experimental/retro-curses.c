@@ -8,9 +8,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <unistd.h>
+#ifndef _WIN32
+  #include <unistd.h>
+#endif
 #include <string.h>
-#include <curses.h>
+#ifdef _WIN32
+  #include "curses.h"
+#else
+  #include <curses.h>
+#endif
 /* ATH */
 #include <sys/stat.h>
 #include <errno.h>
@@ -38,7 +44,11 @@
    Use -DRXBE to enable the BE suffix for big endian images. This is
    only useful on big endian systems.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-#define CELL            int32_t
+#ifdef _WIN32
+  #define CELL            int//int32_t
+#else
+  #define CELL            int32_t
+#endif
 #define IMAGE_SIZE      1000000
 #define ADDRESSES          1024
 #define STACK_DEPTH         128
