@@ -45,6 +45,9 @@ Functions
 | isWhitespace? | c-f     | Return true if character is a space, tab, or   |
 |               |         | end of line. Returns false otherwise           |
 +---------------+---------+------------------------------------------------+
+| isVisible?    | c-f     | Return true if character is visible, or false  |
+|               |         | if it is a control-type character              |
++---------------+---------+------------------------------------------------+
 | toUpper       | c-c     | Convert a lowercase character to uppercase.    |
 |               |         | This will only work on a lowercase character.  |
 +---------------+---------+------------------------------------------------+

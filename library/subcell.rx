@@ -13,6 +13,7 @@ chain: subcell'
   [ 1+ ] [ w@ ] bi ;
 
 : w! ( val wordAddr -- )
+   [ $0000FFFF and ] dip
    2 /mod dup push swap
    [ @ $FFFF0000 and + ]
    [ @ $0000FFFF and swap 16 << + ]
@@ -34,6 +35,7 @@ chain: subcell'
   [ 1+ ] [ c@ ] bi ;
 
 : c! ( val byteaddr -- )
+  [ $00FF and ] dip
   2 /mod dup push swap
   [ w@ $FF00 and + ]
   [ w@ $00FF and swap 8 << + ]
@@ -41,6 +43,28 @@ chain: subcell'
 
 : c!+ ( val byteAddr -- byteAddr+1 )
    [ c! ] [ 1+ ] bi ;
+
+: highNibble ( byteAddr -- highNibbleAddr )
+    2 * ;
+    
+: lowNibble ( byteAddr -- lowNibbleAddr )
+    2 * 1 + ;
+    
+: nibble@ ( nibbleAddr -- val )
+    2 /mod c@ swap [ 4 >> ] ifFalse $F and ;
+
+: nibble@+ ( nibbleAddr -- nibbleAddr val )
+    [ 1+ ] [ nibble@ ] bi ;
+
+: nibble! ( val nibbleaddr -- )
+    [ $0F and ] dip
+    2 /mod dup push swap
+    [ c@ $F0 and + ]
+    [ c@ $0F and swap 4 << + ]
+    if pop c! ;
+
+: nibble!+ ( val nibbleAddr -- nibbleAddr+1 )
+    [ nibble! ] [ 1+ ] bi ;
 
 : packString ( strAddr -- )
     dup highWord highByte
@@ -59,6 +83,7 @@ chain: subcell'
 ;chain
 
 
+
 doc{
 ========
 subcell'
@@ -75,39 +100,51 @@ This library provides functions for accessing 16-bit and 8-bit subsets of cells.
 Functions
 ---------
 
-+-----------------+-----------------------------+
-| Function        | Stack                       |
-+=================+=============================+
-| highWord        | cellAddr -- highwordAddr    |
-+-----------------+-----------------------------+
-| lowWord         | cellAddr -- lowwordAddr     |
-+-----------------+-----------------------------+
-| w@              | wordAddr -- val             |
-+-----------------+-----------------------------+
-| w@+             | wordAddr -- wordAddr val    |
-+-----------------+-----------------------------+
-| w!              | val wordAddr --             |
-+-----------------+-----------------------------+
-| w!+             | val wordAddr -- wordAddr+1  |
-+-----------------+-----------------------------+
-| highByte        | wordAddr -- highbyteAddr    |
-+-----------------+-----------------------------+
-| lowByte         | wordAddr -- lowbyteAddr     |
-+-----------------+-----------------------------+
-| c@              | byteAddr -- val             |
-+-----------------+-----------------------------+
-| c@+             | byteAddr -- byteAddr val    |
-+-----------------+-----------------------------+
-| c!              | val byteaddr --             |
-+-----------------+-----------------------------+
-| c!+             | val byteAddr -- byteAddr+1  |
-+-----------------+-----------------------------+
-| packString      | strAddr --                  |
-+-----------------+-----------------------------+
-| printPack       | strAddr --                  |
-+-----------------+-----------------------------+
-| getPackedLength | strAddr -- strLen           |
-+-----------------+-----------------------------+
++-----------------+-------------------------------+
+| Function        | Stack                         |
++=================+===============================+
+| highWord        | cellAddr -- highwordAddr      |
++-----------------+-------------------------------+
+| lowWord         | cellAddr -- lowwordAddr       |
++-----------------+-------------------------------+
+| w@              | wordAddr -- val               |
++-----------------+-------------------------------+
+| w@+             | wordAddr -- wordAddr val      |
++-----------------+-------------------------------+
+| w!              | val wordAddr --               |
++-----------------+-------------------------------+
+| w!+             | val wordAddr -- wordAddr+1    |
++-----------------+-------------------------------+
+| highByte        | wordAddr -- highbyteAddr      |
++-----------------+-------------------------------+
+| lowByte         | wordAddr -- lowbyteAddr       |
++-----------------+-------------------------------+
+| c@              | byteAddr -- val               |
++-----------------+-------------------------------+
+| c@+             | byteAddr -- byteAddr val      |
++-----------------+-------------------------------+
+| c!              | val byteaddr --               |
++-----------------+-------------------------------+
+| c!+             | val byteAddr -- byteAddr+1    |
++-----------------+-------------------------------+
+| highNibble      | byteAddr -- highnibbleAddr    |
++-----------------+-------------------------------+
+| lowNibble       | byteAddr -- lownibbleAddr     |
++-----------------+-------------------------------+
+| nibble@         | nibbleAddr -- val             |
++-----------------+-------------------------------+
+| nibble@+        | nibbleAddr -- nibbleAddr val  |
++-----------------+-------------------------------+
+| nibble!         | val nibbleAddr --             |
++-----------------+-------------------------------+
+| nibble!+        | val nibbleAddr -- nibbleAddr+1|
++-----------------+-------------------------------+
+| packString      | strAddr --                    |
++-----------------+-------------------------------+
+| printPack       | strAddr --                    |
++-----------------+-------------------------------+
+| getPackedLength | strAddr -- strLen             |
++-----------------+-------------------------------+
 
 
 }doc

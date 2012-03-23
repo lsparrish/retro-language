@@ -6,10 +6,20 @@
    Copyright (c) 2011,        Kenneth Keating
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #include <stdio.h>
-//#include <stdlib.h>
+#include <stdlib.h>
 #include <time.h>
-//#include <unistd.h>
-//#include <string.h>
+#ifndef _WIN32
+  #include <unistd.h>
+#endif
+#include <string.h>
+#ifdef _WIN32
+  #include "curses.h"
+#else
+  #include <curses.h>
+#endif
+/* ATH */
+#include <sys/stat.h>
+#include <errno.h>
 
 /* Configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -34,7 +44,11 @@
    Use -DRXBE to enable the BE suffix for big endian images. This is
    only useful on big endian systems.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-#define CELL            int//int32_t
+#ifdef _WIN32
+  #define CELL            int//int32_t
+#else
+  #define CELL            int32_t
+#endif
 #define IMAGE_SIZE      1000000
 #define ADDRESSES          1024
 #define STACK_DEPTH         128
@@ -117,13 +131,16 @@ void rxGetString(VM *vm, int starting)
 }
 
 /* Console I/O Support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-void rxWriteConsole(VM *vm, CELL c) {
-  (c > 0) ? putchar((char)c) : printf("\033[2J\033[1;1H");
-  /* Erase the previous character if c = backspace */
-  if (c == 8) {
-    putchar(32);
-    putchar(8);
+void rxWriteConsole(CELL c) {
+  if (c >= 0)
+  {
+    addch((char)c);
   }
+  else
+  {
+    clear();
+  }
+  refresh();
 }
 
 CELL rxReadConsole(VM *vm) {
@@ -149,9 +166,13 @@ void rxPrepareInput(VM *vm) {
 }
 
 void rxPrepareOutput(VM *vm) {
+  initscr();                /* initialize the curses library */
+  cbreak();                 /* take input chars one at a time, no wait for \n */
+  scrollok(stdscr, TRUE);   /* Allow the display to scroll */
 }
 
 void rxRestoreIO(VM *vm) {
+  endwin();
 }
 
 /* File I/O Support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -290,6 +311,7 @@ void rxQueryEnvironment(VM *vm) {
     {
       vm->image[dest] = *r;
       dest++;
+      vm->image[dest] = 0;
       r++;
     }
   else
@@ -307,7 +329,7 @@ void rxDeviceHandler(VM *vm) {
 
     /* Output (character generator) */
     if (vm->ports[2] == 1) {
-      rxWriteConsole(vm, TOS); DROP
+      rxWriteConsole(TOS); DROP
       vm->ports[2] = 0;
       vm->ports[0] = 1;
     }
@@ -368,9 +390,9 @@ void rxDeviceHandler(VM *vm) {
         case -10: vm->ports[5] = 0;
                   rxQueryEnvironment(vm);
                   break;
-        case -11: vm->ports[5] = 0;
+        case -11: vm->ports[5] = getmaxx(stdscr);
                   break;
-        case -12: vm->ports[5] = 0;
+        case -12: vm->ports[5] = getmaxy(stdscr);
                   break;
         case -13: vm->ports[5] = CELLSIZE;
                   break;
@@ -635,6 +657,10 @@ int main(int argc, char **argv) {
   VM *vm;
   int i, wantsStats;
 
+  /* ATH */
+  char *env;
+  struct stat sts;
+
   wantsStats = 0;
   vm = calloc(sizeof(VM), sizeof(char));
   strcpy(vm->filename, LOCAL_FNAME);
@@ -662,6 +688,26 @@ int main(int argc, char **argv) {
     }
   }
 
+  /* ATH - 26 January 2012
+   *
+   * Check for the existence of the file name held in vm->filename.
+   * If it does not exist read the env variable RETROIMAGE and check for the existence of that file.
+   * If that does not exists exit with an error.
+   *
+   */
+
+  if ( ( stat( vm->filename, &sts) == -1 ) && errno == ENOENT ) {
+      // File doesn't exist, get the environment variable.
+      //
+      env = (char *)getenv("RETROIMAGE");
+      if( !env ) {
+        fprintf(stderr,"No image file and environment variable RETROIMAGE not set.\n");
+        exit(1);
+      } else {
+          strncpy(vm->filename, env,sizeof(vm->filename));
+          fprintf(stderr,"Loading image from %s\n", env);
+      }
+  }
   if (rxLoadImage(vm, vm->filename) == 0) {
     printf("Sorry, unable to find %s\n", vm->filename);
     free(vm);
@@ -679,4 +725,3 @@ int main(int argc, char **argv) {
   free(vm);
   return 0;
 }
-

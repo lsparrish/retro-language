@@ -41,6 +41,9 @@ clean:
 	rm -f retroImage16BE retroImageBE retroImage64BE
 	rm -f *~
 
+cleaner:
+	rm -f `find . | grep \~`
+
 webdocs:
 	sh tools/exportHTML.sh doc
 	mv doc/*.html www/docs

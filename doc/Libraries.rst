@@ -256,7 +256,7 @@ Example
   'g 2 ^bad'b!
   'h 3 ^bad'b!
   ^bad'pool @ putn
-  2 ^bad'@ putn
+  2 ^bad'b@ putn
 
 
 ---------
@@ -699,6 +699,9 @@ Functions
 | isWhitespace? | c-f     | Return true if character is a space, tab, or   |
 |               |         | end of line. Returns false otherwise           |
 +---------------+---------+------------------------------------------------+
+| isVisible?    | c-f     | Return true if character is visible, or false  |
+|               |         | if it is a control-type character              |
++---------------+---------+------------------------------------------------+
 | toUpper       | c-c     | Convert a lowercase character to uppercase.    |
 |               |         | This will only work on a lowercase character.  |
 +---------------+---------+------------------------------------------------+
@@ -851,6 +854,37 @@ Functions
 +-----------------+-------+----------------------------------------------------+
 | keyword:decrypt | $-$   | Decrypt a string using keyword encryption          |
 +-----------------+-------+----------------------------------------------------+
+
+========
+decimal'
+========
+
+
+--------
+Overview
+--------
+
+This vocabulary provides a prefix and some functions for working with
+simple decimal values. It's not intended as a replacement for fixed or
+floating point math.
+
+
+---------
+Functions
+---------
+
++----------+-------+-------------------------------------------------------+
+| Function | Stack | Usage                                                 |
++==========+=======+=======================================================+
+| __d      | "-n   | Prefix to parse a value like "nn.nnn" into an integer |
++----------+-------+-------------------------------------------------------+
+| putn     | n-    | Display a decimal number, based on **scale**          |
++----------+-------+-------------------------------------------------------+
+| scale    | -a    | Variable containing the number of decimal places      |
++----------+-------+-------------------------------------------------------+
+| split    | -n    | Return a factor to divide by for display/working with |
+|          |       | decimal values                                        |
++----------+-------+-------------------------------------------------------+
 
 ==========
 decompose'
@@ -1581,6 +1615,73 @@ Functions
 | odd?       | n-f   | Returns a flag indicating whether or not a number is|
 |            |       | false                                               |
 +------------+-------+-----------------------------------------------------+
+
+========
+queries'
+========
+
+--------
+Overview
+--------
+
+This library provides symbolic constants and helper functions for
+using the VM queries in a clean, portable manner.
+
+
+---------
+Functions
+---------
+
++------------------------+-----+------------------------------+
+| MEMORY-SIZE            | -n  | Query for determining amount |
+|                        |     | of memory provided by the    |
+|                        |     | virtual machine              |
++------------------------+-----+------------------------------+
+| CANVAS?                | -n  | Query for determining whether|
+|                        |     | the virtual machine provides |
+|                        |     | a canvas device              |
++------------------------+-----+------------------------------+
+| CANVAS-WIDTH           | -n  | Query returning canvas width |
++------------------------+-----+------------------------------+
+| CANVAS-HEIGHT          | -n  | Query returning canvas height|
++------------------------+-----+------------------------------+
+| STACK-DEPTH            | -n  | Query returning data stack   |
+|                        |     | depth                        |
++------------------------+-----+------------------------------+
+| ADDRESS-STACK-DEPTH    | -n  | Query returning address stack|
+|                        |     | depth                        |
++------------------------+-----+------------------------------+
+| MOUSE?                 | -n  | Query for determining if the |
+|                        |     | virtual machine provides a   |
+|                        |     | mouse device                 |
++------------------------+-----+------------------------------+
+| TIME                   | -n  | Query returning current time |
+|                        |     | in seconds                   |
++------------------------+-----+------------------------------+
+| QUIT-VM                | -n  | Query to shutdown the virtual|
+|                        |     | machine                      |
++------------------------+-----+------------------------------+
+| HOST-ENVIRONMENT-QUERY | -n  | Query to lookup and return   |
+|                        |     | the value of an environment  |
+|                        |     | variable in the host system  |
++------------------------+-----+------------------------------+
+| CONSOLE-WIDTH          | -n  | Query returning the console  |
+|                        |     | width                        |
++------------------------+-----+------------------------------+
+| CONSOLE-HEIGHT         | -n  | Query returning the console  |
+|                        |     | height                       |
++------------------------+-----+------------------------------+
+| BITS-PER-CELL          | -n  | Query returning the number of|
+|                        |     | bits in a cell               |
++------------------------+-----+------------------------------+
+| ENDIAN                 | -n  | Query returning a flag which |
+|                        |     | indicates endian used by the |
+|                        |     | virtual machine              |
++------------------------+-----+------------------------------+
+| query                  | ?-? | Perform a query. Actual stack|
+|                        |     | effect varies by query       |
++------------------------+-----+------------------------------+
+
 
 ======
 stack'

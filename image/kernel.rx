@@ -20,8 +20,8 @@ variable which        ( Pointer to dictionary header of the most recently     )
 TIB  variable: <tib>  ( Start of default text input buffer                    )
 
 label: copytag   "Retro" $,
-label: version   "11.3" $,
-label: build     "2012.03.04" $,
+label: version   "11.4" $,
+label: build     "2012.03.19" $,
 label: okmsg     "ok  " $,
 pad
 
@@ -99,7 +99,7 @@ i: ws        ( c-c )
    dup,   13 # =if drop, 10 # then
    remapping # @, 0; drop,
    dup,   10 # =if drop, 32 # then
-   tabAsWhitespace # @, 0 # !if dup, 9 # =if drop, 32 # then then ;
+   tabAsWhitespace # @, 0; drop dup, 9 # =if drop, 32 # then ;
 
 i: <getc> (  -c ) 1 # 1 # out, wait 1 # in, ;
 t: getc   (  -c ) repeat <getc> remapKeys dup 0 # !if ws ; then drop, again ;
@@ -330,16 +330,16 @@ endKernel shrink bootNew
 
 ( Scope ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 create list  ( -a )  0 , 0 ,
-: {{ ( - )  vector off last @ dup list ! list 1+ ! ;
+: {{ ( - )  vector off last @ dup list !+ ! ;
 : ---reveal--- ( - ) vector on last @ list 1+ ! ;
 : }} ( - )
-  vector on list @ list 1+ @ =
+  vector on list @+ swap @ =
   [ list @ last ! ]
   [ list @ [ last repeat @ dup @ list 1+ @ <> 0; drop again ] do ! ] if ;
 
 ( Vectored Execution ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-: :devector ( a-  ) dup 0 swap ! 1+ 0 swap ! ;
-: :is       ( aa- ) dup 8 swap ! 1+ ! ;
+: :devector ( a-  ) 0 swap !+ 0 swap ! ;
+: :is       ( aa- ) 8 swap !+ ! ;
 : devector  ( "-  ) ' 0; :devector ;
 : is        ( a"- ) ' 0; :is ;
 : default:  ( "-  ) ' 2 + , ; ' .macro last @ d->class !
@@ -434,10 +434,10 @@ here
 }}
 
 {{
-  : <each> (  qa- ) [ dup [ swap dup &do dip ] dip 1+ ] times 2drop ;
-  : array  (  aq- ) swap @+ dup 1 > [ <each> ] [ 2drop ] if ;
-  : buffer ( anq- ) 2rot <each> ;
-  : list   (  lq- ) [ &@ dip 2over [ [ do ] dip ] dip over @ ] while 2drop ;
+  : each   (  qa- ) [ [ swap dup &do dip ] sip 1+ ] times 2drop ;
+  : array  (  aq- ) swap @+ dup 1 > [ each ] [ 2drop ] if ;
+  : buffer ( anq- ) 2rot each ;
+  : list   (  lq- ) [ &@ dip 2over [ &do dip ] dip over @ ] while 2drop ;
 ---reveal---
   : <each@> ( ...t- ) drop ;
   : each@   ( ...t- )
@@ -635,8 +635,7 @@ create dicts 64 allot
       putc
     again ;
   : simple ( $- ) [ @ putc ] 2 ( STRING ) each@ ;
-  : defer  ( q- ) update off do update on redraw ;
-  [ [ @formatted [ complex drop ] &simple if ] defer ] is <puts>
+  [ update off @formatted [ complex drop ] &simple if update on redraw ] is <puts>
 }}
 
 ( Debugging ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
@@ -732,12 +731,12 @@ chain: strings'
     buffer 0 STRING-LENGTH fill
     !right !left !src
     @src @left + @right buffer swap copy buffer tempString ;
-  : trimLeft  ( $-$ ) [ @+ [ 32 = ] [ 0 <> ] bi = ] while 1- ;
+  : trimLeft  ( $-$ ) [ @+ [ 32 = ] [ 0 <> ] bi and ] while 1- ;
   : trimRight ( $-$ )
     buffer [ 0 STRING-LENGTH fill ] [ over getLength copy ] [ trim ] tri tempString ;
   : prepend ( $$-$ )
     buffer 0 STRING-LENGTH fill
-    withLength buffer swap dup &copy dip
+    withLength buffer swap &copy sip
     &withLength dip buffer + swap copy buffer tempString ;
   : append ( $$-$ ) swap prepend ;
   : appendChar ( $c-$ ) swap tempString [ withLength + !+ 0 swap ! ] sip ;
