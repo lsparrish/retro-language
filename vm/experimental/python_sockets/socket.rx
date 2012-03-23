@@ -1,3 +1,4 @@
+chain: socket'
 {{
     : ?CR  
 	over 1+ @ 'n = [ drop over 10 swap ! 1+ 0 ] [ -1 ] if ;
@@ -19,45 +20,51 @@
 	?ESCAPE COPYVAL COPYNULL 
 	1+ swap 1+ swap again ;
 	    
-	---reveal---    
+---reveal---    
 	
     : NORMALIZE 
 	_NORMALIZE 2drop ;
 	    
     : PRINTCHARS ( string -- )
 	swap [ dup @ putc 1+ ] times drop ;
+	
+    : connect ( addr port -- sock )         
+	#1 #15 out #0 #0 out wait ;
+    : close   ( sock -- status )             
+	#2 #15 out #0 #0 out wait ;
+    : read    ( sock count buffer -- count )   
+	#3 #15 out #0 #0 out wait ;
+    : write   ( sock length buffer -- count ) 
+	#4 #15 out #0 #0 out wait ;
+
+    : copyargs ( v1 v2 v3 -- v1 v2 v3 v1 v2 v3 )
+	[ 2over ] dip dup [ 2rot ] dip ;
 }}
-
-: connect ( addr port -- sock )         
-    #1 #15 out #0 #0 out wait ;
-: close   ( sock -- status )             
-    #2 #15 out #0 #0 out wait ;
-: read    ( sock count buffer -- count )   
-    #3 #15 out #0 #0 out wait ;
-: write   ( sock length buffer -- count ) 
-    #4 #15 out #0 #0 out wait ;
-
-: copyargs ( v1 v2 v3 -- v1 v2 v3 v1 v2 v3 )
-    [ 2over ] dip dup [ 2rot ] dip ;
+;chain
 
 ( Create read buffer )
 create buffer 1024 allot 
 
 ( Create socket )
-variable socket
+variable sock
 
-( Connect assign socket )
-"www.osnews.com" 80 connect socket ! 
+: testTCPClient ( -- closeStatus )
 
-( Request Page )
-socket @ "GET / HTTP/1.1\r\nHost: www.osnews.com\r\n\r\n" 
-    NORMALIZE withLength swap write
+    ( Connect assign socket )
+    "www.osnews.com" 80 ^socket'connect sock ! 
 
-( Print results )
-socket @ 1024 buffer
-[ copyargs read dup buffer PRINTCHARS 0 > ] while
-2drop 2drop
+    ( Request Page )
+    sock @ "GET / HTTP/1.1\r\nHost: www.osnews.com\r\n\r\n" 
+    ^socket'NORMALIZE withLength swap ^socket'write
 
-( Close Socket )
-socket @ close
+    ( Print results )
+    sock @ 1024 buffer
+    [ ^socket'copyargs ^socket'read dup buffer ^socket'PRINTCHARS 0 > ] while
+    2drop 2drop
+
+    ( Close Socket )
+    sock @ ^socket'close
+;
+
+testTCPClient
 
