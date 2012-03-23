@@ -52,7 +52,7 @@ variable socket
 "www.osnews.com" 80 connect socket ! 
 
 ( Request Page )
-socket @ "GET / HTTP/1.1\r\n\r\n" NORMALIZE withLength swap write
+socket @ "GET / HTTP/1.1\r\nHost: www.osnews.com\r\n\r\n" NORMALIZE withLength swap write
 
 ( Print results )
 socket @ 1024 buffer
