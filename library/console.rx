@@ -1,15 +1,37 @@
 ( VT100/ANSI Console Words ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+needs enum'
+needs queries'
+
 chain: console'
+  0 ^enum'enum| BLACK RED GREEN YELLOW BLUE MAGENTA CYAN WHITE |
+
+  : setCursor   ( rc- )  1 8 out wait ;
+  : foreground  (  n- )  2 8 out wait ;
+  : background  (  n- )  3 8 out wait ;
+
+  : console?  ( -f )  ^queries'CONSOLE? ^queries'query ;
+
  -1 variable: colors
-  : esc    ( $- ) @colors &puts &drop if ;
-  : black   ( - ) "\[30m" esc ;  : onBlack   ( - ) "\[40m" esc ;
-  : red     ( - ) "\[31m" esc ;  : onRed     ( - ) "\[41m" esc ;
-  : green   ( - ) "\[32m" esc ;  : onGreen   ( - ) "\[42m" esc ;
-  : yellow  ( - ) "\[33m" esc ;  : onYellow  ( - ) "\[43m" esc ;
-  : blue    ( - ) "\[34m" esc ;  : onBlue    ( - ) "\[44m" esc ;
-  : magenta ( - ) "\[35m" esc ;  : onMagenta ( - ) "\[45m" esc ;
-  : cyan    ( - ) "\[36m" esc ;  : onCyan    ( - ) "\[46m" esc ;
-  : white   ( - ) "\[37m" esc ;  : onWhite   ( - ) "\[47m" esc ;
+
+  : setFG     ( n- ) console? [ foreground ] [ "\[3%dm" puts ] if ;
+  : black      ( - )  @colors 0; drop BLACK   setFG ;
+  : red        ( - )  @colors 0; drop RED     setFG ;
+  : green      ( - )  @colors 0; drop GREEN   setFG ;
+  : yellow     ( - )  @colors 0; drop YELLOW  setFG ;
+  : blue       ( - )  @colors 0; drop BLUE    setFG ;
+  : magenta    ( - )  @colors 0; drop MAGENTA setFG ;
+  : cyan       ( - )  @colors 0; drop CYAN    setFG ;
+  : white      ( - )  @colors 0; drop WHITE   setFG ;
+  : setBG     ( n- ) console? [ background ] [ "\[4%dm" puts ] if ;
+  : onBlack    ( - )  @colors 0; drop BLACK   setBG ;
+  : onRed      ( - )  @colors 0; drop RED     setBG ;
+  : onGreen    ( - )  @colors 0; drop GREEN   setBG ;
+  : onYellow   ( - )  @colors 0; drop YELLOW  setBG ;
+  : onBlue     ( - )  @colors 0; drop BLUE    setBG ;
+  : onMagenta  ( - )  @colors 0; drop MAGENTA setBG ;
+  : onCyan     ( - )  @colors 0; drop CYAN    setBG ;
+  : onWhite    ( - )  @colors 0; drop WHITE   setBG ;
+
   : normal  ( - ) "\[0m"  esc ;  : bold      ( - ) "\[1m"  esc ;
   : at-xy   ( xy- ) "\[%d;%dH" esc ;
   : home    ( - ) 0 0 at-xy ;

@@ -227,7 +227,22 @@ def handle_devices()
               when -11 then 0      # console width
               when -12 then 0      # console height
               when -13 then 32     # bits per cell
+              when -14 then 0      # endian
+              when -15 then 1      # console support
               end
+
+  case @ports[8]
+    when 1 then
+      @stack.swap
+      print "\33[" + @stack.pop.to_s + ";" + @stack.pop.to_s + "H"
+    when 2 then
+      print "\33[3" + @stack.pop.to_s + "m"
+    when 3 then
+      print "\33[4" + @stack.pop.to_s + "m"
+  end
+  @ports[8] = 0
+
+
 end
 # -----------------------------------------------------------------------------
 def process()
