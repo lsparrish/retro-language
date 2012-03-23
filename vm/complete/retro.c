@@ -398,6 +398,26 @@ void rxDeviceHandler(VM *vm) {
         default:  vm->ports[5] = 0;
       }
     }
+
+    if (vm->ports[8] != 0) {
+      switch (vm->ports[8]) {
+        case 1: vm->ports[8] = 0;
+                printf("\e[%d;%dH", NOS, TOS);
+                DROP; DROP;
+                break;
+        case 2: vm->ports[8] = 0;
+                printf("\e[3%dm", TOS);
+                DROP;
+                break;
+        case 3: vm->ports[8] = 0;
+                printf("\e[4%dm", TOS);
+                DROP;
+                break;
+        case 4: vm->ports[8] = 0;
+                break;
+        default: vm->ports[8] = 0;
+      }
+    }
   }
 }
 
