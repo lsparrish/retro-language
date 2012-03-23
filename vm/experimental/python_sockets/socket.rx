@@ -60,6 +60,8 @@ variable sock
     ( Print results )
     sock @ 1024 buffer
     [ ^socket'copyargs ^socket'read dup buffer ^socket'PRINTCHARS 0 > ] while
+    
+    ( drop result of copyargs left on the stack )
     2drop drop
 
     ( Close Socket )
