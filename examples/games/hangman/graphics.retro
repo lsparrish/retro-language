@@ -10,8 +10,9 @@ needs console'
 
 ( --[ Drawing Routines ]-------------------------------------- )
 
-: bar ( xyn- ) [ ^console'at-xy ] dip [ '- putc ] times ;
-: col ( xyn- ) [ 2over ^console'at-xy '| putc 1+ ] times 2drop ;
+: at-xy  ( cr- ) swap ^console'setCursor ;
+: bar ( xyn- ) [ at-xy ] dip [ '- putc ] times ;
+: col ( xyn- ) [ 2over at-xy '| putc 1+ ] times 2drop ;
 
 ( --[ Stages ]------------------------------------------------ )
 
@@ -27,15 +28,15 @@ graphics variable: current-graphic
 [ 20 15 15                 bar ]   graphic,
 [ 20  5 10                 col ]   graphic,
 [ 20  5 15                 bar ]   graphic,
-[ 21  6 ^console'at-xy '/ putc ]   graphic,
+[ 21  6 at-xy '/ putc ]   graphic,
 [ 30  6  2                 col ]   graphic,
-[ 30  8 ^console'at-xy '@ putc ]   graphic,
+[ 30  8 at-xy '@ putc ]   graphic,
 [ 30  9  1                 col ]   graphic,
-[ 29  9 ^console'at-xy '/ putc ]   graphic,
-[ 31  9 ^console'at-xy '\ putc ]   graphic,
+[ 29  9 at-xy '/ putc ]   graphic,
+[ 31  9 at-xy '\ putc ]   graphic,
 [ 30  9  1                 col ]   graphic,
 [ 30 10  1                 col ]   graphic,
-[ 29 11 ^console'at-xy '/ putc ]   graphic,
-[ 31 11 ^console'at-xy '\ putc ]   graphic,
+[ 29 11 at-xy '/ putc ]   graphic,
+[ 31 11 at-xy '\ putc ]   graphic,
 
 ( ============================================================ )

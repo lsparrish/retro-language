@@ -54,7 +54,7 @@ create foul-addr lives allot
 : .guessed  ( - )  @guessed puts ;
 : .input    ( - )  @lifeline "Tries: (%d): " puts ;
 : .fouls    ( - )  "Fouls: " puts foul-addr puts ;
-: .prompt   ( - )  0 0 ^console'at-xy .guessed cr .fouls cr .input ;
+: .prompt   ( - )  0 0 at-xy .guessed cr .fouls cr .input ;
 : .already  ( - )  " [already guessed]" puts ;
 : .correct  ( - )  " [correct guess]  " puts ;
 : .graphic  ( - )  lives @lifeline - 1- graphics + @ do ;
@@ -91,7 +91,7 @@ create foul-addr lives allot
 : remaining ( -f )  guessed @ '_ has ;
 : alive     ( -f )  remaining lifeline @ 0<> and ;
 : dead?     ( -f )  alive not ;
-: foot      (  - )  0 20 ^console'at-xy ;
+: foot      (  - )  0 20 at-xy ;
 : .lose     (  - )  foot "You LOSE; the word was: " puts .target ;
 : .win      (  - )  foot .target "\nYou WIN!" puts ;
 : endgame   (  - )  @lifeline &.win &.lose if ;

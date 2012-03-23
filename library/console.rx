@@ -5,37 +5,13 @@ needs queries'
 chain: console'
   0 ^enum'enum| BLACK RED GREEN YELLOW BLUE MAGENTA CYAN WHITE |
 
-  : setCursor   ( rc- )  1 8 out wait ;
-  : foreground  (  n- )  2 8 out wait ;
-  : background  (  n- )  3 8 out wait ;
-
   : console?  ( -f )  ^queries'CONSOLE? ^queries'query ;
 
- -1 variable: colors
-
-  : setFG     ( n- ) console? [ foreground ] [ "\[3%dm" puts ] if ;
-  : black      ( - )  @colors 0; drop BLACK   setFG ;
-  : red        ( - )  @colors 0; drop RED     setFG ;
-  : green      ( - )  @colors 0; drop GREEN   setFG ;
-  : yellow     ( - )  @colors 0; drop YELLOW  setFG ;
-  : blue       ( - )  @colors 0; drop BLUE    setFG ;
-  : magenta    ( - )  @colors 0; drop MAGENTA setFG ;
-  : cyan       ( - )  @colors 0; drop CYAN    setFG ;
-  : white      ( - )  @colors 0; drop WHITE   setFG ;
-  : setBG     ( n- ) console? [ background ] [ "\[4%dm" puts ] if ;
-  : onBlack    ( - )  @colors 0; drop BLACK   setBG ;
-  : onRed      ( - )  @colors 0; drop RED     setBG ;
-  : onGreen    ( - )  @colors 0; drop GREEN   setBG ;
-  : onYellow   ( - )  @colors 0; drop YELLOW  setBG ;
-  : onBlue     ( - )  @colors 0; drop BLUE    setBG ;
-  : onMagenta  ( - )  @colors 0; drop MAGENTA setBG ;
-  : onCyan     ( - )  @colors 0; drop CYAN    setBG ;
-  : onWhite    ( - )  @colors 0; drop WHITE   setBG ;
-
-  : normal  ( - ) "\[0m"  esc ;  : bold      ( - ) "\[1m"  esc ;
-  : at-xy   ( xy- ) "\[%d;%dH" esc ;
-  : home    ( - ) 0 0 at-xy ;
-  : dimensions ( -hw ) @ch @cw ;
+  : setCursor   ( rc-   )  console? [ 1 8 out wait ] [ "\[%d;%dH" puts ] if ;
+  : foreground  (  n-   )  console? [ 2 8 out wait ] [ "\[3%dm" puts ]   if ;
+  : background  (  n-   )  console? [ 3 8 out wait ] [ "\[4%dm" puts ]   if ;
+  : home        (   -   )  0 0 setCursor ;
+  : dimensions  (   -hw )  @ch @cw ;
 ;chain
 
 
