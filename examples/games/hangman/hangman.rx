@@ -11,8 +11,8 @@ needs console'
 ( File inclusion will only work if you're running retro from   )
 ( the same directory as hangman.                               )
 
-include graphics.retro
-include dict.retro
+include graphics.rx
+include dict.rx
 
 ( --[ Variables ]--------------------------------------------- )
 

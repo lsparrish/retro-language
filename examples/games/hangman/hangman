@@ -11,4 +11,4 @@ if [ ! -f "library" ]; then
   ln -s ../../../library .
 fi
 
-../../../retro --image ../../../retroImage --with hangman.retro
+../../../retro --image ../../../retroImage --with hangman.rx
