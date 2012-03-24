@@ -17,8 +17,8 @@ include dict.retro
 ( --[ Variables ]--------------------------------------------- )
 
 variables| target guessed lifeline this-char foul-count |
-stages constant lives                     ( see graphics.retro )
-create foul-addr lives allot
+STAGES constant LIVES                     ( see graphics.retro )
+create foul-addr LIVES allot
 
 ( --[ Offset Calculation ]------------------------------------ )
 
@@ -57,7 +57,7 @@ create foul-addr lives allot
 : .prompt   ( - )  0 0 at-xy .guessed cr .fouls cr .input ;
 : .already  ( - )  " [already guessed]" puts ;
 : .correct  ( - )  " [correct guess]  " puts ;
-: .graphic  ( - )  lives @lifeline - 1- graphics + @ do ;
+: .graphic  ( - )  LIVES @lifeline - 1- graphics + @ do ;
 : .wrong    ( - )  " [not present]    " puts .graphic ;
 
 ( --[ Guessing ]---------------------------------------------- )
@@ -85,9 +85,9 @@ create foul-addr lives allot
 : >target  ( $-  )  withLength swap !target _string !guessed ;
 
 : 0fouls    ( -  )  0 !foul-count
-                    foul-addr lives [ 0 over ! 1+ ] times drop ;
+                    foul-addr LIVES [ 0 over ! 1+ ] times drop ;
 
-: revive    ( -  )  lives !lifeline 0fouls ;
+: revive    ( -  )  LIVES !lifeline 0fouls ;
 : remaining ( -f )  guessed @ '_ has ;
 : alive     ( -f )  remaining lifeline @ 0<> and ;
 : dead?     ( -f )  alive not ;

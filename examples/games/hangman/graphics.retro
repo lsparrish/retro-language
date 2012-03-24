@@ -18,9 +18,9 @@ needs console'
 
 ( NOTE: 13 is FIXED unless we add more drawing XTs )
 
-13 constant stages
+13 constant STAGES
 
-create graphics stages allot
+create graphics STAGES allot
 graphics variable: current-graphic
 
 : graphic, @current-graphic ! current-graphic ++ ;
