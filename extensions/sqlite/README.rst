@@ -1,7 +1,6 @@
 sqlite bindings for Retro
 =========================
-This tool and vocabulary provide a bridge between an SQLite3
-database and Retro.
+This tool and vocabulary provide a bridge between an SQLite3 database and Retro.
 
 
 Server
@@ -56,7 +55,7 @@ Loading
 
 Option 1
 ~~~~~~~~
-Put the *sqlite.rx* in the directory with your image, and do:
+Put the *sql.rx* in the directory with your image, and do:
 
 ::
 
