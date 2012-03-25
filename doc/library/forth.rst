@@ -109,4 +109,12 @@ Functions
 | lateBinding | ``$-``   | "on" binds names to functions after execution of   |
 |             |          | **;**, "off" binds immediately                     |
 +-------------+----------+----------------------------------------------------+
+| pick        |...n-..m  | Evil function to access arbitrary stack items      |
++-------------+----------+----------------------------------------------------+
+| roll        | xu xu-1  | Remove u. Rotate u+1 items on the top of the stack |
+|             | ... x0 u |                                                    |
+|             | -- xu-1  |                                                    |
+|             | ... x0 xu|                                                    |
++-------------+----------+----------------------------------------------------+
+
 
