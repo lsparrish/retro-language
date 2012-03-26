@@ -1,5 +1,7 @@
+doc{
 This is a port of the Forth code; but returns a string rather than displaying
 the roman numerals. It only handles numbers between 1 and 3999.
+}doc
 
 : vector ( ...n"- )
   here [ &, times ] dip : .data ` swap ` + ` @ ` do ` ; ;
@@ -21,8 +23,9 @@ the roman numerals. It only handles numbers between 1 and 3999.
 
 : record ( an- )
   10 /mod dup [ [ over 2 + ] dip record ] &drop if .digit ;
+
 : toRoman   ( n-a )
   here ^buffer'set
-  dup 1 3999 within 0 =
-  [ "EX LIMITO!\n" ] [ "IVXLCDM" swap record here ] if ;
+  dup 1 3999 within
+  [ "IVXLCDM" swap record here ] [ "EX LIMITO!\n" ] if ;
 
