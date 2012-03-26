@@ -26,7 +26,7 @@ create dict-word 80 allot
                       [ "failed"     ] if "\nInitialization %s." puts
                     ] ifTrue ;
 
-: toRandom  ( n-n ) random swap /mod drop ;
+: toRandom  ( n-n ) random swap mod ;
 : rand-off   ( -n ) @dict-size toRandom ;
 : rand-pos   ( -n ) rand-off @dict ^files'seek drop ;
 
