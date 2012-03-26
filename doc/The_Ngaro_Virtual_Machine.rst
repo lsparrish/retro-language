@@ -251,6 +251,8 @@ Set port 5 to one of the following values; wait; then read the result back.
 +-------+---------------------------------------+
 | -14   | 0 for little endian, 1 for big endian |
 +-------+---------------------------------------+
+| -15   | -1 if Port 8 enabled, 0 if disabled   |
++-------+---------------------------------------+
 
 At a minimum, an implementation must provide support for -1, -5, -6, -8, and -9.
 
@@ -354,6 +356,53 @@ pushed to the data stack.
 |       | indicate the button being pressed, but|
 |       | this is not required.                 |
 +-------+---------------------------------------+
+
+
+Port 8: Enhanced Text Console
+=============================
+Set port 8 to one of the following values and wait.
+
+*This device is optional.*
+
+Due to platform constraints, implementations may not offer all of these
+functions. An implementation providing this port should at least support
+cursor positioning. *Any non-implemented functions should be silently
+ignored.*
+
+An implementation may provide additional, non-standard functionality
+using negative values.
+
++-------+-------+--------------------------------------------------------+
+| value | stack | action                                                 |
++=======+=======+========================================================+
+| 1     | rc-   | Move the cursor to the specified row and column        |
++-------+-------+--------------------------------------------------------+
+| 2     | n-    | Set the foreground text color                          |
++-------+-------+--------------------------------------------------------+
+| 3     | n-    | Set the background color                               |
++-------+-------+--------------------------------------------------------+
+
+The VM is expected to understand the following colors:
+
++-------+-----------------+
+| value | color           |
++=======+=================+
+| 0     | Black           |
++-------+-----------------+
+| 1     | Red             |
++-------+-----------------+
+| 2     | Green           |
++-------+-----------------+
+| 3     | Yellow          |
++-------+-----------------+
+| 4     | Blue            |
++-------+-----------------+
+| 5     | Magenta         |
++-------+-----------------+
+| 6     | Cyan            |
++-------+-----------------+
+| 7     | White           |
++-------+-----------------+
 
 
 ---------------

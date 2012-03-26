@@ -307,6 +307,9 @@ the deletion fails.</p>
 <tr><td>-14</td>
 <td>0 for little endian, 1 for big endian</td>
 </tr>
+<tr><td>-15</td>
+<td>-1 if Port 8 enabled, 0 if disabled</td>
+</tr>
 </tbody>
 </table>
 <p>At a minimum, an implementation must provide support for -1, -5, -6, -8, and -9.</p>
@@ -462,6 +465,82 @@ on TOS when done. X will be NOS.</td>
 non-zero is true. True values <em>may</em>
 indicate the button being pressed, but
 this is not required.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="port-8-enhanced-text-console">
+<h2>Port 8: Enhanced Text Console</h2>
+<p>Set port 8 to one of the following values and wait.</p>
+<p><em>This device is optional.</em></p>
+<p>Due to platform constraints, implementations may not offer all of these
+functions. An implementation providing this port should at least support
+cursor positioning. <em>Any non-implemented functions should be silently
+ignored.</em></p>
+<p>An implementation may provide additional, non-standard functionality
+using negative values.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="10%" />
+<col width="10%" />
+<col width="80%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">value</th>
+<th class="head">stack</th>
+<th class="head">action</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>1</td>
+<td>rc-</td>
+<td>Move the cursor to the specified row and column</td>
+</tr>
+<tr><td>2</td>
+<td>n-</td>
+<td>Set the foreground text color</td>
+</tr>
+<tr><td>3</td>
+<td>n-</td>
+<td>Set the background color</td>
+</tr>
+</tbody>
+</table>
+<p>The VM is expected to understand the following colors:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="29%" />
+<col width="71%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">value</th>
+<th class="head">color</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>0</td>
+<td>Black</td>
+</tr>
+<tr><td>1</td>
+<td>Red</td>
+</tr>
+<tr><td>2</td>
+<td>Green</td>
+</tr>
+<tr><td>3</td>
+<td>Yellow</td>
+</tr>
+<tr><td>4</td>
+<td>Blue</td>
+</tr>
+<tr><td>5</td>
+<td>Magenta</td>
+</tr>
+<tr><td>6</td>
+<td>Cyan</td>
+</tr>
+<tr><td>7</td>
+<td>White</td>
 </tr>
 </tbody>
 </table>

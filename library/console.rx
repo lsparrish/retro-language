@@ -1,19 +1,17 @@
 ( VT100/ANSI Console Words ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+needs enum'
+needs queries'
+
 chain: console'
- -1 variable: colors
-  : esc    ( $- ) @colors &puts &drop if ;
-  : black   ( - ) "\[30m" esc ;  : onBlack   ( - ) "\[40m" esc ;
-  : red     ( - ) "\[31m" esc ;  : onRed     ( - ) "\[41m" esc ;
-  : green   ( - ) "\[32m" esc ;  : onGreen   ( - ) "\[42m" esc ;
-  : yellow  ( - ) "\[33m" esc ;  : onYellow  ( - ) "\[43m" esc ;
-  : blue    ( - ) "\[34m" esc ;  : onBlue    ( - ) "\[44m" esc ;
-  : magenta ( - ) "\[35m" esc ;  : onMagenta ( - ) "\[45m" esc ;
-  : cyan    ( - ) "\[36m" esc ;  : onCyan    ( - ) "\[46m" esc ;
-  : white   ( - ) "\[37m" esc ;  : onWhite   ( - ) "\[47m" esc ;
-  : normal  ( - ) "\[0m"  esc ;  : bold      ( - ) "\[1m"  esc ;
-  : at-xy   ( xy- ) "\[%d;%dH" esc ;
-  : home    ( - ) 0 0 at-xy ;
-  : dimensions ( -hw ) @ch @cw ;
+  0 ^enum'enum| BLACK RED GREEN YELLOW BLUE MAGENTA CYAN WHITE |
+
+  : console?  ( -f )  ^queries'CONSOLE? ^queries'query ;
+
+  : setCursor   ( rc-   )  console? [ 1 8 out wait ] [ "\[%d;%dH" puts ] if ;
+  : foreground  (  n-   )  console? [ 2 8 out wait ] [ "\[3%dm" puts ]   if ;
+  : background  (  n-   )  console? [ 3 8 out wait ] [ "\[4%dm" puts ]   if ;
+  : home        (   -   )  0 0 setCursor ;
+  : dimensions  (   -hw )  @ch @cw ;
 ;chain
 
 

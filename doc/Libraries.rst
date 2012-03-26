@@ -1330,6 +1330,14 @@ Functions
 | lateBinding | ``$-``   | "on" binds names to functions after execution of   |
 |             |          | **;**, "off" binds immediately                     |
 +-------------+----------+----------------------------------------------------+
+| pick        |...n-..m  | Evil function to access arbitrary stack items      |
++-------------+----------+----------------------------------------------------+
+| roll        | xu xu-1  | Remove u. Rotate u+1 items on the top of the stack |
+|             | ... x0 u |                                                    |
+|             | -- xu-1  |                                                    |
+|             | ... x0 xu|                                                    |
++-------------+----------+----------------------------------------------------+
+
 
 =====
 hash'
@@ -1451,6 +1459,16 @@ Functions
 +----------+-----------+--------------+
 | ``^``    | ( x"-n )  | ``5 ^ 2``    |
 +----------+-----------+--------------+
+
+==============
+introspection'
+==============
+
+--------
+Overview
+--------
+This vocabulary provides functions for examining functions and data structures.
+
 
 ===========
 linkedList'
@@ -1678,6 +1696,9 @@ Functions
 |                        |     | indicates endian used by the |
 |                        |     | virtual machine              |
 +------------------------+-----+------------------------------+
+| CONSOLE?               | -n  | Query to see if enhanced text|
+|                        |     | console is provided          |
++------------------------+-----+------------------------------+
 | query                  | ?-? | Perform a query. Actual stack|
 |                        |     | effect varies by query       |
 +------------------------+-----+------------------------------+
@@ -1832,40 +1853,61 @@ This library provides functions for accessing 16-bit and 8-bit subsets of cells.
 ---------
 Functions
 ---------
++-----------------+-------------------------------+
+| Function        | Stack                         |
++=================+===============================+
+| highWord        | cellAddr -- highwordAddr      |
++-----------------+-------------------------------+
+| lowWord         | cellAddr -- lowwordAddr       |
++-----------------+-------------------------------+
+| w@              | wordAddr -- val               |
++-----------------+-------------------------------+
+| w@+             | wordAddr -- wordAddr val      |
++-----------------+-------------------------------+
+| w!              | val wordAddr --               |
++-----------------+-------------------------------+
+| w!+             | val wordAddr -- wordAddr+1    |
++-----------------+-------------------------------+
+| highByte        | wordAddr -- highbyteAddr      |
++-----------------+-------------------------------+
+| lowByte         | wordAddr -- lowbyteAddr       |
++-----------------+-------------------------------+
+| c@              | byteAddr -- val               |
++-----------------+-------------------------------+
+| c@+             | byteAddr -- byteAddr val      |
++-----------------+-------------------------------+
+| c!              | val byteaddr --               |
++-----------------+-------------------------------+
+| c!+             | val byteAddr -- byteAddr+1    |
++-----------------+-------------------------------+
+| highNibble      | byteAddr -- highnibbleAddr    |
++-----------------+-------------------------------+
+| lowNibble       | byteAddr -- lownibbleAddr     |
++-----------------+-------------------------------+
+| nibble@         | nibbleAddr -- val             |
++-----------------+-------------------------------+
+| nibble@+        | nibbleAddr -- nibbleAddr val  |
++-----------------+-------------------------------+
+| nibble!         | val nibbleAddr --             |
++-----------------+-------------------------------+
+| nibble!+        | val nibbleAddr -- nibbleAddr+1|
++-----------------+-------------------------------+
+| packString      | strAddr --                    |
++-----------------+-------------------------------+
+| printPack       | strAddr --                    |
++-----------------+-------------------------------+
+| getPackedLength | strAddr -- strLen             |
++-----------------+-------------------------------+
 
-+-----------------+-----------------------------+
-| Function        | Stack                       |
-+=================+=============================+
-| highWord        | cellAddr -- highwordAddr    |
-+-----------------+-----------------------------+
-| lowWord         | cellAddr -- lowwordAddr     |
-+-----------------+-----------------------------+
-| w@              | wordAddr -- val             |
-+-----------------+-----------------------------+
-| w@+             | wordAddr -- wordAddr val    |
-+-----------------+-----------------------------+
-| w!              | val wordAddr --             |
-+-----------------+-----------------------------+
-| w!+             | val wordAddr -- wordAddr+1  |
-+-----------------+-----------------------------+
-| highByte        | wordAddr -- highbyteAddr    |
-+-----------------+-----------------------------+
-| lowByte         | wordAddr -- lowbyteAddr     |
-+-----------------+-----------------------------+
-| c@              | byteAddr -- val             |
-+-----------------+-----------------------------+
-| c@+             | byteAddr -- byteAddr val    |
-+-----------------+-----------------------------+
-| c!              | val byteaddr --             |
-+-----------------+-----------------------------+
-| c!+             | val byteAddr -- byteAddr+1  |
-+-----------------+-----------------------------+
-| packString      | strAddr --                  |
-+-----------------+-----------------------------+
-| printPack       | strAddr --                  |
-+-----------------+-----------------------------+
-| getPackedLength | strAddr -- strLen           |
-+-----------------+-----------------------------+
+
+=========
+unsigned'
+=========
+
+--------
+Overview
+--------
+This vocabulary will provide support for creation and use of unsigned values.
 
 
 

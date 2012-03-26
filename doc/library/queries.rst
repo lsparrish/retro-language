@@ -60,6 +60,9 @@ Functions
 |                        |     | indicates endian used by the |
 |                        |     | virtual machine              |
 +------------------------+-----+------------------------------+
+| CONSOLE?               | -n  | Query to see if enhanced text|
+|                        |     | console is provided          |
++------------------------+-----+------------------------------+
 | query                  | ?-? | Perform a query. Actual stack|
 |                        |     | effect varies by query       |
 +------------------------+-----+------------------------------+

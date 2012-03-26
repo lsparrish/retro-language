@@ -26,6 +26,8 @@ libraries
   - add dump'
   - add fixed'
   - add double'
+  - add unsigned'
+  - add introspection'
 
 
 vm
