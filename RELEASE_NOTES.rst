@@ -30,6 +30,11 @@ libraries
   - add introspection'
 
 
+examples
+========
+
+  - cleanups to make better use of higher-level language features
+
 vm
 ==
 

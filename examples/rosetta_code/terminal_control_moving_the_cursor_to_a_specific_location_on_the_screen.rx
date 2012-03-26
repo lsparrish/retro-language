@@ -1,5 +1,8 @@
-( This assumes that you have a VT100 or ANSI style terminal emulator )
+doc{
+As of Retro 11.4, there is VM-level support for some console functionality.
+}doc
 
 needs console'
 
-: hello 3 6 ^console'at-xy "Hello" puts ;
+: hello  6 3  ( row, column )  ^console'setCursor "Hello" puts ;
+
