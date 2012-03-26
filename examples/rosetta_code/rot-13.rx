@@ -1,8 +1,10 @@
+needs char'
+
 {{
   : rotate  ( cb-c ) tuck - 13 + 26 mod + ;
   : rotate? (  c-c )
-    dup 'a 'z within [ 'a rotate ] ifTrue
-    dup 'A 'Z within [ 'A rotate ] ifTrue ;
+    [ ^char'isLower? ]  [ 'a rotate ] when
+    [ ^char'isUpper? ]  [ 'A rotate ] when ;
 ---reveal---
   : rot13   (  s-s ) dup [ [ @ rotate? ] sip ! ] ^types'STRING each@ ;
 }}
