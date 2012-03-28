@@ -261,6 +261,9 @@ Global
 +-----------------+-----------+-----------------------------------------------+
 | tabAsWhitespace |     -a    |  Variable; treat tab as whitespace?           |
 +-----------------+-----------+-----------------------------------------------+
+| ?dup            | | n-n     |  Duplicate TOS if non-zero. If zero, leave    |
+|                 | | n-nn    |  alone                                        |
++-----------------+-----------+-----------------------------------------------+
 | nip             |   xy-y    |  Drop the NOS from the stack                  |
 +-----------------+-----------+-----------------------------------------------+
 | rot             |  xyz-yzx  |  Rotate the top three values on the stack     |
