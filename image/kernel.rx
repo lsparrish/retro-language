@@ -21,7 +21,7 @@ TIB  variable: <tib>  ( Start of default text input buffer                    )
 
 label: copytag   "Retro" $,
 label: version   "11.4" $,
-label: build     "2012.03.19" $,
+label: build     "2012.03.28" $,
 label: okmsg     "ok  " $,
 pad
 
@@ -74,7 +74,7 @@ t: .primitive  (  a- )
 ' .word      'WORD  setClass
 ' .macro     'MACRO setClass
 ' .data      'DATA  setClass
-' .primitive 'PRIM setClass
+' .primitive 'PRIM  setClass
 
 ( Console Output ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 -1 variable: update
@@ -205,8 +205,7 @@ t: isNumber? ( $-f ) isNegative? flag # on (isnumber) drop, flag # @, ;
 6 elements memory fb fw fh cw ch
 
 t: boot         (  -  )
-   copytag # puts 32 # putc version # puts
-   32 # putc 40 # putc build # puts 41 # putc cr ;
+   copytag # puts 32 # putc version # puts cr ;
 i: query        ( n-n ) 5 # out, wait 5 # in, ;
 i: run-on-boot  (  -  )
    -1  # query memory # !,  ( Memory Size     )
@@ -327,6 +326,7 @@ endKernel shrink bootNew
 : -!    (  na-     ) dup push @ swap - pop ! ;
 : ++    (   a-     ) 1 swap +! ;
 : --    (   a-     ) 1 swap -! ;
+: ?dup  (   n-n || n-nn )  dup 0; ;
 
 ( Scope ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 create list  ( -a )  0 , 0 ,
@@ -392,9 +392,9 @@ here
 
 ( Compiler Macros ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : `     ( "-  )
-  ' dup 0 <> -1 =
+  ' ?dup 0 <> -1 =
   [ .data @which @d->class , ]
-  [  drop tib isNumber? -1 =
+  [  tib isNumber? -1 =
     [ tib toNumber .data &.data , ] [ notFound ] if ] if ; compile-only
 : jump: ( "- ) ' 0; 8 , , ; compile-only
 
@@ -462,7 +462,7 @@ here
 : variable   (  "-  ) 0 variable: ;
 : constant   ( n"-  ) create @last !d->xt ;
 : string     ( $"-  ) keepString constant ;
-: allot      (  n-  ) dup 0 < [ +heap ] [ repeat 0; 1- 0 , again ] if ;
+: allot      (  n-  ) dup 0 < [ +heap ] [ [ 0 , ] times ] if ;
 {{
   : list     (  n-a ) here swap allot ;
   : element  (  a-a ) create dup @last !d->xt 1+ ;
@@ -550,7 +550,7 @@ create dicts 64 allot
   &lookup is find
 
   : seek    (   -  )
-    @name default: xt->d dup [ !dt flag on drop 1 ] &drop if ;
+    @name default: xt->d ?dup [ !dt flag on drop 1 ] ifTrue ;
   : lookup  (  a-d )
     &seek !xt (chains search back)
     @flag [ @dt ] [ @name default: xt->d ] if ;
