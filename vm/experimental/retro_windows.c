@@ -178,10 +178,10 @@ CELL rxOpenFile(VM *vm) {
   rxGetString(vm, name);
   if (slot > 0)
   {
-    if (mode == 0)  vm->files[slot] = fopen(vm->request, "r");
-    if (mode == 1)  vm->files[slot] = fopen(vm->request, "w");
-    if (mode == 2)  vm->files[slot] = fopen(vm->request, "a");
-    if (mode == 3)  vm->files[slot] = fopen(vm->request, "r+");
+    if (mode == 0)  vm->files[slot] = fopen(vm->request, "rb");
+    if (mode == 1)  vm->files[slot] = fopen(vm->request, "wb");
+    if (mode == 2)  vm->files[slot] = fopen(vm->request, "ab");
+    if (mode == 3)  vm->files[slot] = fopen(vm->request, "rb+");
   }
   if (vm->files[slot] == NULL)
   {

@@ -20,7 +20,7 @@ bob   dup @->hp swap !->startHP
 variable accumulator
 
 : dieRange ( range -- val )
-     random swap mod 1+ ;
+    random swap mod 1+ ;
 
 : numDice ( num range -- val )
     swap [ dup dieRange +accumulator ] times
@@ -55,8 +55,7 @@ variable accumulator
     [ ->name swap ->name cr "%s misses %s." puts cr ] if ;
 
 : initiative ( attacker defender -- )
-    1 10 0 rollDie
-    1 10 0 rollDie > [ swap ] ifTrue
+    2 [ 1 10 0 rollDie ] times > [ swap ] ifTrue
     over ->name cr "%s wins initiative." puts cr ;
 
 : round ( attacker defender -- )
@@ -64,16 +63,15 @@ variable accumulator
     [ 2over swap attack ] ifTrue ;
 
 : endcombat ( attacker defender -- )
-  dup alive? [ drop ] [ nip ] if
-  ->name "%s dies. " puts cr ;
+    dup alive? [ drop ] [ nip ] if
+    ->name "%s dies. " puts cr ;
 
 : combat ( attacker defender -- )
     [ 2over round [ alive? ] bi@ and ] while
     cr endcombat ;
 
 : startcombat ( attacker defender -- )
-    2over dup @->startHP swap !->hp
-          dup @->startHP swap !->hp
+    2over [ dup @->startHP swap !->hp ] bi@
     combat ;
 
 alice bob startcombat
