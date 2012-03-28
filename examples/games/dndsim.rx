@@ -30,7 +30,7 @@ variable accumulator
     0 !accumulator 2rot numDice + ;
 
 : calcDamage ( attacker -- damage )
-    dup ->dmgnum swap dup ->dmgsize swap ->dmgmod rollDie ;
+    [ ->dmgnum ] [ ->dmgsize ] [ ->dmgmod ] tri rollDie ;
 
 : calcHit ( attacker defender -- t | f )
     ->ac [ ->thac0 ] dip - 1 20 0 rollDie <= ;
