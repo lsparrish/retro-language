@@ -1,0 +1,80 @@
+
+(~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~)
+(     A simple Dungeons and Dragons  CombatSimulator                       )
+(~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~)
+
+create alice "Alice" , 14 , 5 , 18 , 1 , 6 , 0 , 0 ,
+create bob   "Bob"   , 12 , 7 , 16 , 2 , 4 , 0 , 0 ,
+
+: ->name     0 + @ ;
+: ->hp       1 + ;
+: ->ac       2 + @ ;
+: ->thac0    3 + @ ;
+: ->dmgnum   4 + @ ;
+: ->dmgsize  5 + @ ;
+: ->dmgmod   6 + @ ;
+: ->startHP  7 + ;
+
+alice dup @->hp swap !->startHP
+bob   dup @->hp swap !->startHP
+
+0 variable: accumulator
+
+: dieRange ( range -- val )
+     random swap /mod drop 1+  ; 
+     
+: numDice ( num range -- val )
+    swap [ dup dieRange +accumulator ] times 
+    drop @accumulator ;
+    
+: rollDie ( num range modifier -- val )
+    0 !accumulator 2rot numDice + ;
+    
+: calcDamage ( attacker -- damage )
+    dup ->dmgnum swap dup ->dmgsize swap ->dmgmod rollDie ;
+    
+: calcHit ( attacker defender -- t | f )
+    ->ac [ ->thac0 ] dip - 1 20 0 rollDie <= ;
+   
+: printAttack ( attacker defender damage -- defender damage )
+    2rot swap ->name puts space 2over dup
+    ->name [ @->hp ] dip 
+    "hits %s (%d) for %d points of damage. " 
+    puts swap ;
+    
+: printVictim ( defender damage -- )
+    over @->hp swap - over !->hp dup @->hp
+    swap ->name
+    "%s is reduced to %d hp." puts cr ;
+    
+: alive? ( player -- t | f )
+    @->hp 0 > ;
+    
+: attack ( attacker defender -- )
+    2over calcHit
+    [ over calcDamage cr printAttack printVictim ]
+    [ ->name swap ->name cr "%s misses %s." puts cr ] if ;
+    
+: initiative ( attacker defender -- )
+    1 10 0 rollDie
+    1 10 0 rollDie > [ swap ] ifTrue
+    over ->name cr "%s wins initiative." puts cr ;
+    
+: round ( attacker defender -- )
+    initiative 2over attack dup alive? 
+    [ 2over swap attack ] ifTrue ;
+    
+: endcombat ( attacker defender -- )
+  dup alive? [ drop ] [ swap drop ] if 
+  ->name "%s dies. " puts cr ;
+    
+: combat ( attacker defender -- )
+    [ 2over round alive? swap alive? and ] while 
+    cr endcombat ;
+    
+: startcombat ( attacker defender -- )
+    2over dup @->startHP swap !->hp
+          dup @->startHP swap !->hp 
+	  combat ;
+	  
+alice bob startcombat
