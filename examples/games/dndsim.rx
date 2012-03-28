@@ -71,7 +71,7 @@ variable accumulator
     cr endcombat ;
 
 : startcombat ( attacker defender -- )
-    2over [ dup @->startHP swap !->hp ] bi@
+    2over [ [ @->startHP ] sip !->hp ] bi@
     combat ;
 
 alice bob startcombat
