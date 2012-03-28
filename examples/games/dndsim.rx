@@ -1,10 +1,8 @@
 ( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-( A simple Dungeons and Dragons  CombatSimulator                        )
+(           A simple Dungeons and Dragons Combat Simulator              )
 ( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 
-create alice "Alice" , 14 , 5 , 18 , 1 , 6 , 0 , 0 ,
-create bob   "Bob"   , 12 , 7 , 16 , 2 , 4 , 0 , 0 ,
-
+{{
 : ->name     0 + @ ;
 : ->hp       1 + ;
 : ->ac       2 + @ ;
@@ -13,9 +11,6 @@ create bob   "Bob"   , 12 , 7 , 16 , 2 , 4 , 0 , 0 ,
 : ->dmgsize  5 + @ ;
 : ->dmgmod   6 + @ ;
 : ->startHP  7 + ;
-
-alice dup @->hp swap !->startHP
-bob   dup @->hp swap !->startHP
 
 variable accumulator
 
@@ -28,22 +23,28 @@ variable accumulator
 
 : rollDie ( num range modifier -- val )
     0 !accumulator 2rot numDice + ;
+    
+: rollD20 ( -- val )
+    1 20 0 rollDie ;
+    
+: rollD10 ( -- val )
+    1 10 0 rollDie ;
 
 : calcDamage ( attacker -- damage )
     [ ->dmgnum ] [ ->dmgsize ] [ ->dmgmod ] tri rollDie ;
 
 : calcHit ( attacker defender -- t | f )
-    ->ac [ ->thac0 ] dip - 1 20 0 rollDie <= ;
+    ->ac [ ->thac0 ] dip - rollD20 <= ;
 
 : printAttack ( attacker defender damage -- defender damage )
-    2rot swap ->name puts space 2over dup
-    ->name [ @->hp ] dip
+    2rot swap ->name puts space 2over
+    [ @->hp ] sip ->name
     "hits %s (%d) for %d points of damage. "
     puts swap ;
 
 : printVictim ( defender damage -- )
-    over @->hp swap - over !->hp dup @->hp
-    swap ->name
+    over @->hp swap - over !->hp 
+    [ @->hp ] sip ->name
     "%s is reduced to %d hp." puts cr ;
 
 : alive? ( player -- t | f )
@@ -52,10 +53,10 @@ variable accumulator
 : attack ( attacker defender -- )
     2over calcHit
     [ over calcDamage cr printAttack printVictim ]
-    [ ->name swap ->name cr "%s misses %s." puts cr ] if ;
+    [ [ ->name ] bi@ swap cr "%s misses %s." puts cr ] if ;
 
 : initiative ( attacker defender -- )
-    2 [ 1 10 0 rollDie ] times > [ swap ] ifTrue
+    2 [ rollD10 ] times > [ swap ] ifTrue
     over ->name cr "%s wins initiative." puts cr ;
 
 : round ( attacker defender -- )
@@ -69,10 +70,17 @@ variable accumulator
 : combat ( attacker defender -- )
     [ 2over round [ alive? ] bi@ and ] while
     cr endcombat ;
+---reveal---
 
 : startcombat ( attacker defender -- )
     2over [ [ @->startHP ] sip !->hp ] bi@
     combat ;
+}}
+
+( name, currenthp, ac, thac0, numdice, dicerange, dicemodifier, startinghp )
+    
+create alice "Alice" , 0 , 5 , 18 , 1 , 6 , 0 , 14 ,
+create bob   "Bob"   , 0 , 7 , 16 , 2 , 4 , 0 , 12 ,
 
 alice bob startcombat
 
