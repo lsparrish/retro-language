@@ -1,3 +1,6 @@
+needs math'
+with math'
+
 : high|low ( gn-g$ )
   over > [ "high" ] [ "low" ] if ;
 

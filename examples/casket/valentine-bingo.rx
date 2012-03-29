@@ -6,6 +6,7 @@
 
 needs casket'
 needs array'
+needs math'
 
 [ "Be Mine"
   "Love"
@@ -42,7 +43,7 @@ create CARD
   1+ + @ ;
 
 : rnd  ( -n )
-  random #WORDS mod ;
+  ^math'random #WORDS mod ;
 
 : obtain  ( -$ )
   0 [ drop rnd WORDS nth dup CARD ^array'stringIn? ] while ;

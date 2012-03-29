@@ -1,3 +1,5 @@
+needs math'
+
 chain: fixed'
 
 16384 constant +1
@@ -15,8 +17,8 @@ chain: fixed'
     10000 /. ;
 
 : pDec
-    abs
-    '. putc 
+    ^math'abs
+    '. putc
     1000 /mod putn
     100  /mod putn
     10   /mod putn

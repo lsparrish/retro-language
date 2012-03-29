@@ -36,7 +36,7 @@ chain: array'
     here over 1+ - over ! ;
 
   : fromQuote ( q-a )
-    depth &do dip here 0 , [ depth - abs &, times ] dip
+    depth &do dip here 0 , [ depth - ^math'abs &, times ] dip
     here over 1+ - over ! dup reverse ;
 
   : toQuote ( a-q )

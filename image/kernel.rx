@@ -680,24 +680,6 @@ create dicts 64 allot
 : variables|  ( "- )
   repeat getToken "|" compare if; tib header 0 , again ;
 
-( Math Operations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-: pow  ( bp-n ) 1 swap [ over * ] times nip ;
-: abs  (  n-n ) dup 0 < &negate ifTrue ;
-: min  ( ab-c ) 2over < &drop &nip  if ;
-: max  ( ab-c ) 2over < &nip  &drop if ;
-{{
-  variables| w z |
-  : seeds?   ( -  ) @w @z and ;
-  : seed     ( -  ) time [ 62903 and !w ] [ 78578 and !z ] bi ;
-  : ?seed    ( -  ) repeat seeds? 0 <> if; seed again ;
-  : (random) ( -x )
-    36969 z @ 65535 and * @z 16 >> + !z
-    18000 w @ 65535 and * @w 16 >> + !w
-    @z 16 << @w + ;
----reveal---
-  : random     (  -x ) ?seed (random) abs ;
-}}
-
 ( Generic Buffer ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 global
 chain: buffer'

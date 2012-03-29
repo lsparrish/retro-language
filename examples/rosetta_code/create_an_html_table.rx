@@ -1,7 +1,8 @@
 Using the decompose' library which allows creation of HTML using quotes and combinators:
 
   needs decompose'
-  with  decompose'
+  needs math'
+  with| decompose' math' |
 
   : rnd ( -$ ) random 1000 mod toString ;
 

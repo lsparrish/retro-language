@@ -1,3 +1,5 @@
+needs math'
+
 chain: double'
   : s>d     ( n-dd )  dup 0 < [ -1 ] [ 0 ] if ;
   : d+      ( dd-d )  [ rot over + [  > [ 1+ ] ifTrue  ] sip swap ] dip + ;

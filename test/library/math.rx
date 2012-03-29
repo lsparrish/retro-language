@@ -34,6 +34,33 @@ with assertion'
   100 ^math'odd?  0 assert=
   109 ^math'odd? -1 assert= ; assertion
 
+doc{
+TEST: pow
+  [ 2 3 pow ] expected: { 8 }
+  [ 3 2 pow ] expected: { 9 }
+results
+
+TEST: abs
+  [ -1 abs ] expected: { 1 }
+  [  1 abs ] expected: { 1 }
+results
+
+TEST: min
+  [  1 10 min ] expected: { 1 }
+  [ 91 10 min ] expected: { 10 }
+results
+
+TEST: max
+  [  1 10 max ] expected: { 10 }
+  [ 91 10 max ] expected: { 91 }
+results
+
+TEST: random
+  [ random random = ] expected: { 0 }
+results
+}doc
+
+
 : go
   cr a0 a1 a2 a3 a4 a5 bye ;
 
