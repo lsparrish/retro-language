@@ -35,6 +35,7 @@ global
   @failed +tfailed
   @passed +tpassed ;
 ( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+needs files'
 with files'
 
 variable fid

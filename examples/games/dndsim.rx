@@ -1,6 +1,7 @@
 ( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 (           A simple Dungeons and Dragons Combat Simulator              )
 ( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+needs math'
 
 {{
 : ->name     0 + @ ;
@@ -15,7 +16,7 @@
 variable accumulator
 
 : dieRange ( range -- val )
-    random swap mod 1+ ;
+    ^math'random swap mod 1+ ;
 
 : numDice ( num range -- val )
     swap [ dup dieRange +accumulator ] times

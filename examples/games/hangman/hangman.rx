@@ -6,6 +6,8 @@
 ( License: ISC                                                 )
 ( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 
+needs math'
+needs files'
 needs console'
 
 ( File inclusion will only work if you're running retro from   )

@@ -8,8 +8,7 @@
 
 ( Kernel Begins ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 IMAGE-SIZE  constant CORE
-CORE 0000 + constant TIB
-TIB   256 + constant HEAP
+CORE 0000 + constant HEAP
 
 ( Initial Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 mark variable last    ( Pointer to the most recent dictionary header          )
@@ -17,13 +16,13 @@ HEAP variable: heap   ( Starting address of the data/code heap                )
 variable compiler     ( Is the compiler on or off?                            )
 variable which        ( Pointer to dictionary header of the most recently     )
                       ( looked up word                                        )
-TIB  variable: <tib>  ( Start of default text input buffer                    )
+
+6 elements memory fb fw fh cw ch
 
 label: copytag   "Retro" $,
 label: version   "11.4" $,
-label: build     "2012.03.28" $,
+label: build     "2012.03.29" $,
 label: okmsg     "ok  " $,
-pad
 
 ( Primitives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 t: dup  (  n-nn )  dup,  ;      t: 1+   (  n-n  )  1+,   ;
@@ -91,7 +90,9 @@ t: puts   ( a-  ) <puts> ;
 -1 variable: eatLeading?                 ( Eat leading delimiters?            )
 -1 variable: tabAsWhitespace
 
-t: tib ( -a ) <tib> # @, ;
+t: STRING-LENGTH  ( -n )  256 # ;
+t: STRING-BUFFERS ( -n )   12 # ;
+t: tib ( -a ) memory # @, STRING-LENGTH - ;
 
 t: remapKeys ( c-c ) ;
 i: ws        ( c-c )
@@ -175,8 +176,6 @@ i: count       ( a-a ) repeat @+ 0; drop, again ;
 t: getLength   ( a-n ) dup, count 1-, swap, -, ;
 t: withLength  ( a-an ) dup, getLength ;
 t: keepString  ( a-a ) withLength 3 # +, here +, 8 # , , here swap, $ ;
-t: STRING-LENGTH  ( -n )  256 # ;
-t: STRING-BUFFERS ( -n )   12 # ;
 
 ( Numbers [Parsing & Display] ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 4 elements #value num negate? flag
@@ -202,8 +201,6 @@ i: (isnumber)
 t: isNumber? ( $-f ) isNegative? flag # on (isnumber) drop, flag # @, ;
 
 ( Startup ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-6 elements memory fb fw fh cw ch
-
 t: boot         (  -  )
    copytag # puts 32 # putc version # puts cr ;
 i: query        ( n-n ) 5 # out, wait 5 # in, ;
@@ -343,6 +340,20 @@ create list  ( -a )  0 , 0 ,
 : devector  ( "-  ) ' 0; :devector ;
 : is        ( a"- ) ' 0; :is ;
 : default:  ( "-  ) ' 2 + , ; ' .macro last @ d->class !
+
+{{
+  : scratch  ( -a )  memory @ 2048 - ;
+  create next  0 ,
+  create split 0 ,
+
+  [ split @
+    [ heap @ [ next @ heap ! default: header heap @ next ! ] dip heap ! here last @ d->xt ! ]
+    [ default: header ] if ] is header
+
+  [ split  on scratch next ! default: {{           ] is {{
+  [ split off                default: ---reveal--- ] is ---reveal---
+  [ split off                default: }}           ] is }}
+}}
 
 ( Dictionary ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 {{
@@ -669,24 +680,6 @@ create dicts 64 allot
 : variables|  ( "- )
   repeat getToken "|" compare if; tib header 0 , again ;
 
-( Math Operations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-: pow  ( bp-n ) 1 swap [ over * ] times nip ;
-: abs  (  n-n ) dup 0 < &negate ifTrue ;
-: min  ( ab-c ) 2over < &drop &nip  if ;
-: max  ( ab-c ) 2over < &nip  &drop if ;
-{{
-  variables| w z |
-  : seeds?   ( -  ) @w @z and ;
-  : seed     ( -  ) time [ 62903 and !w ] [ 78578 and !z ] bi ;
-  : ?seed    ( -  ) repeat seeds? 0 <> if; seed again ;
-  : (random) ( -x )
-    36969 z @ 65535 and * @z 16 >> + !z
-    18000 w @ 65535 and * @w 16 >> + !w
-    @z 16 << @w + ;
----reveal---
-  : random     (  -x ) ?seed (random) abs ;
-}}
-
 ( Generic Buffer ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 global
 chain: buffer'
@@ -774,46 +767,6 @@ with strings'
   getToken dup find nip
   &drop [ "library/" prepend chop ".rx" append :include ] if ;
 without
-
-( Files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-chain: files'
-{{
-  variables| fid fsize active |
-  : io     (  n-f )  4 out wait 4 in ;
-  : done   ( nn-  )  2drop active off ;
----reveal---
-  0 constant :R
-  1 constant :W
-  2 constant :A
-  3 constant :M
-  : open   (  $m-h ) -1 io ;
-  : read   (   h-f ) -2 io ;
-  : write  (  ch-f ) -3 io ;
-  : close  (   h-f ) -4 io ;
-  : pos    (   h-n ) -5 io ;
-  : seek   (  nh-f ) -6 io ;
-  : size   (   h-n ) -7 io ;
-  : delete (   $-n ) -8 io ;
-  : slurp  (  a$-n )
-    :R open !fid
-    @fid size !fsize
-    @fsize [ @fid read swap !+ ] times 0 swap !
-    @fid close drop @fsize ;
-  : spew   (  an$-n )
-    :W open !fid 0 !fsize
-    [ @+ @fid write drop fsize ++ ] times drop
-    @fid close drop @fsize ;
-  : readLine ( h-a )
-    active on
-    tib [ over read dup 10 13 within
-          [ drop 0 swap ! drop active off ] [ swap !+ ] if @active ] while
-    tib tempString ;
-  : writeLine ( $h- )
-    !fid active on
-    [ @+ dup 0 = &done [ @fid write drop ] if @active ] while
-    10 @fid write drop ;
-}}
-;chain
 
 ( types' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 chain: types'

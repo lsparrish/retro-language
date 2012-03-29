@@ -21,9 +21,6 @@ Overview
 --------
 This vocabulary provides functions for examining functions and data structures.
 
-}doc
-
-
 ---------
 Functions
 ---------
@@ -39,4 +36,6 @@ Functions
 +------------------+-------+----------------------------------------------------+
 | getClass         | a-a   | Return the class of a function, or 0 if not found  |
 +------------------+-------+----------------------------------------------------+
+
+}doc
 

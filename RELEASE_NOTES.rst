@@ -3,6 +3,17 @@ Release Notes
 =============
 
 
+
+The **pow**, **abs**, **min**, **max**, and **random** are now in the **math'**
+vocabulary. Load the library, and add **^math'** prefix to these if you need
+them.
+
+::
+
+  needs math'
+
+
+
 ----------
 Retro 11.4
 ----------
@@ -12,11 +23,19 @@ core language / standard image
 ==============================
 
   - clean ups and refactorings
+
     - {{ and }}
     - :is and :devector
     - each@
     - <puts>
 
+  - removals
+
+    - **pow**
+    - **abs**
+    - **min**
+    - **max**
+    - **random**
 
 libraries
 =========
@@ -28,6 +47,14 @@ libraries
   - add double'
   - add unsigned'
   - add introspection'
+
+  - update math'
+
+    - add **pow**
+    - add **abs**
+    - add **min**
+    - add **max**
+    - add **random**
 
 
 examples

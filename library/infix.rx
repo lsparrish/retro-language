@@ -1,4 +1,7 @@
 ( Infix Math for Retro ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+needs math'
+with math'
+
 chain: infix'
 {{
   : common getNumber .data ;
@@ -18,6 +21,8 @@ chain: infix'
   &div rename: /
   &dmod rename: /mod
 ;chain
+without
+
 
 doc{
 ======

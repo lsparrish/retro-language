@@ -1,3 +1,6 @@
+needs math'
+with math'
+
 : checkGuess ( gn-gf || f )
   over = [ drop 0 ] [ "Sorry, try again!\n" puts -1 ] if ;
 

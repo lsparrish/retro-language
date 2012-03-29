@@ -4,6 +4,7 @@
 ( License: ISC                                                                )
 ( --------------------------------------------------------------------------- )
 needs dissect'
+needs files'
 
 chain: autopsy'
 
@@ -12,7 +13,7 @@ chain: autopsy'
   variable qdepth
 
   : resolveName  ( a-a )
-    dup @ xt->d dup [ d->name ] [ drop dup putn " do" ] if puts space 1+ ;
+    dup @ xt->d ?dup [ d->name ] [ dup putn " do" ] if puts space 1+ ;
 
   : dumpString  ( a-a )
     '" putc [ repeat @+ 0; putc again ] do '" putc space ;
@@ -58,7 +59,7 @@ chain: autopsy'
   : .boxedn   ( n-  )   '| putc space .number space '| putc ;
   : .empty    (  -  )   '| putc -2 .pad '| putc ;
 
-  : xt->name  ( $-$ )   toNumber xt->d dup [ d->name ] [ drop "" ] if ;
+  : xt->name  ( $-$ )   toNumber xt->d ?dup [ d->name ] [ "" ] if ;
 
   variable escCell
   : lookup    ( a-$ )

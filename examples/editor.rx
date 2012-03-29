@@ -21,6 +21,8 @@
 ( TAB     Switch between edit and command mode                                )
 ( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 
+needs files'
+
 chain: editor'
 
 {{
