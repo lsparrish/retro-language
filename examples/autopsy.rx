@@ -4,6 +4,7 @@
 ( License: ISC                                                                )
 ( --------------------------------------------------------------------------- )
 needs dissect'
+needs files'
 
 chain: autopsy'
 

@@ -974,7 +974,7 @@ TEST: dicts
   [ global @dicts ] expected: { 0 }
   with buffer'
   [ @dicts ] expected: { 1 }
-  global with| strings' files' |
+  global with| strings' types' |
   [ @dicts ] expected: { 2 }
   global
 results

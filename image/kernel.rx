@@ -768,46 +768,6 @@ with strings'
   &drop [ "library/" prepend chop ".rx" append :include ] if ;
 without
 
-( Files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-chain: files'
-{{
-  variables| fid fsize active |
-  : io     (  n-f )  4 out wait 4 in ;
-  : done   ( nn-  )  2drop active off ;
----reveal---
-  0 constant :R
-  1 constant :W
-  2 constant :A
-  3 constant :M
-  : open   (  $m-h ) -1 io ;
-  : read   (   h-f ) -2 io ;
-  : write  (  ch-f ) -3 io ;
-  : close  (   h-f ) -4 io ;
-  : pos    (   h-n ) -5 io ;
-  : seek   (  nh-f ) -6 io ;
-  : size   (   h-n ) -7 io ;
-  : delete (   $-n ) -8 io ;
-  : slurp  (  a$-n )
-    :R open !fid
-    @fid size !fsize
-    @fsize [ @fid read swap !+ ] times 0 swap !
-    @fid close drop @fsize ;
-  : spew   (  an$-n )
-    :W open !fid 0 !fsize
-    [ @+ @fid write drop fsize ++ ] times drop
-    @fid close drop @fsize ;
-  : readLine ( h-a )
-    active on
-    tib [ over read dup 10 13 within
-          [ drop 0 swap ! drop active off ] [ swap !+ ] if @active ] while
-    tib tempString ;
-  : writeLine ( $h- )
-    !fid active on
-    [ @+ dup 0 = &done [ @fid write drop ] if @active ] while
-    10 @fid write drop ;
-}}
-;chain
-
 ( types' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 chain: types'
   0 constant ARRAY  ( -n )

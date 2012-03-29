@@ -1,5 +1,6 @@
 ( "filename"  "substring" grep )
 ( display all lines containing "substring" in "filename" )
+needs files'
 
 {{
   variables| token content |
