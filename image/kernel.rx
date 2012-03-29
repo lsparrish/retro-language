@@ -21,7 +21,7 @@ TIB  variable: <tib>  ( Start of default text input buffer                    )
 
 label: copytag   "Retro" $,
 label: version   "11.4" $,
-label: build     "2012.03.28" $,
+label: build     "2012.03.29" $,
 label: okmsg     "ok  " $,
 pad
 
@@ -343,6 +343,20 @@ create list  ( -a )  0 , 0 ,
 : devector  ( "-  ) ' 0; :devector ;
 : is        ( a"- ) ' 0; :is ;
 : default:  ( "-  ) ' 2 + , ; ' .macro last @ d->class !
+
+{{
+  : scratch  ( -a )  memory @ 2048 - ;
+  create next  0 ,
+  create split 0 ,
+
+  [ split @
+    [ heap @ [ next @ heap ! default: header heap @ next ! ] dip heap ! here last @ d->xt ! ]
+    [ default: header ] if ] is header
+
+  [ split  on scratch next ! default: {{           ] is {{
+  [ split off                default: ---reveal--- ] is ---reveal---
+  [ split off                default: }}           ] is }}
+}}
 
 ( Dictionary ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 {{
