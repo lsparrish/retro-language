@@ -342,7 +342,7 @@ create list  ( -a )  0 , 0 ,
 : default:  ( "-  ) ' 2 + , ; ' .macro last @ d->class !
 
 {{
-  : scratch  ( -a )  memory @ STRING-LENGTH STRING-BUFFERS 3 + * - ;
+  : scratch  ( -a )  memory @ STRING-LENGTH STRING-BUFFERS 2 + * - 2048 - ;
   create next  0 ,
   create split 0 ,
 
