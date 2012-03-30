@@ -1,15 +1,16 @@
 ( casket ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 needs files'
+needs introspection'
 
 chain: casket'
 {{
   variable :options
   : KiB            ( n-n ) 1024 * ;
 ---reveal---
-  : casket:path    ( -$ ) @memory  8 KiB - ;
+  : casket:path    ( -$ ) ^introspection'startOfBuffers  8 KiB - ;
   : casket:options ( -$ ) @:options ;
-  : casket:buffer  ( -$ ) @memory 16 KiB - ;
-  : casket:form    ( -$ ) @memory 32 KiB - ;
+  : casket:buffer  ( -$ ) ^introspection'startOfBuffers 16 KiB - ;
+  : casket:form    ( -$ ) ^introspection'startOfBuffers 32 KiB - ;
   : casket:root    ( -$ ) "./" ;
   : casket:url     ( -$ ) "http://domain.com/path/to/cgi" ;
   : getRequest     ( -$ )
