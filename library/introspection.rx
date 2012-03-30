@@ -8,6 +8,13 @@ chain: introspection'
   : isVisible?  ( a-f )
     xt->d 0 <> ;
 
+  : buffers  ( -n )
+    @memory        STRING-LENGTH   -  ( tib     )
+                   STRING-LENGTH   -  ( scratch )
+    STRING-BUFFERS STRING-LENGTH * -  ( buffers )
+    2048                           -  ( headers ) ;
+
+
 ;chain
 
 

@@ -21,7 +21,7 @@ variable which        ( Pointer to dictionary header of the most recently     )
 
 label: copytag   "Retro" $,
 label: version   "11.4" $,
-label: build     "2012.03.29" $,
+label: build     "2012.03.30" $,
 label: okmsg     "ok  " $,
 
 ( Primitives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
@@ -342,7 +342,12 @@ create list  ( -a )  0 , 0 ,
 : default:  ( "-  ) ' 2 + , ; ' .macro last @ d->class !
 
 {{
-  : scratch  ( -a )  memory @ STRING-LENGTH STRING-BUFFERS 2 + * - 2048 - ;
+  : scratch  ( -a )
+    memory @       STRING-LENGTH   -  ( tib     )
+                   STRING-LENGTH   -  ( scratch )
+    STRING-BUFFERS STRING-LENGTH * -  ( buffers )
+    2048                           -  ( headers ) ;
+
   create next  0 ,
   create split 0 ,
 
@@ -594,7 +599,10 @@ create dicts 64 allot
 
 ( Core Strings ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 {{
-  : buffers ( -a ) @memory STRING-LENGTH STRING-BUFFERS 1+ * - ;
+  : buffers  ( -a )
+    @memory        STRING-LENGTH   -  ( tib     )
+                   STRING-LENGTH   -  ( scratch )
+    STRING-BUFFERS STRING-LENGTH * -  ( buffers ) ;
   variable next
 ---reveal---
   : tempString ( $-$ )
@@ -606,7 +614,9 @@ create dicts 64 allot
 
 {{
   variable end
-  : pad     (  -a ) @memory STRING-LENGTH  STRING-BUFFERS 2 + * - ;
+  : pad  ( -a )
+    @memory        STRING-LENGTH   -  ( tib     )
+                   STRING-LENGTH   -  ( scratch ) ;
   : keep    (  -  ) @compiler &keepString &tempString if .data ;
   : >pad    ( $-$ ) pad over getLength 1+ copy pad keep ;
   : chop    ( $-$ ) end -- 0 @end ! ;
@@ -702,7 +712,9 @@ with buffer'
 chain: strings'
 {{
   variables| len needle haystack flag right left src |
-  : buffer (  -a ) @memory STRING-LENGTH  STRING-BUFFERS 2 + * - ;
+  : buffer  ( -a )
+    @memory        STRING-LENGTH   -  ( tib     )
+                   STRING-LENGTH   -  ( scratch ) ;
   : trim   ( $-$ )
     dup withLength + 1- dup @ 32 = [ 0 swap ! dup 1- -- trim ] &drop if ;
   : place  ( $$n- ) [ copy 0 ] sip here + ! ;
