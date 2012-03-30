@@ -8,13 +8,14 @@ chain: introspection'
   : isVisible?  ( a-f )
     xt->d 0 <> ;
 
-  : buffers  ( -n )
+  : startOfBuffers  ( -a )
     @memory        STRING-LENGTH   -  ( tib     )
                    STRING-LENGTH   -  ( scratch )
     STRING-BUFFERS STRING-LENGTH * -  ( buffers )
     2048                           -  ( headers ) ;
 
-
+  : reserved   ( -n )  @memory startOfBuffers - ;
+  : freeSpace  ( -n )  startOfBuffers here - ;
 ;chain
 
 
@@ -43,6 +44,12 @@ Functions
 +------------------+-------+----------------------------------------------------+
 | getClass         | a-a   | Return the class of a function, or 0 if not found  |
 +------------------+-------+----------------------------------------------------+
-
+| startOfBuffers   | -a    | Address where system buffers begin                 |
++------------------+-------+----------------------------------------------------+
+| reserved         | -n    | Amount of memory used for buffers                  |
++------------------+-------+----------------------------------------------------+
+| freeSpace        | -n    | Amount of free space (between **here** and         |
+|                  |       | **startOfBuffers**                                 |
++------------------+-------+----------------------------------------------------+
 }doc
 

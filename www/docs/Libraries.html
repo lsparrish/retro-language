@@ -1676,6 +1676,96 @@ of <em>Cloak of Darkness</em>, as well as various small puzzle games for my chil
 </table>
 </div>
 </div>
+<div class="section" id="files">
+<h1>files'</h1>
+<table border="1" class="corefunc docutils">
+<colgroup>
+<col width="23%" />
+<col width="15%" />
+<col width="63%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Function</th>
+<th class="head">Stack</th>
+<th class="head">Notes</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>:R</td>
+<td>-n</td>
+<td>Mode for reading a file. Does not create file</td>
+</tr>
+<tr><td>:W</td>
+<td>-n</td>
+<td>Mode for writing a file</td>
+</tr>
+<tr><td>:A</td>
+<td>-n</td>
+<td>Mode for appending to a file</td>
+</tr>
+<tr><td>:M</td>
+<td>-n</td>
+<td>Mode for modifying a file. Does not create
+file.</td>
+</tr>
+<tr><td>open</td>
+<td>$m-h</td>
+<td>Open a file. Will return a handle. Valid
+handles will be non-zero. A zero handle
+indicates failure to open a file.</td>
+</tr>
+<tr><td>read</td>
+<td>h-c</td>
+<td>Read a byte from a file. This returns the
+byte.</td>
+</tr>
+<tr><td>write</td>
+<td>ch-f</td>
+<td>Write a byte to a file. This returns a flag
+indicating the number of bytes written.
+(Should always equal '1')</td>
+</tr>
+<tr><td>close</td>
+<td>h-f</td>
+<td>Close an open file. Returns a flag of zero if
+unable to close, or non-zero if successful.</td>
+</tr>
+<tr><td>pos</td>
+<td>h-n</td>
+<td>Get current position in a file</td>
+</tr>
+<tr><td>seek</td>
+<td>nh-f</td>
+<td>Seek a position in a file</td>
+</tr>
+<tr><td>size</td>
+<td>h-n</td>
+<td>Return size of open file</td>
+</tr>
+<tr><td>delete</td>
+<td>$-f</td>
+<td>Delete a file. Returns a handle. Non-zero if
+successful, zero if failed.</td>
+</tr>
+<tr><td>slurp</td>
+<td>a$-n</td>
+<td>Read a file into a buffer</td>
+</tr>
+<tr><td>spew</td>
+<td>an$-n</td>
+<td>Write (n) bytes from address (a) into a file</td>
+</tr>
+<tr><td>readLine</td>
+<td>h-$</td>
+<td>Read a line from a file</td>
+</tr>
+<tr><td>writeLine</td>
+<td>$h-</td>
+<td>Write a string to a file</td>
+</tr>
+</tbody>
+</table>
+</div>
 <div class="section" id="forth">
 <h1>forth'</h1>
 <div class="section" id="id48">
@@ -2018,10 +2108,55 @@ with infix'
 <h2>Overview</h2>
 <p>This vocabulary provides functions for examining functions and data structures.</p>
 </div>
+<div class="section" id="id59">
+<h2>Functions</h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="23%" />
+<col width="9%" />
+<col width="68%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Function</th>
+<th class="head">Stack</th>
+<th class="head">Usage</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>isRevectorable?</td>
+<td>a-f</td>
+<td>Returns -1 if a function can be revectored, or 0
+if not.</td>
+</tr>
+<tr><td>isVisible?</td>
+<td>a-f</td>
+<td>Returns -1 if a function is visible in the current
+dictionary, or 0 if not</td>
+</tr>
+<tr><td>getClass</td>
+<td>a-a</td>
+<td>Return the class of a function, or 0 if not found</td>
+</tr>
+<tr><td>startOfBuffers</td>
+<td>-a</td>
+<td>Address where system buffers begin</td>
+</tr>
+<tr><td>reserved</td>
+<td>-n</td>
+<td>Amount of memory used for buffers</td>
+</tr>
+<tr><td>freeSpace</td>
+<td>-n</td>
+<td>Amount of free space (between <strong>here</strong> and
+<strong>startOfBuffers</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <div class="section" id="linkedlist">
 <h1>linkedList'</h1>
-<div class="section" id="id59">
+<div class="section" id="id60">
 <h2>Overview</h2>
 <p>While linked lists are a simple data structure, they are very useful.
 This vocabulary provides a foundation for creating and using them in
@@ -2035,7 +2170,7 @@ the prior node. The list pointer variable is updated with each <strong>add</stro
 or <strong>remove</strong> to point to the newest node in the chain.</p>
 </div>
 </div>
-<div class="section" id="id60">
+<div class="section" id="id61">
 <h2>Examples</h2>
 <div class="section" id="creating-a-list">
 <h3>Creating A List</h3>
@@ -2062,7 +2197,7 @@ L ^linkList'remove
 </pre>
 </div>
 </div>
-<div class="section" id="id61">
+<div class="section" id="id62">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2121,7 +2256,7 @@ starts at <em>1</em>.</td>
 </div>
 <div class="section" id="locals">
 <h1>locals'</h1>
-<div class="section" id="id62">
+<div class="section" id="id63">
 <h2>Overview</h2>
 <p>This vocabulary provides an easy way to give functions access to local variables within
 certain limitations.</p>
@@ -2130,7 +2265,7 @@ certain limitations.</p>
 <li>Functions using local variables are not reentrant</li>
 </ul>
 </div>
-<div class="section" id="id63">
+<div class="section" id="id64">
 <h2>Example</h2>
 <pre class="literal-block">
 : foo ( nos tos - result )  locals{ tos nos }  &#64;nos &#64;tos + &#64;nos * ;
@@ -2138,7 +2273,7 @@ certain limitations.</p>
 <p>Note here that <strong>locals{</strong> will modify the temporary variable names to match the names
 you specify.</p>
 </div>
-<div class="section" id="id64">
+<div class="section" id="id65">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2203,7 +2338,7 @@ stack comments.</td>
 <h1>math'</h1>
 <p>This library provides support for additional mathmatic operations not provided
 by the core Retro language.</p>
-<div class="section" id="id65">
+<div class="section" id="id66">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2248,18 +2383,38 @@ true</td>
 <td>Returns a flag indicating whether or not a number is
 false</td>
 </tr>
+<tr><td>pow</td>
+<td>bp-n</td>
+<td>Raise (b) to power (p)</td>
+</tr>
+<tr><td>abs</td>
+<td>n-n</td>
+<td>Absoulte value of number (n)</td>
+</tr>
+<tr><td>min</td>
+<td>ab-c</td>
+<td>Minimum of (a) or (b)</td>
+</tr>
+<tr><td>max</td>
+<td>ab-c</td>
+<td>Maximum of (a) or (b)</td>
+</tr>
+<tr><td>random</td>
+<td>-x</td>
+<td>Return a random number</td>
+</tr>
 </tbody>
 </table>
 </div>
 </div>
 <div class="section" id="queries">
 <h1>queries'</h1>
-<div class="section" id="id66">
+<div class="section" id="id67">
 <h2>Overview</h2>
 <p>This library provides symbolic constants and helper functions for
 using the VM queries in a clean, portable manner.</p>
 </div>
-<div class="section" id="id67">
+<div class="section" id="id68">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2358,14 +2513,14 @@ effect varies by query</td>
 <div class="section" id="stack">
 <h1>stack'</h1>
 <p>This library provides a vocabulary for creating and using custom LIFO stacks.</p>
-<div class="section" id="id68">
+<div class="section" id="id69">
 <h2>Loading</h2>
 <p>The following should suffice:</p>
 <pre class="literal-block">
 needs stack'
 </pre>
 </div>
-<div class="section" id="id69">
+<div class="section" id="id70">
 <h2>Examples</h2>
 <pre class="literal-block">
 with stack'
@@ -2392,7 +2547,7 @@ pop putn
 pop putn
 </pre>
 </div>
-<div class="section" id="id70">
+<div class="section" id="id71">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2441,12 +2596,12 @@ pop putn
 </div>
 <div class="section" id="struct">
 <h1>struct'</h1>
-<div class="section" id="id71">
+<div class="section" id="id72">
 <h2>Overview</h2>
 <p>This vocabulary provides support for creating and using simple data
 structures.</p>
 </div>
-<div class="section" id="id72">
+<div class="section" id="id73">
 <h2>Example</h2>
 <pre class="literal-block">
 with struct'
@@ -2475,7 +2630,7 @@ Sue &#64;.id putn
 Sue .initials puts
 </pre>
 </div>
-<div class="section" id="id73">
+<div class="section" id="id74">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2524,11 +2679,11 @@ allocated structure.</td>
 </div>
 <div class="section" id="subcell">
 <h1>subcell'</h1>
-<div class="section" id="id74">
+<div class="section" id="id75">
 <h2>Overview</h2>
 <p>This library provides functions for accessing 16-bit and 8-bit subsets of cells.</p>
 </div>
-<div class="section" id="id75">
+<div class="section" id="id76">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2610,7 +2765,7 @@ allocated structure.</td>
 </div>
 <div class="section" id="unsigned">
 <h1>unsigned'</h1>
-<div class="section" id="id76">
+<div class="section" id="id77">
 <h2>Overview</h2>
 <p>This vocabulary will provide support for creation and use of unsigned values.</p>
 </div>
@@ -2619,14 +2774,14 @@ allocated structure.</td>
 <h1>values'</h1>
 <p>A value is a variable that returns the stored value when used. This
 library provides an implementation for Retro.</p>
-<div class="section" id="id77">
+<div class="section" id="id78">
 <h2>Loading</h2>
 <p>The following should suffice:</p>
 <pre class="literal-block">
 needs values'
 </pre>
 </div>
-<div class="section" id="id78">
+<div class="section" id="id79">
 <h2>Examples</h2>
 <pre class="literal-block">
 with values'
@@ -2641,7 +2796,7 @@ foo foo + .s
 foo foo + .s
 </pre>
 </div>
-<div class="section" id="id79">
+<div class="section" id="id80">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2685,7 +2840,7 @@ mode</td>
 </div>
 <div class="section" id="variations">
 <h1>variations'</h1>
-<div class="section" id="id80">
+<div class="section" id="id81">
 <h2>Overview</h2>
 <p>This library provides some functions for determining the differences between
 VM implementations and conditionally evaluating code blocks based on these
@@ -2693,7 +2848,7 @@ differences.</p>
 <p>Specifically, it provides functions for determining the number of bits per
 cell and the endian nature of an implementation.</p>
 </div>
-<div class="section" id="id81">
+<div class="section" id="id82">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
