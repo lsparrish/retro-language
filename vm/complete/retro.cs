@@ -21,9 +21,10 @@ namespace Retro.Ngaro
     string request;
 
     /* Input Stack  */
-    string[] inputs;
+    byte[] [] inputs;
     int[] lengths;
-    int isp, offset;
+    int[] offset;
+    int isp;
     static readonly int MAX_OPEN_FILES = 8;
     static readonly int MAX_REQUEST_LENGTH = 1024;
     FileStream[] files = {null,null,null,null,null,null,null,null};
@@ -42,6 +43,49 @@ namespace Retro.Ngaro
       VM_SHR,      VM_ZERO_EXIT,  VM_INC,
       VM_DEC,      VM_IN,         VM_OUT,
       VM_WAIT
+    }
+
+    void rxSetTextColor(int color, int arg)
+    {
+        ConsoleColor col = ConsoleColor.White;
+        bool valid = true;
+        switch (color)
+        {
+            case 0:
+                col = ConsoleColor.Black;
+                break;
+            case 1:
+                col = ConsoleColor.Red;
+                break;
+            case 2:
+                col = ConsoleColor.Green;
+                break;
+            case 3:
+                col = ConsoleColor.Yellow;
+                break;
+            case 4:
+                col = ConsoleColor.Blue;
+                break;
+            case 5:
+                col = ConsoleColor.Magenta;
+                break;
+            case 6:
+                col = ConsoleColor.Cyan;
+                break;
+            case 7:
+                col = ConsoleColor.White;
+                break;
+            default:
+                valid = false;
+                break;
+        }
+        if (valid)
+        {
+            if (arg == 1)
+                Console.ForegroundColor = col;
+            else
+                Console.BackgroundColor = col;
+        }
     }
 
     void rxGetString(int starting)
@@ -177,10 +221,10 @@ namespace Retro.Ngaro
       ports   = new int[12];
       memory  = new int[1000000];
 
-      inputs  = new string[12];
+      inputs  = new byte[12][];
       lengths = new int[12];
       isp = 0;
-      offset = 0;
+      offset = new int[12];
 
       loadImage();
 
@@ -235,14 +279,13 @@ namespace Retro.Ngaro
       int a = 0;
 
       /* Check to see if we need to move to the next input source */
-      if (isp > 0 && offset == lengths[isp]) {
+      if (isp > 0 && offset[isp] == (lengths[isp])) {
         isp--;
-        offset = 0;
+        offset[isp] = 0;
       }
 
       if (isp > 0) {      /* Read from a file */
-        a = (int)inputs[isp][offset];
-        offset++;
+        a = (int)inputs[isp][offset[isp]++];
       }
       else {              /* Read from Console */
         ConsoleKeyInfo cki = Console.ReadKey();
@@ -303,8 +346,9 @@ namespace Retro.Ngaro
               i++; name++;
             }
             isp++;
-            inputs[isp]  = System.IO.File.ReadAllText(new String(s,0,i));
+            inputs[isp] = System.IO.File.ReadAllBytes(new String(s, 0, i));// System.IO.File.ReadAllText(new String(s, 0, i));
             lengths[isp] = inputs[isp].Length;
+            offset[isp] = 0;
           }
           break;
 
@@ -378,11 +422,37 @@ namespace Retro.Ngaro
         }
         memory[name] = 0;
         ports[5] = 0;
+
       }
+
       if (ports[5] == -11)
         ports[5] = Console.WindowWidth;
       if (ports[5] == -12)
         ports[5] = Console.WindowHeight;
+      if (ports[5] == -15)
+          ports[5] = -1;
+
+      int tos;
+      int nos;
+      switch (ports[8])
+      {
+          case 1:
+              tos = data[sp--];
+              nos = data[sp--];
+              Console.SetCursorPosition(tos, nos);
+              break;
+          case 2:
+              tos = data[sp--];
+              rxSetTextColor(tos, 1);
+              break;
+          case 3:
+              tos = data[sp--];
+              rxSetTextColor(tos, 2);
+              break;
+          default:
+              break;
+      }
+      ports[8] = 0;
     }
 
 
@@ -576,7 +646,7 @@ namespace Retro.Ngaro
         if (args[i] == "--with") {
           i++;
           vm.isp++;
-          vm.inputs[vm.isp] = System.IO.File.ReadAllText(args[i]);
+          vm.inputs[vm.isp] = System.IO.File.ReadAllBytes(args[i]);// System.IO.File.ReadAllText(args[i]);
           vm.lengths[vm.isp] = vm.inputs[vm.isp].Length;
         }
       }
