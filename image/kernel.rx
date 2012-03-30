@@ -342,7 +342,7 @@ create list  ( -a )  0 , 0 ,
 : default:  ( "-  ) ' 2 + , ; ' .macro last @ d->class !
 
 {{
-  : scratch  ( -a )  memory @ 2048 - ;
+  : scratch  ( -a )  memory @ STRING-LENGTH STRING-BUFFERS 2 + * - 2048 - ;
   create next  0 ,
   create split 0 ,
 
@@ -594,7 +594,7 @@ create dicts 64 allot
 
 ( Core Strings ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 {{
-  : buffers ( -a ) STRING-LENGTH 4 * here + ;
+  : buffers ( -a ) @memory STRING-LENGTH STRING-BUFFERS 1+ * - ;
   variable next
 ---reveal---
   : tempString ( $-$ )
@@ -606,7 +606,7 @@ create dicts 64 allot
 
 {{
   variable end
-  : pad     (  -a ) STRING-LENGTH 2 * here + ;
+  : pad     (  -a ) @memory STRING-LENGTH  STRING-BUFFERS 2 + * - ;
   : keep    (  -  ) @compiler &keepString &tempString if .data ;
   : >pad    ( $-$ ) pad over getLength 1+ copy pad keep ;
   : chop    ( $-$ ) end -- 0 @end ! ;
@@ -702,7 +702,7 @@ with buffer'
 chain: strings'
 {{
   variables| len needle haystack flag right left src |
-  : buffer (  -a ) here STRING-LENGTH 4 * + STRING-BUFFERS STRING-LENGTH * + ;
+  : buffer (  -a ) @memory STRING-LENGTH  STRING-BUFFERS 2 + * - ;
   : trim   ( $-$ )
     dup withLength + 1- dup @ 32 = [ 0 swap ! dup 1- -- trim ] &drop if ;
   : place  ( $$n- ) [ copy 0 ] sip here + ! ;
