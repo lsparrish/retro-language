@@ -10,9 +10,8 @@ chain: diet'
   : bloat   ( - )
     &STRING-LENGTH :devector
     &STRING-BUFFERS :devector ;
-
-  shrink
 ;chain
+
 
 doc{
 =====
@@ -57,4 +56,6 @@ Functions
 |             |           | default                                        |
 +-------------+-----------+------------------------------------------------+
 }doc
+
+^diet'shrink
 
