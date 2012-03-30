@@ -2,6 +2,7 @@
  * Ngaro for Mono / .NET
  *
  * Copyright (c) 2009 - 2011, Simon Waite and Charles Childers
+ * Copyright (c) 2012,        Todd Thomas
  *
  * Please compile with `gmcs` as `mcs` seems to have a
  * simple Console.in implementation.
