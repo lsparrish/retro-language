@@ -12,6 +12,11 @@ them.
 
   needs math'
 
+The **files'** vocabulary is now part of the library. Do this if you need it:
+
+::
+
+  needs files'
 
 
 ----------
@@ -36,6 +41,10 @@ core language / standard image
     - **min**
     - **max**
     - **random**
+    - **files'**
+
+  - new memory layout (buffers at physical end of memory)
+  - hidden headers now disappear when global scope resumes
 
 libraries
 =========
@@ -47,7 +56,7 @@ libraries
   - add double'
   - add unsigned'
   - add introspection'
-
+  - add files'
   - update math'
 
     - add **pow**
