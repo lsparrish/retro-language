@@ -12,7 +12,7 @@ chain: introspection'
     @memory        STRING-LENGTH   -  ( tib     )
                    STRING-LENGTH   -  ( scratch )
     STRING-BUFFERS STRING-LENGTH * -  ( buffers )
-    2048                           -  ( headers ) ;
+    HEADERS [ STRING-LENGTH * ] [ 3 * ] bi + - ( headers ) ;
 
   : reserved   ( -n )  @memory startOfBuffers - ;
   : freeSpace  ( -n )  startOfBuffers here - ;

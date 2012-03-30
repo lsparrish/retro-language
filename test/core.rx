@@ -1046,6 +1046,7 @@ results
 
 IO: STRING-LENGTH
 IO: STRING-BUFFERS
+IO: HEADERS
 
 TEST: tempString
   [ "100" dup tempString over over < [ compare ] dip and ] expected: { -1 }

@@ -341,12 +341,14 @@ create list  ( -a )  0 , 0 ,
 : is        ( a"- ) ' 0; :is ;
 : default:  ( "-  ) ' 2 + , ; ' .macro last @ d->class !
 
+: HEADERS   (  -n ) 32 ;
+
 {{
   : scratch  ( -a )
     memory @       STRING-LENGTH   -  ( tib     )
                    STRING-LENGTH   -  ( scratch )
     STRING-BUFFERS STRING-LENGTH * -  ( buffers )
-    2048                           -  ( headers ) ;
+    HEADERS dup STRING-LENGTH * swap 3 * + -  ( headers ) ;
 
   create next  0 ,
   create split 0 ,
