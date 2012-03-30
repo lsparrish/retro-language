@@ -13,7 +13,7 @@ chain: hash'
   ( Dan Bernstein, comp.lang.c with 'abs' hack )
   : djb2 ( $-n )
     5381 over getLength
-    [ [ dup 5 << + over ] dip + @ + ] iter ^math'nip abs ;
+    [ [ dup 5 << + over ] dip + @ + ] iter nip ^math'abs ;
 
   ( 193, 389, 769 are all pretty good; if you expect to have )
   ( a lot of keys, use a larger prime.                       )
