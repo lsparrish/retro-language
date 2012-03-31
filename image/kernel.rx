@@ -762,11 +762,11 @@ chain: strings'
     [ dup @ add 1- ] times drop
     start tempString ;
   : split ( $n-$$ )
-    2over 0 swap getSubset [ + ] dip ;
+    2over 0 swap getSubset &+ dip ;
   : splitAtChar ( $c-$$ )
     2over over swap findChar over - 1+ 0 swap getSubset [ findChar 1+ ] dip ;
   : splitAtChar: ( $"-$$ )
-    32 accept tib @ .data ` splitAtChar ; immediate
+    @getToken .data ` splitAtChar ; immediate
 ;chain
 without
 
@@ -774,7 +774,7 @@ without
 with strings'
 : __^  ( "- )
   splitAtChar: ' find
-  [ @d->xt findInChain [ [ @d->xt ] [ @d->class ] bi do ] &drop if ]
+  [ @d->xt findInChain [ [ @d->xt ] [ @d->class ] bi withClass ] &drop if ]
   &drop if ; parsing
 
 : needs  ( "- )
