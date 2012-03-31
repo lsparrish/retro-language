@@ -3,25 +3,46 @@ Release Notes
 =============
 
 
+----------
+Retro 11.4
+----------
 
-The **pow**, **abs**, **min**, **max**, and **random** are now in the **math'**
-vocabulary. Load the library, and add **^math'** prefix to these if you need
-them.
+Compatibility Issues
+====================
 
-::
+This release brings several changes that may require small alterations to
+existing source code.
 
-  needs math'
-
-The **files'** vocabulary is now part of the library. Do this if you need it:
+First, the **files'** vocabulary is now in the library and not the core
+language. For most users, adding a single line to the start of their sources
+will be sufficient.
 
 ::
 
   needs files'
 
+The second change is more significant. We have moved **pow**, **abs**, **min**,
+**max**, and **random** to the **math'** library. If you have source using these,
+you need to add the following to your sources:
 
-----------
-Retro 11.4
-----------
+::
+
+  needs math'
+  with  math'
+
+If you don't want to do **with math'**, you can add a **^math'** prefix to each
+use of these functions and just use the **needs math'** line.
+
+Third, hidden headers are no longer preserved. There is a new function, **HEADERS**,
+which returns the maximum number of hidden headers. Exceeding this will cause
+problems, so it can be revectored to increase (or decrease) as needed.
+
+Fourth, the **tib**, temporary string buffers, and hidden headers are now moved
+to the end of physical memory. Use the **introspection'** library to determine
+the size and actual locations of these buffers, and avoid overflowing into them.
+E.g., in **casket'**, we use **^introspection'startOfBuffers** to identify the
+start of the buffers and dynamically shift the casket buffers to a safe location.
+
 
 
 core language / standard image
@@ -29,10 +50,10 @@ core language / standard image
 
   - clean ups and refactorings
 
-    - {{ and }}
-    - :is and :devector
-    - each@
-    - <puts>
+    - **{{** and **}}**
+    - **:is** and **:devector**
+    - **each@**
+    - **<puts>**
 
   - removals
 
@@ -49,21 +70,23 @@ core language / standard image
 libraries
 =========
 
-  - d' renamed to decimal' (resolve naming conflict)
-  - add queries'
-  - add dump'
-  - add fixed'
-  - add double'
-  - add unsigned'
-  - add introspection'
-  - add files'
-  - update math'
+  - **d'** renamed to **decimal'** (resolve naming conflict)
+  - add **queries'**
+  - add **dump'**
+  - add **fixed'**
+  - add **double'**
+  - add **unsigned'**
+  - add **introspection'**
+  - add **files'**
+  - update **math'**
 
     - add **pow**
     - add **abs**
     - add **min**
     - add **max**
     - add **random**
+
+  - updated **console'** to use new console device with VT100 fallback
 
 
 examples
@@ -75,7 +98,8 @@ vm
 ==
 
   - add retro-curses
-
+  - C# is now feature complete
+  - added support for VM-level console device
 
 website
 =======
