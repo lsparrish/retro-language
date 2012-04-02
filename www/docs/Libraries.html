@@ -1326,10 +1326,11 @@ and number of string buffers.</p>
 easily reversible.</p>
 </div>
 <div class="section" id="id34">
-<h2>Loading</h2>
-<p>The following should suffice:</p>
+<h2>Usage</h2>
+<p>After loading, add a call to the function desired to your application code.
+E.g.,</p>
 <pre class="literal-block">
-needs diet'
+[ ^diet'extreme ] is boot
 </pre>
 </div>
 <div class="section" id="id35">
@@ -1356,6 +1357,11 @@ the initial load of the library</td>
 <td><tt class="docutils literal">-</tt></td>
 <td>Further reductions of string length and reduces
 the buffers</td>
+</tr>
+<tr><td>max</td>
+<td><tt class="docutils literal">-</tt></td>
+<td>Shrink as far as possible. Disables hidden
+headers and temporary strings</td>
 </tr>
 <tr><td>bloat</td>
 <td><tt class="docutils literal">-</tt></td>

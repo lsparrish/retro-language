@@ -18,11 +18,12 @@ and number of string buffers.</p>
 <p>While easy enough to do manually, this automates the process and makes it
 easily reversible.</p>
 </div>
-<div class="section" id="loading">
-<h1>Loading</h1>
-<p>The following should suffice:</p>
+<div class="section" id="usage">
+<h1>Usage</h1>
+<p>After loading, add a call to the function desired to your application code.
+E.g.,</p>
 <pre class="literal-block">
-needs diet'
+[ ^diet'extreme ] is boot
 </pre>
 </div>
 <div class="section" id="functions">
@@ -49,6 +50,11 @@ the initial load of the library</td>
 <td><tt class="docutils literal">-</tt></td>
 <td>Further reductions of string length and reduces
 the buffers</td>
+</tr>
+<tr><td>max</td>
+<td><tt class="docutils literal">-</tt></td>
+<td>Shrink as far as possible. Disables hidden
+headers and temporary strings</td>
 </tr>
 <tr><td>bloat</td>
 <td><tt class="docutils literal">-</tt></td>
