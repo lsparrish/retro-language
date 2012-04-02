@@ -13,10 +13,10 @@ chain: dump'
     dup 10 < [ 48 + ] [ 55 + ] if putc ;
     
   : printPaddedDecimal ( val -- )
-    100000000 8 [ 10 / swap over /mod putn swap ] times ;
+    100000000 8 [ 10 / swap over /mod putn swap ] times 2drop ;
     
   : printDecimal ( addr -- )
-    @ printPaddedDecimal 2drop space ;
+    @ printPaddedDecimal space ;
 
   : printHex ( addr -- )
     ^subcell'highWord ^subcell'highByte ^subcell'highNibble
@@ -35,7 +35,7 @@ chain: dump'
   : printAddr ( addr -- )
     '[ putc
     printPaddedDecimal
-    '] putc 2drop ;
+    '] putc ;
 
   : dumpLine ( addr -- )
     2dup printAddr space
