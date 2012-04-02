@@ -980,14 +980,16 @@ While easy enough to do manually, this automates the process and makes it
 easily reversible.
 
 
--------
-Loading
--------
-The following should suffice:
+-----
+Usage
+-----
+After loading, add a call to the function desired to your application code.
+E.g.,
 
 ::
 
-  needs diet'
+  [ ^diet'extreme ] is boot
+
 
 
 ---------
@@ -1002,6 +1004,9 @@ Functions
 +-------------+-----------+------------------------------------------------+
 | extreme     | ``-``     | Further reductions of string length and reduces|
 |             |           | the buffers                                    |
++-------------+-----------+------------------------------------------------+
+| max         | ``-``     | Shrink as far as possible. Disables hidden     |
+|             |           | headers and temporary strings                  |
 +-------------+-----------+------------------------------------------------+
 | bloat       | ``-``     | Restore buffers and string length to the       |
 |             |           | default                                        |
