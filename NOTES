@@ -2,11 +2,6 @@
 
 == Ideas for 11.4 ==
 
-- add port for console interactions
-
-  This would allow for portable setting of colors and cursor
-  positioning.
-
 - add secondary time port for millisecond time resolution
 
   Probably this will be purely optional, with VM or OSes that
@@ -14,9 +9,7 @@
 
 - ngaro vm test suite
 
-  A set of omages to test the instruction set and IO functionality
-
-- look into finishng the C# VM
+  A set of images to test the instruction set and IO functionality
 
 - fully document casket and decompose, add detailed instructions
   on setting this up
