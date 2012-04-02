@@ -4197,3 +4197,5 @@ a.thumbnail:hover {
 i[class^="icon-"] {
   opacity: 0.8;
 }
+
+.nav-list :visited { color: darkblue; }
