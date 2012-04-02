@@ -1,19 +1,30 @@
 needs subcell'
 
 chain: dump'
-{{
-  variables| A B |
-    
+{{    
+
+  : hex? ( -- t | f )
+    base @ 16 = ;
+      
   : visible? ( val -- t | f )
     31 126 within ;
 
-  : printField ( val -- )
+  : printNibble ( val -- )
     dup 10 < [ 48 + ] [ 55 + ] if putc ;
+    
+  : printPaddedDecimal ( val -- )
+    100000000 8 [ 10 / swap over /mod putn swap ] times ;
+    
+  : printDecimal ( addr -- )
+    @ printPaddedDecimal 2drop space ;
 
-  : printWords ( addr -- )
+  : printHex ( addr -- )
     ^subcell'highWord ^subcell'highByte ^subcell'highNibble
-    8 [ dup ^subcell'nibble@ printField 1+ ] times drop space ;
+    8 [ dup ^subcell'nibble@ printNibble 1+ ] times drop space ;
 
+  : printCells ( addr -- )
+    hex? [ printHex ] [ printDecimal ] if ;
+    
   : printChar ( val -- )
     dup visible? [ putc ] [ drop '_ putc ] if ;
 
@@ -22,23 +33,16 @@ chain: dump'
     16 [ dup ^subcell'c@ printChar 1+ ] times drop cr ;
     
   : printAddr ( addr -- )
-      '[ putc
-      10000000 /mod putn
-      1000000  /mod putn
-      100000   /mod putn
-      10000    /mod putn
-      1000     /mod putn
-      100      /mod putn
-      10       /mod putn
-      1        /mod putn 
-      '] putc  drop ;
+    '[ putc
+    printPaddedDecimal
+    '] putc 2drop ;
 
   : dumpLine ( addr -- )
-    @A printAddr space
-    4 [ @A printWords A ++ ] times @B printChars @A !B ;
+    2dup printAddr space
+    4 [ dup printCells 1+ ] times swap printChars ;
 ---reveal---
   : dump ( numLines addr -- )
-    cr dup !A !B [ dumpLine ] times ;
+    cr swap [ dumpLine ] times drop ;
 }}
 
 ;chain
