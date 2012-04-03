@@ -55,7 +55,7 @@ core language / standard image
     - **each@**
     - **<puts>**
 
-  - removals
+  - removals (now in library)
 
     - **pow**
     - **abs**
@@ -77,14 +77,14 @@ libraries
   - add **double'**
   - add **unsigned'**
   - add **introspection'**
-  - add **files'**
+  - add **files'** (used to be in core image)
   - update **math'**
 
-    - add **pow**
-    - add **abs**
-    - add **min**
-    - add **max**
-    - add **random**
+    - add **pow** (used to be in core image)
+    - add **abs** (used to be in core image)
+    - add **min** (used to be in core image)
+    - add **max** (used to be in core image)
+    - add **random** (used to be in core image)
 
   - updated **console'** to use new console device with VT100 fallback
 
