@@ -24,7 +24,7 @@ chain: fixed'
     dup 0 < [ '- putc ] ifTrue ;
 
 : putWhole ( num -- num )
-    dup 10000 >= [ 10000 /mod putn ] [ 0 putn ] if ;
+    dup 10000 >= [ 10000 /mod ] [ 0 ] if putn ;
 
 : putFrac ( num -- num )
     '. putc
