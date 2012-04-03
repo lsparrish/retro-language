@@ -1,20 +1,20 @@
 needs subcell'
 
 chain: dump'
-{{    
+{{
 
   : hex? ( -- t | f )
     base @ 16 = ;
-      
+
   : visible? ( val -- t | f )
     31 126 within ;
 
   : printNibble ( val -- )
     dup 10 < [ 48 + ] [ 55 + ] if putc ;
-    
+
   : printPaddedDecimal ( val -- )
     100000000 8 [ 10 / swap over /mod putn swap ] times 2drop ;
-    
+
   : printDecimal ( addr -- )
     @ printPaddedDecimal space ;
 
@@ -24,14 +24,14 @@ chain: dump'
 
   : printCells ( addr -- )
     hex? [ printHex ] [ printDecimal ] if ;
-    
+
   : printChar ( val -- )
     dup visible? [ putc ] [ drop '_ putc ] if ;
 
   : printChars ( addr -- )
     ^subcell'highWord ^subcell'highByte
     16 [ dup ^subcell'c@ printChar 1+ ] times drop cr ;
-    
+
   : printAddr ( addr -- )
     '[ putc
     printPaddedDecimal
