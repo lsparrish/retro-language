@@ -19,13 +19,13 @@ chain: fixed'
 
 : D->F ( d -- fraction )
     drop 10000 /. ;
-    
+
 : putSign ( num -- num )
     dup 0 < [ '- putc ] ifTrue ;
-    
+
 : putWhole ( num -- num )
     dup 10000 >= [ 10000 /mod putn ] [ 0 putn ] if ;
-    
+
 : putFrac ( num -- num )
     '. putc
     1000 /mod putn
