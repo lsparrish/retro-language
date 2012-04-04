@@ -1,22 +1,17 @@
-chain: queries'
- -1 constant MEMORY-SIZE
- -2 constant CANVAS?
- -3 constant CANVAS-WIDTH
- -4 constant CANVAS-HEIGHT
- -5 constant STACK-DEPTH
- -6 constant ADDRESS-STACK-DEPTH
- -7 constant MOUSE?
- -8 constant TIME
- -9 constant QUIT-VM
--10 constant HOST-ENVIRONMENT-QUERY
--11 constant CONSOLE-WIDTH
--12 constant CONSOLE-HEIGHT
--13 constant BITS-PER-CELL
--14 constant ENDIAN
--15 constant CONSOLE?
+needs enum'
 
+with enum'
+
+chain: queries'
+  [ 1- ] is step
+  -1 enum| MEMORY-SIZE CANVAS? CANVAS-WIDTH CANVAS-HEIGHT STACK-DEPTH
+           ADDRESS-STACK-DEPTH MOUSE? TIME QUIT-VM HOST-ENVIRONMENT-QUERY
+           CONSOLE-WIDTH CONSOLE-HEIGHT BITS-PER-CELL ENDIAN CONSOLE? |
+  devector step
   : query  ( n-m )  5 out wait 5 in ;
 ;chain
+
+without
 
 doc{
 ========

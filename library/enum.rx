@@ -6,7 +6,7 @@ chain: enum'
   : <enum|>
     repeat
       getToken dup "|" compare if;
-      header dup @last !d->xt step
+      header [ @last !d->xt ] [ step ] bi
     again ;
 ---reveal---
   : enum| ( n"- ) <enum|> 2drop ;
