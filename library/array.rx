@@ -32,7 +32,7 @@ chain: array'
     swap [ [ @ over ! 1+ ] sip 1- ] times 2drop ;
 
   : append ( aa-a )
-    here 0 , [ swap @+ [ @+ , ] times drop @+ [ @+ , ] times drop ] dip
+    here 0 , [ swap 2 [ @+ [ @+ , ] times drop ] times ] dip
     here over 1+ - over ! ;
 
   : fromQuote ( q-a )
@@ -43,11 +43,11 @@ chain: array'
     [ ` [ ] dip [ 1 , , ] apply ` ] ;
 
   : in?  ( na-f )
-    -1 !flag
+    flag on
     [ over <> @flag and !flag ] apply drop @flag not ;
 
   : stringIn?  ( $a-f )
-    -1 !flag
+    flag on
     [ over compare not @flag and !flag ] apply drop @flag not ;
 
   : display ( a- )
