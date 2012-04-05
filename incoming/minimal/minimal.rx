@@ -7,7 +7,10 @@ c: pop    c: push   c: 0;     c: ;;    c: ;      c: repeat c: again
 
 d' nip heap !
 
-( reset dictionary )
+( unhide 'vector' )
+d' tabAsWhitespace 10 - d' tabAsWhitespace !
+
+( reset last entry to tabAsWhitespace )
 d' tabAsWhitespace last !
 
 ( essentials )
