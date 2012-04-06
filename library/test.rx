@@ -28,16 +28,3 @@ chain: test'
 
 without
 
-with test'
-with assertion'
-
-TEST: +
-  1 2 + 3 assert=
- -1 2 + 1 assert= ;
-
-TEST: *
-  2 3 * 6 assert= ;
-
-runTests
-
-
