@@ -76,7 +76,7 @@ create next
   : (v)     (   -   ) clear vb ;
   : pos     (   -cl ) @column @line ;
   : get     ( cl-a  ) toLine + ;
-  : va      (  a-va ) dup @ swap ;
+  : va      (  a-va ) [ @ ] sip ;
   : c!      (  a-   ) '@ swap ! ;
   : show    ( va-   ) dup c! (v) ! ;
   : display (   -   ) bounds pos get va show ;
@@ -86,7 +86,7 @@ create next
     [ 'k = ] [ line ++   -1 ] whend
     [ 'j = ] [ column -- -1 ] whend
     [ 'l = ] [ column ++ -1 ] whend
-    [ 32 = ] [ @line toLine @column + dup @ [ 0 ] [ 1 ] if swap ! -1 ] whend
+    [ 32 = ] [ @line toLine @column + [ @ [ 0 ] [ 1 ] if ] sip ! -1 ] whend
     [ 'z = ] [ 0 ] whend ;
 ---reveal---
   : edit
