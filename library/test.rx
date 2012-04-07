@@ -15,6 +15,9 @@ chain: test'
   : TEST:  ( "-  )
     getToken keepString findLastNode here swap ! 0 , , here 1+ , ]] ;
 
+  : IO:    ( "-  )
+    getToken keepString findLastNode here swap ! 0 , , [ ] , ;
+
   : listTests
     tests [ [ @1+ 0; puts space ] [ :next ] bi dup 0 <> ] while ;
 

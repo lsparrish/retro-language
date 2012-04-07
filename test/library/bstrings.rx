@@ -1,43 +1,33 @@
+needs test'
 needs assertion'
 needs bstrings'
 
-with assertion'
+with| test' assertion' |
 
-[ [ "passed" ] [ "failed" ] if "%s\n" puts ] is postCond
+TEST: ^bstrings'pack
+  "hello" ^bstrings'pack @ 'h = not assert ;
 
-: a0
-  "Testing pack : " puts
-  "hello" ^bstrings'pack @ 'h = not assert ; assertion
+TEST: ^bstrings'getLength
+  "hello" ^bstrings'pack ^bstrings'getLength 5 assert= ;
 
-: a1
-  "Testing getLength : " puts
-  "hello" ^bstrings'pack ^bstrings'getLength 5 assert= ; assertion
-
-: a2
-  "Testing unpack : " puts
+TEST: ^bstrings'unpack
   "hello" ^bstrings'pack dup @ 'h = not assert
-  ^bstrings'unpack @ 'h assert= ; assertion
+  ^bstrings'unpack @ 'h assert= ;
 
-: a3
-  "Testing withLength : " puts
+TEST: ^bstrings'withLength
   "hello" ^bstrings'pack dup ^bstrings'withLength
   5 assert=
-  = assert ; assertion
+  = assert ;
 
-: a4
-  "Not testing puts [io related] : " puts ; assertion
+IO: ^bstrings'puts
 
-: a5
-  "Testing toLower : " puts
+TEST: ^bstrings'toLower
   "HeLLo123#" ^bstrings'pack ^bstrings'toLower ^bstrings'unpack
-  "hello123#" compare assert ; assertion
+  "hello123#" compare assert ;
 
-: a6
-  "Testing toUpper : " puts
+TEST: ^bstrings'toUpper
   "HeLLo123#" ^bstrings'pack ^bstrings'toUpper ^bstrings'unpack
-  "HELLO123#" compare assert ; assertion
+  "HELLO123#" compare assert ;
 
-: go
-  cr a0 a1 a2 a3 a4 a5 a6 bye ;
+runTests bye
 
-go
