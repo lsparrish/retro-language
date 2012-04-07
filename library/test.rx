@@ -18,8 +18,15 @@ chain: test'
   : IO:    ( "-  )
     getToken keepString findLastNode here swap ! 0 , , [ ] , ;
 
+  : OMIT:    ( "-  )
+    getToken keepString findLastNode here swap ! 0 , , [ ] , ;
+
   : listTests
     tests [ [ @1+ 0; puts space ] [ :next ] bi dup 0 <> ] while ;
+
+  : expected:  ( q"- )
+    getToken drop  ` do
+    [ getToken dup "}" compare [ drop 0 ] [ toNumber .data ` assert= -1 ] if ] while ; immediate
 
   : runTests
     cr
