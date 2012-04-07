@@ -1,67 +1,59 @@
+needs test'
 needs assertion'
 needs stack'
+include examples/autopsy.rx
 
-with assertion'
+with| autopsy' assertion' test' |
 
-[ [ "passed" ] [ "failed" ] if "%s\n" puts ] is postCond
 
 ^stack'new: foo
 ^stack'new: bar
 
-: a0
-  "Testing new: : " puts
-  foo bar <> assert ; assertion
+TEST: ^stack'new:
+  foo bar <> assert ;
 
-variable a
-variable b
+variables| a b |
 
-: a1
-  "Testing new : " puts
+TEST: ^stack'new
   ^stack'new ^stack'get !a
   ^stack'new ^stack'get !b
   @a @b <> assert
   @a foo <> assert
-  @b bar <> assert ; assertion
+  @b bar <> assert ;
 
-: a2
-  "Testing get : " puts
-  ^stack'get @b assert= ; assertion
+TEST: ^stack'get
+  ^stack'get @b assert= ;
 
-: a3
-  "Testing set : " puts
+TEST: ^stack'set
   @a ^stack'set
   @a ^stack'get assert=
   foo ^stack'set
-  bar ^stack'get <> assert ; assertion
+  bar ^stack'get <> assert ;
 
-: a4
-  "Testing push : " puts
+variable d
+TEST: ^stack'push
+  depth !d
   @a ^stack'set
-  100 200 ^stack'push depth 1 assert=
-          ^stack'push depth 0 assert=
+  100 200 ^stack'push depth @d - 1 assert=
+          ^stack'push depth @d - 0 assert=
   bar ^stack'set
-  400 300 ^stack'push depth 1 assert=
-          ^stack'push depth 0 assert= ; assertion
+  400 300 ^stack'push depth @d - 1 assert=
+          ^stack'push depth @d - 0 assert= ;
 
-: a5
-  "Testing pop : " puts
+TEST: ^stack'pop
   @a ^stack'set
-  ^stack'pop 100 assert=
-  ^stack'pop 200 assert=
+  [ ^stack'pop ^stack'pop ] expected: { 200 100 }
   bar ^stack'set
-  ^stack'pop 400 assert=
-  ^stack'pop 300 assert= ; assertion
+  [ ^stack'pop ^stack'pop ] expected: { 300 400 } ;
 
-: a6
-  "Testing depth : " puts
+TEST: ^stack'depth
+  depth !d
   @a ^stack'set
-  100 200 ^stack'push depth 1 assert=
-          ^stack'push depth 0 assert=
+  100 200 ^stack'push depth @d - 1 assert=
+          ^stack'push depth @d - 0 assert=
   ^stack'depth 2 assert=
   ^stack'pop 100 assert=
-  ^stack'depth 1 assert= ; assertion
+  ^stack'depth 1 assert= ;
 
-: go
-  cr a0 a1 a2 a3 a4 a5 a6 bye ;
+runTests bye
 
-go
