@@ -1,23 +1,19 @@
 needs assertion'
+needs test'
 needs decorator'
 
-with assertion'
-
-[ [ "passed" ] [ "failed" ] if "%s\n" puts ] is postCond
+with| test' assertion' |
 
 : foo
   12 ;
 
-: a0
+TEST: ^decorator'decorate
   foo 12 assert=
   &foo [ 14 ] ^decorator'decorate
-  foo 12 assert= 14 assert= ; assertion
+  foo 12 assert= 14 assert= ;
 
-: a1
+TEST: ^decorator'undecorate
   &foo ^decorator'undecorate
-  foo 12 assert= ; assertion
+  foo 12 assert= ;
 
-: go
-  cr a0 a1 bye ;
-
-go
+runTests bye

@@ -1,37 +1,30 @@
 needs assertion'
+needs test'
 needs enum'
 
-with| assertion' enum' |
+with| test' assertion' enum' |
 
-[ [ "passed" ] [ "failed" ] if "%s\n" puts ] is postCond
 
 1 enum a enum b enum c drop
 
-: a0
-  "Testing enum : " puts
+TEST: ^enum'enum
   a 1 assert=
   b 2 assert=
-  c 3 assert= ; assertion
+  c 3 assert= ;
 
 1 enum| d e f |
 
-: a1
-  "Testing enum| : " puts
+TEST: ^enum'enum|
   d 1 assert=
   e 2 assert=
-  f 3 assert= ; assertion
+  f 3 assert= ;
 
 [ 10 + ] is step
 0 enum| g h i |
 
-: a2
-  "Testing step : " puts
+TEST: ^enum'step
   g 00 assert=
   h 10 assert=
-  i 20 assert= ; assertion
+  i 20 assert= ;
 
-
-: go
-  cr a0 a1 a2 bye ;
-
-go
+runTests bye
