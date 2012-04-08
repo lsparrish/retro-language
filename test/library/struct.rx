@@ -1,9 +1,8 @@
+needs test'
 needs assertion'
 needs struct'
 
-with assertion'
-
-[ [ "passed" ] [ "failed" ] if "%s\n" puts ] is postCond
+with| test' assertion' |
 
 with struct'
 
@@ -16,27 +15,24 @@ with struct'
 foo bar
 
 
-: a0
-  "The following are tested implicitly:\n" puts
-  "  {  }  field  fields\n" puts
-  "The code laid down by them will be used by the remaining tests.\n" puts ;
+( These are tested implicitly by the above code )
+TEST: ^struct'{   ;
+TEST: ^struct'}   ;
+TEST: ^struct'field  ;
+TEST: ^struct'fields  ;
 
-: a1
-  "Testing size : " puts
-  &foo size 12 assert= ; assertion
+TEST: ^struct'size
+  &foo size 12 assert= ;
 
-: a2
-  "Testing clone : " puts
-  &foo clone here swap - 12 assert= ; assertion
+TEST: ^struct'clone
+  &foo clone here swap - 12 assert= ;
 
-: a3
-  "Testing field access : " puts
+TEST: ...
+  "Testing field access: " puts
   1 bar .a !
   2 bar .c !
   bar .a @ 1 assert=
-  bar .c @ 2 assert= ; assertion
+  bar .c @ 2 assert= ;
 
-: go
-  cr a0 a1 a2 a3 bye ;
+runTests bye
 
-go

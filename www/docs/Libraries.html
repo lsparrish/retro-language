@@ -2260,91 +2260,11 @@ starts at <em>1</em>.</td>
 </table>
 </div>
 </div>
-<div class="section" id="locals">
-<h1>locals'</h1>
-<div class="section" id="id63">
-<h2>Overview</h2>
-<p>This vocabulary provides an easy way to give functions access to local variables within
-certain limitations.</p>
-<ul class="simple">
-<li>Variable names are limited to twelve characters</li>
-<li>Functions using local variables are not reentrant</li>
-</ul>
-</div>
-<div class="section" id="id64">
-<h2>Example</h2>
-<pre class="literal-block">
-: foo ( nos tos - result )  locals{ tos nos }  &#64;nos &#64;tos + &#64;nos * ;
-</pre>
-<p>Note here that <strong>locals{</strong> will modify the temporary variable names to match the names
-you specify.</p>
-</div>
-<div class="section" id="id65">
-<h2>Functions</h2>
-<table border="1" class="docutils">
-<colgroup>
-<col width="11%" />
-<col width="20%" />
-<col width="26%" />
-<col width="44%" />
-</colgroup>
-<thead valign="bottom">
-<tr><th class="head">Name</th>
-<th class="head">Stack (Runtime)</th>
-<th class="head">Stack (Compile-Time)</th>
-<th class="head">Usage</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr><td>locals{</td>
-<td><tt class="docutils literal">-</tt></td>
-<td>-a</td>
-<td>Parse for and setup local variables.
-The parsing ends when <strong>}</strong> is
-found. Local variables are created
-and initialized in reverse order of
-stack comments.</td>
-</tr>
-<tr><td>a</td>
-<td>-a</td>
-<td>a-a</td>
-<td>First local variable</td>
-</tr>
-<tr><td>b</td>
-<td>-a</td>
-<td>a-a</td>
-<td>Second local variable</td>
-</tr>
-<tr><td>c</td>
-<td>-a</td>
-<td>a-a</td>
-<td>Third local variable</td>
-</tr>
-<tr><td>d</td>
-<td>-a</td>
-<td>a-a</td>
-<td>Fourth local variable</td>
-</tr>
-<tr><td>e</td>
-<td>-a</td>
-<td>a-a</td>
-<td>Fifth local variable</td>
-</tr>
-<tr><td>f</td>
-<td>-a</td>
-<td>a-a</td>
-<td>Sixth local variable</td>
-</tr>
-</tbody>
-</table>
-<p>The initial variable names will be replaced by <strong>locals{</strong> each time it is used.</p>
-</div>
-</div>
 <div class="section" id="math">
 <h1>math'</h1>
 <p>This library provides support for additional mathmatic operations not provided
 by the core Retro language.</p>
-<div class="section" id="id66">
+<div class="section" id="id63">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2415,12 +2335,12 @@ false</td>
 </div>
 <div class="section" id="queries">
 <h1>queries'</h1>
-<div class="section" id="id67">
+<div class="section" id="id64">
 <h2>Overview</h2>
 <p>This library provides symbolic constants and helper functions for
 using the VM queries in a clean, portable manner.</p>
 </div>
-<div class="section" id="id68">
+<div class="section" id="id65">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2519,14 +2439,14 @@ effect varies by query</td>
 <div class="section" id="stack">
 <h1>stack'</h1>
 <p>This library provides a vocabulary for creating and using custom LIFO stacks.</p>
-<div class="section" id="id69">
+<div class="section" id="id66">
 <h2>Loading</h2>
 <p>The following should suffice:</p>
 <pre class="literal-block">
 needs stack'
 </pre>
 </div>
-<div class="section" id="id70">
+<div class="section" id="id67">
 <h2>Examples</h2>
 <pre class="literal-block">
 with stack'
@@ -2553,7 +2473,7 @@ pop putn
 pop putn
 </pre>
 </div>
-<div class="section" id="id71">
+<div class="section" id="id68">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2602,12 +2522,12 @@ pop putn
 </div>
 <div class="section" id="struct">
 <h1>struct'</h1>
-<div class="section" id="id72">
+<div class="section" id="id69">
 <h2>Overview</h2>
 <p>This vocabulary provides support for creating and using simple data
 structures.</p>
 </div>
-<div class="section" id="id73">
+<div class="section" id="id70">
 <h2>Example</h2>
 <pre class="literal-block">
 with struct'
@@ -2636,7 +2556,7 @@ Sue &#64;.id putn
 Sue .initials puts
 </pre>
 </div>
-<div class="section" id="id74">
+<div class="section" id="id71">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2685,11 +2605,11 @@ allocated structure.</td>
 </div>
 <div class="section" id="subcell">
 <h1>subcell'</h1>
-<div class="section" id="id75">
+<div class="section" id="id72">
 <h2>Overview</h2>
 <p>This library provides functions for accessing 16-bit and 8-bit subsets of cells.</p>
 </div>
-<div class="section" id="id76">
+<div class="section" id="id73">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2771,7 +2691,7 @@ allocated structure.</td>
 </div>
 <div class="section" id="unsigned">
 <h1>unsigned'</h1>
-<div class="section" id="id77">
+<div class="section" id="id74">
 <h2>Overview</h2>
 <p>This vocabulary will provide support for creation and use of unsigned values.</p>
 </div>
@@ -2780,14 +2700,14 @@ allocated structure.</td>
 <h1>values'</h1>
 <p>A value is a variable that returns the stored value when used. This
 library provides an implementation for Retro.</p>
-<div class="section" id="id78">
+<div class="section" id="id75">
 <h2>Loading</h2>
 <p>The following should suffice:</p>
 <pre class="literal-block">
 needs values'
 </pre>
 </div>
-<div class="section" id="id79">
+<div class="section" id="id76">
 <h2>Examples</h2>
 <pre class="literal-block">
 with values'
@@ -2802,7 +2722,7 @@ foo foo + .s
 foo foo + .s
 </pre>
 </div>
-<div class="section" id="id80">
+<div class="section" id="id77">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
@@ -2846,7 +2766,7 @@ mode</td>
 </div>
 <div class="section" id="variations">
 <h1>variations'</h1>
-<div class="section" id="id81">
+<div class="section" id="id78">
 <h2>Overview</h2>
 <p>This library provides some functions for determining the differences between
 VM implementations and conditionally evaluating code blocks based on these
@@ -2854,7 +2774,7 @@ differences.</p>
 <p>Specifically, it provides functions for determining the number of bits per
 cell and the endian nature of an implementation.</p>
 </div>
-<div class="section" id="id82">
+<div class="section" id="id79">
 <h2>Functions</h2>
 <table border="1" class="docutils">
 <colgroup>
