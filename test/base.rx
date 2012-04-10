@@ -20,7 +20,7 @@ TEST: swap
 TEST: drop
   [   2 1 drop      ] expected: { 2 }
   [ 3 2 1 drop drop ] expected: { 3 }
-  [ 1 2 3 4 5 drop depth ] expected: { 4 4 3 2 1 } ;
+  [ 1 2 3 4 5 drop ] expected: { 4 3 2 1 } ;
 
 TEST: and
   [  0  0 and ] expected: {  0 }
@@ -68,15 +68,13 @@ TEST: /mod
   [ -5 -2 /mod ] expected: {  2 -1 }
   [  5 -2 /mod ] expected: { -2  1 } ;
 
+binary
 TEST: <<
-  binary
-  [ 111000111 11 << ] expected: { 111000111000 }
-  decimal ;
+  [ 111000111 11 << ] expected: { 111000111000 } ;
 
 TEST: >>
-  binary
-  [ 111000111000 11 >> ] expected: { 111000111 }
-  decimal ;
+  [ 111000111000 11 >> ] expected: { 111000111 } ;
+decimal
 
 IO: tib
 
@@ -115,6 +113,81 @@ TEST: :
 TEST: header
   [ @last d->name "foo" compare ] expected: { -1 }
   [ @last d->name "bar" compare ] expected: {  0 } ;
+
+IO: cr
+IO: putc
+
+TEST: remapKeys
+  [ 10 remapKeys ] expected: { 10 } ;
+
+IO: <puts>
+
+TEST: over
+  [ 3 2 over      ] expected: { 3 2 3 }
+  [ 1 2 over over ] expected: { 2 1 2 1 }
+  [ 2 3 over      ] expected: { 2 3 2 } ;
+
+TEST: not
+  [ -1 not ] expected: { 0 }
+  [ -3 not ] expected: { 2 }
+  [  0 not ] expected: { -1 }
+  [  2 not ] expected: { -3 } ;
+
+variable foo
+TEST: on
+  [        foo @ ] expected: { 0 }
+  [ foo on foo @ ] expected: { -1 } ;
+
+-1 variable: foo
+TEST: off
+  [         foo @ ] expected: { -1 }
+  [ foo off foo @ ] expected: { 0 } ;
+
+TEST: /
+  [ 5 2 / ] expected: { 2 } ;
+
+TEST: mod
+  [ 5 2 mod ] expected: { 1 } ;
+
+TEST: negate
+  [ -1 negate ] expected: { 1 }
+  [  1 negate ] expected: { -1 } ;
+
+TEST: do
+  [ 100 &1+ do ] expected: { 101 } ;
+
+TEST: numbers
+  [ numbers  0 + @ ] expected: { 48 }
+  [ numbers  1 + @ ] expected: { 49 }
+  [ numbers  2 + @ ] expected: { 50 }
+  [ numbers  3 + @ ] expected: { 51 }
+  [ numbers  4 + @ ] expected: { 52 }
+  [ numbers  5 + @ ] expected: { 53 }
+  [ numbers  6 + @ ] expected: { 54 }
+  [ numbers  7 + @ ] expected: { 55 }
+  [ numbers  8 + @ ] expected: { 56 }
+  [ numbers  9 + @ ] expected: { 57 }
+  [ numbers 10 + @ ] expected: { 65 }
+  [ numbers 11 + @ ] expected: { 66 }
+  [ numbers 12 + @ ] expected: { 67 }
+  [ numbers 13 + @ ] expected: { 68 }
+  [ numbers 14 + @ ] expected: { 69 }
+  [ numbers 15 + @ ] expected: { 70 } ;
+
+IO: wait
+
+create foo
+' foo here
+' foo 21
+TEST:
+  [ = ] expected: {  0 }
+  [ = ] expected: { -1 } ;
+
+create a 1 , 2 , 3 ,
+TEST: @+
+  [ a @+ swap @+ swap @+ swap drop ] expected: { 3 2 1 } ;
+
+
 
 runTests bye
 
