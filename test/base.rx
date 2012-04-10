@@ -183,6 +183,43 @@ create a 1 , 2 , 3 ,
 TEST: @+
   [ a @+ swap @+ swap @+ swap drop ] expected: { 3 2 1 } ;
 
+create a 0 , 0 , 0 ,
+TEST: !+
+  [ 3 2 1 a !+ !+ !+ drop
+    a @+ swap @+ swap @+ swap drop ] expected: { 3 2 1 } ;
+
+TEST: keepString
+  [ "hello" dup keepString <> ] expected: { -1 } ;
+
+TEST: getLength
+  [ "abc" getLength ] expected: { 3 } ;
+
+TEST: withLength
+  [ "abc" dup withLength [ = ] dip ] expected: { 3 -1 } ;
+
+: dict'  d' .data ; immediate
+TEST: d->class
+  dict' words [ d->class @ &.word = ] expected: { -1 } ;
+
+TEST: d->xt
+  dict' words [ d->xt @ &words = ] expected: { -1 } ;
+
+TEST: d->name
+  dict' words [ d->name "words" compare ] expected: { -1 } ;
+
+IO: boot
+
+TEST: toNumber
+  [  "123" toNumber ] expected: { 123 }
+  [ "-123" toNumber ] expected: { -123 } ;
+
+TEST: isNumber?
+  [ "123" isNumber? ] expected: { -1 }
+  [ "qaz" isNumber? ] expected: {  0 } ;
+
+IO: ok
+IO: listen
+IO: putc
 
 
 runTests bye
