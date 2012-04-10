@@ -1,6 +1,6 @@
 global
 needs test'
-with| test' |
+with test'
 
 TEST: 1+
   [    3 1+ ] expected: { 4 }
@@ -97,20 +97,23 @@ TEST: ,
   here  1 , 2 , 3 ,
   [ @+ swap @+ swap @ ] expected: { 3 2 1 } ;
 
+: lastWord  ( -a )  @last .data ; immediate
 create foo
 TEST: create
-  [ @last d->name "foo" compare ] expected: { -1 }
-  [ @last d->name "bar" compare ] expected: {  0 }
-  [ @last @d->class &.data = ] expected: { -1 }
-  [ @last @d->class &.data <> ] expected: { 0 } ;
+  [ lastWord d->name "foo" compare ] expected: { -1 }
+  [ lastWord d->name "bar" compare ] expected: {  0 }
+  [ lastWord @d->class &.data = ] expected: { -1 }
+  [ lastWord @d->class &.data <> ] expected: { 0 } ;
+hide lastWord
 
 : foo 12 ;
 : bar foo 2 * ;
 TEST: :
   [ foo bar ] expected: { 24 12 } ;
 
-"foo" header
+
 TEST: header
+  "foo" header
   [ @last d->name "foo" compare ] expected: { -1 }
   [ @last d->name "bar" compare ] expected: {  0 } ;
 
@@ -175,13 +178,6 @@ TEST: numbers
   [ numbers 15 + @ ] expected: { 70 } ;
 
 IO: wait
-
-create foo
-' foo here
-' foo 21
-TEST:
-  [ = ] expected: {  0 }
-  [ = ] expected: { -1 } ;
 
 create a 1 , 2 , 3 ,
 TEST: @+
