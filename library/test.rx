@@ -30,8 +30,8 @@ chain: test'
 
   : runTests
     cr
-    [ [ "passed" ] [ "failed" ] if "%s\n" puts ] &postCond :is
-    tests [ [ [ :name 0; puts space ] [ :xt 0; .assertion ] bi ] [ :next ] bi dup 0 <> ] while
+    [ [ "PASS: %s\n" ] [ "FAIL: %s\n" ] if puts ] &postCond :is
+    tests [ [ [ :name ?dup [ "???" ] ifFalse ] [ :xt 0; .assertion ] bi ] [ :next ] bi dup 0 <> ] while
     &postCond :devector ;
 
 ;chain

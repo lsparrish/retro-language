@@ -183,7 +183,111 @@ create a 1 , 2 , 3 ,
 TEST: @+
   [ a @+ swap @+ swap @+ swap drop ] expected: { 3 2 1 } ;
 
+create a 0 , 0 , 0 ,
+TEST: !+
+  [ 3 2 1 a !+ !+ !+ drop
+    a @+ swap @+ swap @+ swap drop ] expected: { 3 2 1 } ;
 
+TEST: keepString
+  [ "hello" dup keepString <> ] expected: { -1 } ;
+
+TEST: getLength
+  [ "abc" getLength ] expected: { 3 } ;
+
+TEST: withLength
+  [ "abc" dup withLength [ = ] dip ] expected: { 3 -1 } ;
+
+: dict'  d' .data ; immediate
+TEST: d->class
+  dict' words [ d->class @ &.word = ] expected: { -1 } ;
+
+TEST: d->xt
+  dict' words [ d->xt @ &words = ] expected: { -1 } ;
+
+TEST: d->name
+  dict' words [ d->name "words" compare ] expected: { -1 } ;
+
+IO: boot
+
+TEST: toNumber
+  [  "123" toNumber ] expected: { 123 }
+  [ "-123" toNumber ] expected: { -123 } ;
+
+TEST: isNumber?
+  [ "123" isNumber? ] expected: { -1 }
+  [ "qaz" isNumber? ] expected: {  0 } ;
+
+IO: ok
+IO: listen
+IO: putc
+
+TEST: find
+  [ &words "words" find [ @d->xt = ] dip ] expected: { -1 -1 }
+  [ "zzz"   find nip ] expected: { 0 } ;
+
+IO: puts
+
+TEST: compare
+  [ "abc" "abc" compare ] expected: { -1 }
+  [ "abc" "def" compare ] expected: {  0 }
+  [ "gobo abc" "gobo abc" compare ] expected: { -1 }
+  [ "fooarcabc" "defaf"   compare ] expected: {  0 } ;
+
+IO: redraw
+
+TEST: if
+  [ -1 [ 1 ] [ 2 ] if ] expected: { 1 }
+  [  0 [ 1 ] [ 2 ] if ] expected: { 2 } ;
+
+TEST: ifTrue
+  [ 9  4 [ 1+ ] ifTrue ] expected: { 10 }
+  [ 0 -1 [ 1+ ] ifTrue ] expected: { 1 }
+  [ 0  0 [ 1+ ] ifTrue ] expected: { 0 } ;
+
+TEST: ifFalse
+  [ 9  4 [ 1+ ] ifFalse ] expected: { 9 }
+  [ 0 -1 [ 1+ ] ifFalse ] expected: { 0 }
+  [ 0  0 [ 1+ ] ifFalse ] expected: { 1 } ;
+
+TEST: dip
+  [ 1 2 [ 3 ] dip ] expected: { 2 3 1 } ;
+
+TEST: sip
+  [ 1 2 [ 3 ] sip ] expected: { 2 3 2 1 } ;
+
+TEST: =
+  [ 1 2 = ] expected: { 0 }
+  [ 2 1 = ] expected: { 0 }
+  [ 1 1 = ] expected: { -1 }
+  [ 2 2 = ] expected: { -1 }
+  [ 31 121 121 = ] expected: { -1 31 } ;
+
+TEST: <>
+  [ 1 2 <> ] expected: { -1 }
+  [ 2 1 <> ] expected: { -1 }
+  [ 1 1 <> ] expected: { 0 }
+  [ 2 2 <> ] expected: { 0 }
+  [ 31 121 121 <> ] expected: { 0 31 } ;
+
+TEST: <
+  [ 1 2 < ] expected: { -1 }
+  [ 1 1 < ] expected: {  0 }
+  [ 2 1 < ] expected: {  0 } ;
+
+TEST: >
+  [ 1 2 > ] expected: {  0 }
+  [ 1 1 > ] expected: {  0 }
+  [ 2 1 > ] expected: { -1 } ;
+
+TEST: >=
+  [ 1 2 >= ] expected: {  0 }
+  [ 1 1 >= ] expected: { -1 }
+  [ 2 1 >= ] expected: { -1 } ;
+
+TEST: <=
+  [ 1 2 <= ] expected: { -1 }
+  [ 1 1 <= ] expected: { -1 }
+  [ 2 1 <= ] expected: {  0 } ;
 
 runTests bye
 
