@@ -21,7 +21,7 @@ variable which        ( Pointer to dictionary header of the most recently     )
 
 label: copytag   "Retro" $,
 label: version   "11.4" $,
-label: build     "2012.03.31" $,
+label: build     "2012.04.11" $,
 label: okmsg     "ok  " $,
 
 ( Primitives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
@@ -238,9 +238,9 @@ t: notFound   ( -  ) <notFound> 0; drop cr tib puts 32 # putc '? # putc cr ;
 ( Listener ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 t: ok      (   - ) compiler # @, not 0; drop, cr okmsg # puts ;
 i: word    (  d- ) xt:class jump: withClass
-i: build#  (   - ) tib toNumber ' .data # withClass ;
-i: number  (   - ) tib isNumber? 0 # !if build# ; then notFound ;
-i: process ( af- ) 0 # !if word ; then drop number ;
+i: build#  (   - ) tib toNumber ' .data # jump: withClass
+i: number  (   - ) tib isNumber? 0 # !if jump: build# then jump: notFound
+i: process ( af- ) 0 # !if xt:class jump: withClass then drop jump: number
 t: listen  (   - ) repeat ok 32 # accept tib find process again ;
 
 ( Initial Dictionary ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
