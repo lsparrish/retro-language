@@ -1,44 +1,41 @@
-needs assertion'
+needs test'
 needs bad'
 
-with assertion'
+with| test' assertion' |
 
-[ [ "passed" ] [ "failed" ] if "%s\n" puts ] is postCond
 
-: a0 ( - )
-  "Testing: ^bad'pool and ^bad'newPool : " puts
+TEST: ^bad'pool
   100 ^bad'pool !
-  ^bad'pool @ 100 assert=
+  ^bad'pool @ 100 assert= ;
+
+TEST: ^bad'newPool
   50 ^bad'newPool
-  ^bad'pool @ 100 <> assert ; assertion
+  ^bad'pool @ 100 <> assert ;
 
-: a1 ( - )
-  "Testing: ^bad'pack : " puts
-  'a 'b 'c 'd ^bad'pack 1684234849 assert= ; assertion
+TEST: ^bad'pack
+  'a 'b 'c 'd ^bad'pack 1684234849 assert= ;
 
-: a2 ( - )
-  "Testing: ^bad'unpack : " puts
+TEST: ^bad'unpack
    1684234849 ^bad'unpack
-  'd assert= 'c assert= 'b assert= 'a assert= ; assertion
+  'd assert= 'c assert= 'b assert= 'a assert= ;
 
-: a3 ( - )
-  "Testing: ^bad'b! and ^bad'b@ : " puts
+TEST: ^bad'b!
   'a 0 ^bad'b!
   'b 1 ^bad'b!
+     0 ^bad'b@ 'a assert= ;
+
+TEST: ^bad'b@
   0 ^bad'b@ 'a assert=
   1 ^bad'b@ 'c = not assert
-  1 ^bad'b@ 'b assert= ; assertion
+  1 ^bad'b@ 'b assert= ;
 
-: a4 ( - )
-  "Testing: ^bad'b@+ : " puts
-  0 ^bad'b@+ 'a assert= ^bad'b@+ 'b assert= drop ; assertion
+TEST: ^bad'b@+
+  0 ^bad'b@+ 'a assert= ^bad'b@+ 'b assert= drop ;
 
-: a5 ( - )
-  "Testing: ^bad'b!+ : " puts
-  'c 'd 'e 0 3 [ ^bad'b!+ ] times
-  0 ^bad'b@+ 'e assert= ^bad'b@+ 'd assert= ^bad'b@ 'c assert= ; assertion
+TEST: ^bad'b!+
+  'c 'd 'e 0 3 [ ^bad'b!+ ] times drop
+  0 ^bad'b@+ 'e assert= ^bad'b@+ 'd assert= ^bad'b@ 'c assert= ;
 
-: go ( - )
-  cr a0 a1 a2 a3 a4 a5 bye ;
+runTests
+bye
 
-go

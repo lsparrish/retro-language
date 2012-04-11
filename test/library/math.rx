@@ -1,67 +1,50 @@
 needs assertion'
+needs test'
 needs math'
 
-with assertion'
+with| test' assertion' |
 
-[ [ "passed" ] [ "failed" ] if "%s\n" puts ] is postCond
-
-: a0
-  "Testing squareRoot : " puts
+TEST: ^math'squareRoot
   144 ^math'squareRoot 12 assert=
-   36 ^math'squareRoot  6 assert= ; assertion
+   36 ^math'squareRoot  6 assert= ;
 
-: a1
-  "Testing gcd : " puts
+TEST: ^math'gcd
   36 12 ^math'gcd 12 assert=
-  44 55 ^math'gcd 11 assert= ; assertion
+  44 55 ^math'gcd 11 assert= ;
 
-: a2
-  "Testing lcm : " puts
-  96 144 ^math'lcm 288 assert= ; assertion
+TEST: ^math'lcm
+  96 144 ^math'lcm 288 assert= ;
 
-: a3
-  "Testing divisor? : " puts
+TEST: ^math'divisor?
   100 25 ^math'divisor? -1 assert=
-  100 31 ^math'divisor?  0 assert= ; assertion
+  100 31 ^math'divisor?  0 assert= ;
 
-: a4
-  "Testing even? : " puts
+TEST: ^math'even?
   100 ^math'even? -1 assert=
-  109 ^math'even?  0 assert= ; assertion
+  109 ^math'even?  0 assert= ;
 
-: a5
-  "Testing odd? : " puts
+TEST: ^math'odd?
   100 ^math'odd?  0 assert=
-  109 ^math'odd? -1 assert= ; assertion
+  109 ^math'odd? -1 assert= ;
 
-doc{
-TEST: pow
-  [ 2 3 pow ] expected: { 8 }
-  [ 3 2 pow ] expected: { 9 }
-results
+TEST: ^math'pow
+  2 3 ^math'pow 8 assert=
+  3 2 ^math'pow 9 assert= ;
 
-TEST: abs
-  [ -1 abs ] expected: { 1 }
-  [  1 abs ] expected: { 1 }
-results
+TEST: ^math'abs
+  -1 ^math'abs 1 assert=
+   1 ^math'abs 1 assert= ;
 
-TEST: min
-  [  1 10 min ] expected: { 1 }
-  [ 91 10 min ] expected: { 10 }
-results
+TEST: ^math'min
+   1 10 ^math'min  1 assert=
+  91 10 ^math'min 10 assert= ;
 
-TEST: max
-  [  1 10 max ] expected: { 10 }
-  [ 91 10 max ] expected: { 91 }
-results
+TEST: ^math'max
+   1 10 ^math'max 10 assert=
+  91 10 ^math'max 91 assert= ;
 
-TEST: random
-  [ random random = ] expected: { 0 }
-results
-}doc
+TEST: ^math'random
+  ^math'random ^math'random = 0 assert= ;
 
+runTests bye
 
-: go
-  cr a0 a1 a2 a3 a4 a5 bye ;
-
-go
