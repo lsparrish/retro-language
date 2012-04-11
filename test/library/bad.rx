@@ -33,7 +33,7 @@ TEST: ^bad'b@+
   0 ^bad'b@+ 'a assert= ^bad'b@+ 'b assert= drop ;
 
 TEST: ^bad'b!+
-  'c 'd 'e 0 3 [ ^bad'b!+ ] times
+  'c 'd 'e 0 3 [ ^bad'b!+ ] times drop
   0 ^bad'b@+ 'e assert= ^bad'b@+ 'd assert= ^bad'b@ 'c assert= ;
 
 runTests
