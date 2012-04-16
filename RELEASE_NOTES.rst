@@ -43,6 +43,8 @@ the size and actual locations of these buffers, and avoid overflowing into them.
 E.g., in **casket'**, we use **^introspection'startOfBuffers** to identify the
 start of the buffers and dynamically shift the casket buffers to a safe location.
 
+Fifth, string constants are now created using **string:** instead of **string**.
+This requires a quick search/replace to fix.
 
 
 core language / standard image
@@ -66,6 +68,8 @@ core language / standard image
 
   - new memory layout (buffers at physical end of memory)
   - hidden headers now disappear when global scope resumes
+  - helper function **string** for strings
+
 
 libraries
 =========

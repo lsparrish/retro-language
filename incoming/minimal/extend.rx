@@ -168,7 +168,7 @@ here
 : variable:  ( n"-  ) create , ;
 : variable   (  "-  ) 0 variable: ;
 : constant   ( n"-  ) create @last !d->xt ;
-: string     ( $"-  ) keepString constant ;
+: string:    ( $"-  ) keepString constant ;
 : allot      (  n-  ) dup 0 < [ +heap ] [ [ 0 , ] times ] if ;
 {{
   : list     (  n-a ) here swap allot ;

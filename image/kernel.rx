@@ -21,7 +21,7 @@ variable which        ( Pointer to dictionary header of the most recently     )
 
 label: copytag   "Retro" $,
 label: version   "11.4" $,
-label: build     "2012.04.11" $,
+label: build     "2012.04.16" $,
 label: okmsg     "ok  " $,
 
 ( Primitives ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
@@ -175,7 +175,9 @@ t: compare  ( $$-f )
 i: count       ( a-a ) repeat @+ 0; drop, again ;
 t: getLength   ( a-n ) dup, count 1-, swap, -, ;
 t: withLength  ( a-an ) dup, getLength ;
-t: keepString  ( a-a ) withLength 3 # +, here +, 8 # , , here swap, $ ;
+i: (string)    ( a-a ) repeat @+ 0; drop, again ;
+t: string      ( -   ) pop, (string) 1-, push, ;
+t: keepString  ( a-a ) ' string # , here swap, $ ;
 
 ( Numbers [Parsing & Display] ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 4 elements #value num negate? flag
@@ -283,6 +285,7 @@ t: listen  (   - ) repeat ok 32 # accept tib find process again ;
 ' =              word: =              ' <>           word: <>
 ' <              word: <              ' >            word: >
 ' <=             word: <=             ' >=           word: >=
+' string         word: string
 
 ' t-;            macro: ;             ' ;;           macro: ;;
 ' t-repeat       macro: repeat
@@ -478,7 +481,7 @@ here
 : variable:  ( n"-  ) create , ;
 : variable   (  "-  ) 0 variable: ;
 : constant   ( n"-  ) create @last !d->xt ;
-: string     ( $"-  ) keepString constant ;
+: string:    ( $"-  ) keepString constant ;
 : allot      (  n-  ) dup 0 < [ +heap ] [ [ 0 , ] times ] if ;
 {{
   : list     (  n-a ) here swap allot ;

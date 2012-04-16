@@ -104,6 +104,8 @@ Global
 | !+              |   ca-a    |  Store a value to an address, return next     |
 |                 |           |  address                                      |
 +-----------------+-----------+-----------------------------------------------+
+| string          |     -     |  Helper function for strings                  |
++-----------------+-----------+-----------------------------------------------+
 | keepString      |    a-a    |  Move the string to a permanent location      |
 +-----------------+-----------+-----------------------------------------------+
 | getLength       |    a-n    |  Return the length of a string                |
@@ -447,7 +449,7 @@ Global
 +-----------------+-----------+-----------------------------------------------+
 | constant        |   n"-     |  Create a numeric constant                    |
 +-----------------+-----------+-----------------------------------------------+
-| string          |   $"-     |  Create a string constant                     |
+| string:         |   $"-     |  Create a string constant                     |
 +-----------------+-----------+-----------------------------------------------+
 | allot           |    n-     |  Allocate space in the heap                   |
 +-----------------+-----------+-----------------------------------------------+

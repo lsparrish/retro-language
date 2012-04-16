@@ -3,9 +3,9 @@
 
 variables| height weight |
 
-"BMI Calculator 1.1\n"     string VERSION
-"height, in centimeters" string HEIGHT
-"weight, in kilograms"   string WEIGHT
+"BMI Calculator 1.1\n"   string: VERSION
+"height, in centimeters" string: HEIGHT
+"weight, in kilograms"   string: WEIGHT
 
 : get  ( a$- )
   "\nPlease enter your %s: " puts getNumber swap ! ;

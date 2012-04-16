@@ -69,7 +69,7 @@ We assume that you know how to play and will only make valid moves.
 
 {{
 
-  "rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR" string BLANK
+  "rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR" string: BLANK
 
   create board
     64 allot
