@@ -1,5 +1,4 @@
-
-needs regAB' 
+needs regAB'
 
 create r_DataStack 100 allot ;
 create r_ReturnStack 100 allot ;
@@ -49,3 +48,4 @@ r_OPS
 ( OUT )       [] swap !+
 ( WAIT )      [] swap !+
 drop
+
