@@ -56,6 +56,7 @@ core language / standard image
     - **:is** and **:devector**
     - **each@**
     - **<puts>**
+    - **toNumber**
 
   - removals (now in library)
 

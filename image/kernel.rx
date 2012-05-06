@@ -185,16 +185,17 @@ t: keepString  ( a-a ) ' string # , here swap, $ ;
 label: numbers "0123456789ABCDEF" $,
 
 t: nums     ( -a ) numbers # ;
+i: @base    ( -n ) base # @, ;
 i: (digits) nums +, @, over =if num # on then ;
 i: digits   1- repeat dup, push, (digits) pop, 0; 1- again ;
-i: valid?   base # @, dup, 16 # <if digits ; then drop, ;
+i: valid?   @base dup, 16 # <if digits ; then drop, ;
 i: digit?   num # off valid? drop, num # @, ;
-i: toDigit  ( c-n ) '0 # -, base # @, 16 # =if dup, 16 # >if 7 # -, then then ;
+i: toDigit  ( c-n ) '0 # -, @base 16 # =if dup, 16 # >if 7 # -, then then ;
 i: isNegative? ( a-a )
-   dup, @, '- # =if -1 # negate? # !, 1+, ; then 1 # negate? # !, ;
+   dup, @, '- # =if negate? # on 1+, ; then 1 # negate? # !, ;
 i: (convert)
    repeat
-     dup, @, 0; toDigit #value # @, base # @, *, +, #value # !, 1+,
+     dup, @, 0; toDigit #value # @, @base *, +, #value # !, 1+,
    again ;
 t: toNumber ( $-n )
    isNegative? 0 # #value # !, (convert) drop, #value # @, negate? # @, *, ;
