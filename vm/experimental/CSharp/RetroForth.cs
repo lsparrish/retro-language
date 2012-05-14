@@ -335,8 +335,8 @@ namespace Retro.Ngaro {
 
       /* Check to see if we need to move to the next input source */
       if (isp > 0 && offset[isp] == (lengths[isp])) {
+	offset[isp] = 0;
         isp--;
-        offset[isp] = 0;
       }
 
       if (isp > 0) {      /* Read from a file */
